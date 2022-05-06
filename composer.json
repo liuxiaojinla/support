@@ -1,0 +1,19 @@
+{
+  "name": "xin/support",
+  "type": "library",
+  "authors": [
+    {
+      "name": "晋",
+      "email": "657306123@qq.com"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "files": [
+      "src/helpers.php"
+    ],
+    "psr-4": {
+      "Xin\\Support": "src/"
+    }
+  }
+}
