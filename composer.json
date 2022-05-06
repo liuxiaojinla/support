@@ -7,13 +7,18 @@
       "email": "657306123@qq.com"
     }
   ],
-  "require": {},
+  "require": {
+    "php": ">=7.1.9",
+    "nesbot/carbon": "^2.0",
+    "ramsey/uuid": "^3.5 | ^4.0",
+    "doctrine/inflector": "^2.0"
+  },
   "autoload": {
     "files": [
       "src/helpers.php"
     ],
     "psr-4": {
-      "Xin\\Support": "src/"
+      "Xin\\Support\\": "src/"
     }
   }
 }
