@@ -34,7 +34,9 @@ class XML
 	 */
 	public static function encode($param, $root = 'xml', $tag = '')
 	{
-		if (!is_array($param) || count($param) <= 0) return '';
+		if (!is_array($param) || count($param) <= 0) {
+			return '';
+		}
 
 		$xml = '';
 		foreach ($param as $key => $val) {
@@ -51,9 +53,8 @@ class XML
 				$root = !empty($tag) ? '' : $root;
 			}
 		}
-		$xml = (empty($root) ? "" : "<$root>") . $xml . (empty($root) ? "" : "</$root>");
 
-		return $xml;
+		return (empty($root) ? "" : "<$root>") . $xml . (empty($root) ? "" : "</$root>");
 	}
 
 }

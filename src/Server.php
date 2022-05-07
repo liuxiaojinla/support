@@ -1,11 +1,4 @@
 <?php
-/**
- * I know no such things as genius,it is nothing but labor and diligence.
- *
- * @copyright (c) 2015~2019 BD All rights reserved.
- * @license       http://www.apache.org/licenses/LICENSE-2.0
- * @author        <657306123@qq.com> LXSEA
- */
 
 namespace Xin\Support;
 
@@ -88,13 +81,13 @@ final class Server
 	{
 		$headers = [];
 		foreach ($_SERVER as $key => $value) {
-			if ('HTTP_' == substr($key, 0, 5)) {
+			if (strpos($key, 'HTTP_') === 0) {
 				$headers [str_replace('_', '-', substr($key, 5))] = $value;
 			}
 		}
 		if (isset ($_SERVER ['PHP_AUTH_DIGEST'])) {
 			$headers ['AUTHORIZATION'] = $_SERVER ['PHP_AUTH_DIGEST'];
-		} elseif (isset ($_SERVER ['PHP_AUTH_USER']) && isset ($_SERVER ['PHP_AUTH_PW'])) {
+		} elseif (isset($_SERVER ['PHP_AUTH_USER'], $_SERVER ['PHP_AUTH_PW'])) {
 			$headers ['AUTHORIZATION'] = base64_encode($_SERVER ['PHP_AUTH_USER'] . ':' . $_SERVER ['PHP_AUTH_PW']);
 		}
 		if (isset ($_SERVER ['CONTENT_LENGTH'])) {
@@ -116,8 +109,8 @@ final class Server
 	public static function getClientName($isVersion = true)
 	{
 		// 获取客户端版本信息
-		$getVersion = function ($str, $checkname) {
-			$pos = strpos($str, $checkname);
+		$getVersion = static function ($str, $checkName) {
+			$pos = strpos($str, $checkName);
 			$len = strpos($str, ';', $pos);
 			$len = $len ? $len - $pos : strlen($str) - $pos;
 
@@ -126,36 +119,54 @@ final class Server
 
 		$info = self::getClientInfo();
 		if (strpos($info ['info_str'], 'windows phone') !== false) {
-			if (!$isVersion) return "windows phone";
+			if (!$isVersion) {
+				return "windows phone";
+			}
 
 			return $getVersion($info ['info_str'], 'windows phone');
-		} else {
-			if (strpos($info ['info_str'], 'windows') !== false) {
-				if (!$isVersion) return "windows";
-
-				return $getVersion($info ['info_str'], 'windows');
-			} elseif (strpos($info ['info_str'], 'android') !== false) {
-				if (!$isVersion) return "android";
-
-				return $getVersion($info ['info_str'], 'android');
-			} elseif (strpos($info ['info_str'], 'iphone') !== false) {
-				if (!$isVersion) return "iphone";
-
-				return $getVersion($info ['info_str'], 'iphone');
-			} elseif (strpos($info ['info_str'], 'mac os') !== false) {
-				if (!$isVersion) return "mac os";
-
-				return $getVersion($info ['info_str'], 'mac os');
-			} elseif (is_array($info ['info'])) {
-				if ($isVersion == false) {
-					$info ['info'] = explode(" ", $info ['info'] [0]);
-				}
-
-				return $info ['info'] [0];
-			} else {
-				return "other";
-			}
 		}
+
+		if (strpos($info ['info_str'], 'windows') !== false) {
+			if (!$isVersion) {
+				return "windows";
+			}
+
+			return $getVersion($info ['info_str'], 'windows');
+		}
+
+		if (strpos($info ['info_str'], 'android') !== false) {
+			if (!$isVersion) {
+				return "android";
+			}
+
+			return $getVersion($info ['info_str'], 'android');
+		}
+
+		if (strpos($info ['info_str'], 'iphone') !== false) {
+			if (!$isVersion) {
+				return "iphone";
+			}
+
+			return $getVersion($info ['info_str'], 'iphone');
+		}
+
+		if (strpos($info ['info_str'], 'mac os') !== false) {
+			if (!$isVersion) {
+				return "mac os";
+			}
+
+			return $getVersion($info ['info_str'], 'mac os');
+		}
+
+		if (is_array($info ['info'])) {
+			if (!$isVersion) {
+				$info ['info'] = explode(" ", $info ['info'] [0]);
+			}
+
+			return $info ['info'] [0];
+		}
+
+		return "other";
 	}
 
 	/**
@@ -180,9 +191,8 @@ final class Server
 		$user_agent2 = substr($user_agent, $firstSpilt + 2, strlen($user_agent) - $firstSpilt);
 		$user_agent2 = preg_replace('/(\(.*\))\s/', "", $user_agent2);
 		$user_agents = explode(" ", $user_agent2);
-		$len = count($user_agents);
-		for ($i = 0; $i < $len; $i++) {
-			$temps = explode("/", $user_agents [$i], 2);
+		foreach ($user_agents as $iValue) {
+			$temps = explode("/", $iValue, 2);
 			$info [$temps [0]] = $temps [1];
 		}
 
@@ -228,7 +238,7 @@ final class Server
 		// 如果via信息含有wap则一定是移动设备,部分服务商会屏蔽该信息
 		if (isset ($_SERVER['HTTP_VIA'])) {
 			// 找不到为flase,否则为true
-			return stristr($_SERVER['HTTP_VIA'], "wap") ? true : false;
+			return stripos($_SERVER['HTTP_VIA'], "wap") !== false;
 		}
 		// 脑残法，判断手机发送的客户端标志,兼容性有待提高
 		if (isset ($_SERVER['HTTP_USER_AGENT'])) {
@@ -248,91 +258,12 @@ final class Server
 			}
 		}
 		// 协议法，因为有可能不准确，放到最后判断
-		if (isset ($_SERVER['HTTP_ACCEPT'])) {
-			// 如果只支持wml并且不支持html那一定是移动设备
-			// 如果支持wml和html但是wml在html之前则是移动设备
-			if ((strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') !== false)
-				&& (strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false
-					|| (strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') < strpos($_SERVER['HTTP_ACCEPT'], 'text/html')))) {
-				return true;
-			}
-		}
-
-		return false;
+		// 如果只支持wml并且不支持html那一定是移动设备
+		// 如果支持wml和html但是wml在html之前则是移动设备
+		return isset ($_SERVER['HTTP_ACCEPT']) && (strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') !== false)
+			&& (strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false
+				|| (strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') < strpos($_SERVER['HTTP_ACCEPT'], 'text/html')));
 	}
 
-	/**
-	 * 调用客户端回掉函数
-	 *
-	 * @param $callback
-	 * @param $param
-	 */
-	public static function javascriptCall($callback, $param = '')
-	{
-		if (is_string($param)) {
-			$param = '"' . addslashes($param) . '"';
-		} else {
-			if (is_array($param)) {
-				if (key($param) == 0) {
-					$tmpStr = '';
-					$len = count($param);
-					for ($i = 0; $i < $len; $i++) {
-						if ($i != 0) $tmpStr .= ",";
-						$tmpStr .= '"' . addslashes($param) . '"';
-					}
-					$param = $tmpStr;
-				} else {
-					$param = json_encode($param);
-				}
-			}
-		}
-		self::sendJavascript("{$callback} ( " . json_encode($param) . " )");
-	}
-
-	/**
-	 * 发送到客户端script
-	 *
-	 * @param string $script
-	 */
-	public static function sendJavascript($script)
-	{
-		echo "<script type=\"text/javascript\">{$script}</script>";
-		flush();
-		ob_flush();
-	}
-
-	/**
-	 * URL重定向
-	 *
-	 * @param string $url 重定向的URL地址
-	 * @param integer $time 重定向的等待时间（秒）
-	 * @param string $msg 重定向前的提示信息
-	 * @return void
-	 */
-	public static function redirect($url, $time = 0, $msg = '')
-	{
-		//多行URL地址支持
-		$url = str_replace(["\n", "\r"], '', $url);
-		if (empty($msg)) {
-			$msg = "系统将在{$time}秒之后自动跳转到{$url}！";
-		}
-
-		if (!headers_sent()) {
-			// redirect
-			if (0 === $time) {
-				header('Location: ' . $url);
-			} else {
-				header("refresh:{$time};url={$url}");
-				echo($msg);
-			}
-			exit();
-		} else {
-			$str = "<meta http-equiv=\"Refresh\" content=\"{$time};URL={$url}\">";
-			if (0 != $time) {
-				$str .= $msg;
-			}
-			exit($str);
-		}
-	}
 
 }

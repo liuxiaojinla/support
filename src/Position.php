@@ -18,14 +18,16 @@ namespace Xin\Support;
  */
 final class Position
 {
+	// 百度坐标系
+	public const  BAIDU_LBS_TYPE = "bd09ll";
 
-	const  BAIDU_LBS_TYPE = "bd09ll";
+	// PI
+	public const  PI = 3.1415926535897932384626;
 
-	const  PI = 3.1415926535897932384626;
+	// 地球半径
+	public const  A = 6378245.0;
 
-	const  A = 6378245.0;
-
-	const  EE = 0.00669342162296594323;
+	public const  EE = 0.00669342162296594323;
 
 	/**
 	 * 84 to 火星坐标系 (GCJ-02) World Geodetic System ==> Mars Geodetic System
@@ -202,23 +204,35 @@ final class Position
 	}
 
 	/**
-	 * 计算距离
+	 * 计算两点地理坐标之间的距离
 	 *
-	 * @param array $from [起点坐标(经纬度),例如:array(118.012951,36.810024)]
-	 * @param array $to [终点坐标(经纬度)]
-	 * @param bool $km 是否以公里为单位 false:米 true:公里(千米)
+	 * @param float $longitude1 起点经度
+	 * @param float $latitude1 起点纬度
+	 * @param float $longitude2 终点经度
+	 * @param float $latitude2 终点纬度
+	 * @param int $unit 单位 1:米 2:公里
 	 * @param int $decimal 精度 保留小数位数
 	 * @return float
 	 */
-	public static function getDistance($from, $to, $km = false, $decimal = 2)
+	public static function calcDistance($longitude1, $latitude1, $longitude2, $latitude2, $unit = 2, $decimal = 2)
 	{
-		$EARTH_RADIUS = 6378.138; // 地球半径系数(6370.996)
+		$EARTH_RADIUS = 6370.996; // 地球半径系数
+		$PI = 3.1415926;
 
-		$distance = $EARTH_RADIUS * 2 * asin(sqrt(pow(sin(($from[1] * pi() / 180 - $to[1] * pi() / 180) / 2), 2) +
-				cos($from[1] * pi() / 180) * cos($to[1] * pi() / 180) * pow(sin(($from[0] * pi() / 180 - $to[0] * pi() / 180) / 2), 2))) * 1000;
+		$radLat1 = $latitude1 * $PI / 180.0;
+		$radLat2 = $latitude2 * $PI / 180.0;
 
-		if ($km) {
-			$distance = $distance / 1000;
+		$radLng1 = $longitude1 * $PI / 180.0;
+		$radLng2 = $longitude2 * $PI / 180.0;
+
+		$a = $radLat1 - $radLat2;
+		$b = $radLng1 - $radLng2;
+
+		$distance = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
+		$distance *= $EARTH_RADIUS * 1000;
+
+		if ($unit == 2) {
+			$distance /= 1000;
 		}
 
 		return round($distance, $decimal);

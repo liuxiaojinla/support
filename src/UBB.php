@@ -9,16 +9,34 @@ namespace Xin\Support;
 
 class UBB
 {
+	/**
+	 * @var string
+	 */
+	protected $content;
+
+	/**
+	 * @param string $content
+	 */
+	public function __construct($content)
+	{
+		$this->content = $content;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->parse();
+	}
 
 	/**
 	 * 解析UBB语法
-	 *
-	 * @param string $Text 要解析的文本
-	 * @return mixed|string
+	 * @return string
 	 */
-	public static function parse($Text)
+	public function parse()
 	{
-		$Text = trim($Text);
+		$Text = trim($this->content);
 		$Text = htmlspecialchars($Text);
 		$Text = preg_replace("/\\t/is", "  ", $Text);
 		$Text = preg_replace("/\\[h1\\](.+?)\\[\\/h1\\]/is", "<h1>\\1</h1>", $Text);

@@ -105,7 +105,7 @@ class Radix
 	 *
 	 * @return $this|null
 	 */
-	public static function gain62()
+	public static function radix62()
 	{
 		if (static::$instance62 === null) {
 			static::$instance62 = new static(

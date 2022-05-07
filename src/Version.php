@@ -52,7 +52,9 @@ final class Version
 			if (isset($new[$k])) {
 				if ($cur < $new[$k]) {
 					return -1;
-				} elseif ($cur > $new[$k]) {
+				}
+
+				if ($cur > $new[$k]) {
 					return 1;
 				}
 			} else {

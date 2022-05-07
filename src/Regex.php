@@ -25,7 +25,9 @@ final class Regex
 	 */
 	public static function isUsername($value, $minLen = 2, $maxLen = 48, $type = 'ALL')
 	{
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		switch ($type) {
 			case 'EN' :
@@ -52,7 +54,9 @@ final class Regex
 	public static function isPassword($value, $minLen = 6, $maxLen = 16)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		$match = '/^[\\~!@#$%^&*()-_=+|{}\[\],.?\/:;\'\"\d\w]{' . $minLen . ',' . $maxLen . '}$/';
 
@@ -68,7 +72,9 @@ final class Regex
 	public static function isEmail($value)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		$match = '/^[\w\d]+[\w\d-.]*@[\w\d-.]+\.[\w\d]{2,10}$/i';
 
@@ -84,7 +90,9 @@ final class Regex
 	public static function isTelephone($value)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		$match = '/^0[0-9]{2,3}[-]?\d{7,8}$/';
 
@@ -100,7 +108,9 @@ final class Regex
 	public static function isMobile($value)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		$match = '/^[(86)|0]?(1\d{10})$/';
 
@@ -116,7 +126,9 @@ final class Regex
 	public static function isPostCode($value)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		$match = '/\d{6}/';
 
@@ -132,7 +144,9 @@ final class Regex
 	public static function isIp($value)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 
 		$match = '/^(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])' .
 			'\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)' .
@@ -151,8 +165,13 @@ final class Regex
 	public static function isIDCard($value)
 	{
 		$value = trim($value);
-		if (empty ($value)) return false;
-		elseif (strlen($value) > 18) return false;
+		if (empty ($value)) {
+			return false;
+		}
+
+		if (strlen($value) > 18) {
+			return false;
+		}
 
 		$match = '/^\d{6}((1[89])|(2\d))\d{2}((0\d)|(1[0-2]))((3[01])|([0-2]\d))\d{3}(\d|X)$/i';
 
@@ -168,7 +187,9 @@ final class Regex
 	public static function isUrl($value)
 	{
 		$value = strtolower(trim($value));
-		if (empty ($value)) return false;
+		if (empty ($value)) {
+			return false;
+		}
 		$match = '/^(http:\/\/)?(https:\/\/)?([\w\d-]+\.)+[\w-]+(\/[\d\w-.\/?%&=]*)?$/';
 
 		return preg_match($match, $value) !== 0;

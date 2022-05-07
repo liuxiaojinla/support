@@ -10,11 +10,11 @@ namespace Xin\Support;
 class Reflect
 {
 
-	const VISIBLE_PUBLIC = 0;
+	public const VISIBLE_PUBLIC = 0;
 
-	const VISIBLE_PROTECTED = 1;
+	public const VISIBLE_PROTECTED = 1;
 
-	const VISIBLE_PRIVATE = 2;
+	public const VISIBLE_PRIVATE = 2;
 
 	/**
 	 * 获取类方法可见范围
@@ -29,11 +29,13 @@ class Reflect
 		$ref = new \ReflectionMethod($class, $method);
 		if ($ref->isPublic()) {
 			return self::VISIBLE_PUBLIC;
-		} elseif ($ref->isProtected()) {
-			return self::VISIBLE_PROTECTED;
-		} else {
-			return self::VISIBLE_PRIVATE;
 		}
+
+		if ($ref->isProtected()) {
+			return self::VISIBLE_PROTECTED;
+		}
+
+		return self::VISIBLE_PRIVATE;
 	}
 
 	/**
@@ -65,12 +67,70 @@ class Reflect
 	public static function fallbackCalls($class, $methods, $args = [])
 	{
 		foreach ($methods as $method) {
-			if (self::VISIBLE_PUBLIC == self::getMethodVisible($class, $method)) {
+			if (self::VISIBLE_PUBLIC === self::getMethodVisible($class, $method)) {
 				return call_user_func_array([$class, $method], $args);
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * 获取类属性
+	 * @param string|object $class
+	 * @param string $propertyName
+	 * @return \ReflectionProperty
+	 * @throws \ReflectionException
+	 */
+	public static function getProperty($class, $propertyName)
+	{
+		$property = new \ReflectionProperty($class, $propertyName);
+		$property->setAccessible(true);
+
+		return $property;
+	}
+
+	/**
+	 * 获取属性值
+	 * @param object $classInstance
+	 * @param string $property
+	 * @return mixed
+	 * @throws \ReflectionException
+	 */
+	public static function getPropertyValue($classInstance, $property)
+	{
+		return static::getProperty($classInstance, $property)->getValue($classInstance);
+	}
+
+	/**
+	 * 获取属性值
+	 * @param object $classInstance
+	 * @param string $property
+	 * @return mixed
+	 * @return mixed
+	 */
+	public static function propertyValue($classInstance, $property)
+	{
+		try {
+			return static::getPropertyValue($classInstance, $property);
+		} catch (\ReflectionException $e) {
+			return null;
+		}
+	}
+
+	/**
+	 * @param object $classInstance
+	 * @param string $propertyName
+	 * @param mixed $value
+	 * @return \ReflectionProperty
+	 * @throws \ReflectionException
+	 */
+	public static function setPropertyValue($classInstance, $propertyName, $value)
+	{
+		$property = static::getProperty($classInstance, $propertyName);
+		$property->setValue($classInstance, $value);
+
+		return $property;
 	}
 
 }

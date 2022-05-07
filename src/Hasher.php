@@ -72,7 +72,7 @@ class Hasher
 			throw new \RuntimeException('This password does not use the Bcrypt algorithm.');
 		}
 
-		if (strlen($hashedValue) === 0) {
+		if ($hashedValue === '') {
 			return false;
 		}
 
