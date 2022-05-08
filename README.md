@@ -2,14 +2,13 @@
 
 #### 介绍
 
-日常开发必备基础库【字符串、集合、数值、哈希、加密、时间、文件、反射、重试、服务器、XML】
+日常开发必备基础库【字符串、集合、数值、加密、时间、文件、反射、重试、服务器、XML】
 
 - 数组相关（Arr.php）
 - 字符串相关（Str.php）
 - 简单集合（Collection.php）
 - 文件相关（File.php）【待升级】
 - Fluent（Fluent.php）
-- 哈希（Hasher.php）
 - 高阶对象代理（HigherOrderTapProxy.php）
 - Javascript（Javascript.php）
 - 简约限流器（LimitThrottle.php）

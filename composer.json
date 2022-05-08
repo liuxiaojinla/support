@@ -1,5 +1,6 @@
 {
   "name": "xin/support",
+  "description": "日常开发必备基础库【字符串、集合、数值、加密、时间、文件、反射、重试、服务器、XML】",
   "type": "library",
   "authors": [
     {
