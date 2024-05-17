@@ -4,7 +4,7 @@ namespace Xin\Support;
 
 use Carbon\Carbon;
 
-class Time
+final class Time
 {
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Xin\Support;
 
-class UBB
+final class UBB
 {
 	/**
 	 * @var string

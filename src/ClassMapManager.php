@@ -2,6 +2,7 @@
 
 namespace Xin\Support;
 
+use ReturnTypeWillChange;
 use Xin\Support\Traits\Macroable;
 
 class ClassMapManager implements \ArrayAccess
@@ -124,7 +125,8 @@ class ClassMapManager implements \ArrayAccess
 	/**
 	 * @inheritDoc
 	 */
-	public function offsetExists($offset)
+	#[ReturnTypeWillChange]
+    public function offsetExists($offset)
 	{
 		return $this->has($offset);
 	}
@@ -132,7 +134,8 @@ class ClassMapManager implements \ArrayAccess
 	/**
 	 * @inheritDoc
 	 */
-	public function offsetGet($offset)
+	#[ReturnTypeWillChange]
+    public function offsetGet($offset)
 	{
 		return $this->get($offset);
 	}
@@ -140,6 +143,7 @@ class ClassMapManager implements \ArrayAccess
 	/**
 	 * @inheritDoc
 	 */
+    #[ReturnTypeWillChange]
 	public function offsetSet($offset, $value)
 	{
 		$this->bind($offset, $value);
@@ -148,6 +152,7 @@ class ClassMapManager implements \ArrayAccess
 	/**
 	 * @inheritDoc
 	 */
+    #[ReturnTypeWillChange]
 	public function offsetUnset($offset)
 	{
 		$this->forget($offset);

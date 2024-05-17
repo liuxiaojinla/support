@@ -2,7 +2,7 @@
 
 namespace Xin\Support;
 
-class SQL
+final class SQL
 {
 
 	/**

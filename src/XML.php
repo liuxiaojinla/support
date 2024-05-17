@@ -2,7 +2,7 @@
 
 namespace Xin\Support;
 
-class XML
+final class XML
 {
 
 	/**

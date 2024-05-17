@@ -267,3 +267,20 @@ if (!function_exists('trait_uses_recursive')) {
 		return $traits;
 	}
 }
+
+if (! function_exists('with')) {
+    /**
+     * 返回给定的值，可以选择通过给定的回调传递。
+     *
+     * @template TValue
+     * @template TReturn
+     *
+     * @param  TValue  $value
+     * @param  (callable(TValue): (TReturn))|null  $callback
+     * @return ($callback is null ? TValue : TReturn)
+     */
+    function with($value, callable $callback = null)
+    {
+        return is_null($callback) ? $value : $callback($value);
+    }
+}

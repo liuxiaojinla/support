@@ -2,6 +2,9 @@
 
 namespace Xin\Support;
 
+/**
+ * URL重定向
+ */
 class Redirect
 {
 	/**

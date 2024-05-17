@@ -4,6 +4,9 @@ namespace Xin\Support;
 
 use Xin\Support\Traits\Macroable;
 
+/**
+ * 微代理器
+ */
 class MacroProxy
 {
 

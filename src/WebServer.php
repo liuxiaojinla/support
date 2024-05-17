@@ -5,7 +5,7 @@ namespace Xin\Support;
 /**
  * 系统相关操作工具类
  */
-final class Server
+final class WebServer
 {
 
 	/**
