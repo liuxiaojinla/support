@@ -71,21 +71,21 @@ final class Framework
     /**
      * @throws RuntimeException
      */
-    protected static function throwUnknownFrameworkException()
+    public static function throwUnknownFrameworkException()
     {
         throw new RuntimeException('Unknown framework.');
     }
 
     /**
-     * @return FrameworkInvoke
+     * @return FrameworkWhen
      */
     public static function when()
     {
-        return new FrameworkInvoke();
+        return new FrameworkWhen();
     }
 }
 
-class FrameworkInvoke
+class FrameworkWhen
 {
     /**
      * @var array
