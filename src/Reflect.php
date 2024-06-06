@@ -63,12 +63,11 @@ final class Reflect
      * @param array $methods
      * @param array $args
      * @return mixed
-     * @throws \ReflectionException
      */
-    public static function fallbackCalls($class, $methods, $args = [])
+    public static function fallbackCalls($class, array $methods, array $args = [])
     {
         foreach ($methods as $method) {
-            if (self::VISIBLE_PUBLIC === self::getMethodVisible($class, $method)) {
+            if (self::VISIBLE_PUBLIC === self::methodVisible($class, $method)) {
                 return call_user_func_array([$class, $method], $args);
             }
         }

@@ -13,16 +13,16 @@ class ClassMapManager implements \ArrayAccess
 	/**
 	 * @var array
 	 */
-	protected $maps = [];
+	protected $mapping = [];
 
 	/**
 	 * 获取类型列表
 	 *
 	 * @return array
 	 */
-	public function getMaps()
+	public function getMapping()
 	{
-		return $this->maps;
+		return $this->mapping;
 	}
 
 	/**
@@ -31,7 +31,7 @@ class ClassMapManager implements \ArrayAccess
 	 */
 	public function getTypes()
 	{
-		return array_keys($this->maps);
+		return array_keys($this->mapping);
 	}
 
 	/**
@@ -40,7 +40,7 @@ class ClassMapManager implements \ArrayAccess
 	 */
 	public function getClassList()
 	{
-		return array_values($this->maps);
+		return array_values($this->mapping);
 	}
 
 	/**
@@ -55,7 +55,7 @@ class ClassMapManager implements \ArrayAccess
 			throw new \LogicException("class map {$type} duplicate defined.");
 		}
 
-		$this->maps[$type] = $class;
+		$this->mapping[$type] = $class;
 	}
 
 	/**
@@ -66,7 +66,7 @@ class ClassMapManager implements \ArrayAccess
 	 */
 	public function has($type)
 	{
-		return isset($this->maps[$type]);
+		return isset($this->mapping[$type]);
 	}
 
 	/**
@@ -81,7 +81,7 @@ class ClassMapManager implements \ArrayAccess
 			throw new \LogicException("class map {$type} not defined.");
 		}
 
-		return $this->maps[$type];
+		return $this->mapping[$type];
 	}
 
 	/**
@@ -91,7 +91,7 @@ class ClassMapManager implements \ArrayAccess
 	 */
 	public function forget($type)
 	{
-		unset($this->maps[$type]);
+		unset($this->mapping[$type]);
 	}
 
 	/**
@@ -100,7 +100,7 @@ class ClassMapManager implements \ArrayAccess
 	 */
 	public function clear()
 	{
-		$this->maps = [];
+		$this->mapping = [];
 	}
 
 	/**
