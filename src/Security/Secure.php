@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Xin\Support;
+namespace Xin\Support\Security;
 
 /**
  * 安全相关工具类

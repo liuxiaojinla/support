@@ -171,6 +171,9 @@ class FrameworkWhen
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function invoke()
     {
         foreach ($this->things as $thing) {
