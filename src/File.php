@@ -4,6 +4,9 @@
 namespace Xin\Support;
 
 use FilesystemIterator;
+use League\Flysystem\Config;
+use League\Flysystem\Filesystem;
+use League\Flysystem\PathNormalizer;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -166,6 +169,25 @@ final class File
         }
 
         return $filePath;
+    }
+
+    /**
+     * 获取上传的真实路径
+     * @param string $path
+     * @param Filesystem $filesystem
+     * @return string
+     * @throws \ReflectionException
+     */
+    public static function filesystemRealpath(string $path, Filesystem $filesystem)
+    {
+        /** @var Config $config */
+        $config = Reflect::getPropertyValue($filesystem, 'config');
+        /** @var PathNormalizer $pathNormalizer */
+        $pathNormalizer = Reflect::getPropertyValue($filesystem, 'pathNormalizer');
+
+        $realPath = $config->get('root', $config->get('path', '')) . DIRECTORY_SEPARATOR . $path;
+
+        return $pathNormalizer->normalizePath($realPath);
     }
 
 }
