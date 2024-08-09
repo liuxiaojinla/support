@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Support\Str;
 
 class CallbackUrl
 {
@@ -118,5 +119,26 @@ class CallbackUrl
     protected static function hook(string $type, $data)
     {
         self::$hook && call_user_func(self::$hook, $type, $data);
+    }
+
+    /**
+     * 公共回调
+     * @param $url
+     * @param array $params
+     * @param bool $async
+     * @return mixed
+     */
+    public static function callback($url, $params = [], $async = true)
+    {
+        if (class_exists($url)) {
+            $instance = app($url);
+            return app()->call([$instance, 'handle'], $params);
+        } elseif (is_callable($url)) {
+            return app()->call($url, $params);
+        } elseif (Str::is("/http[s]?:\/\/[\w.]+[\w\/]*[\w.]*\??[\w=&\+\%]*/is", $url)) {
+            return $async ? self::postSync($url, $params) : self::post($url, $params);
+        }
+
+        throw new \InvalidArgumentException('Invalid callback url');
     }
 }

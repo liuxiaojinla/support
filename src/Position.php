@@ -232,4 +232,21 @@ final class Position
 
         return round($distance, $decimal);
     }
+
+
+    /**
+     * 是否在范围内
+     * @param float $lng1 经度1
+     * @param float $lat1 纬度1
+     * @param float $lng2 经度2
+     * @param float $lat2 纬度2
+     * @param float $range 范围
+     * @return bool
+     */
+    public static function isWithinRange($lng1, $lat1, $lng2, $lat2, $range)
+    {
+        $distance = self::calcDistance($lng1, $lat1, $lng2, $lat2);
+
+        return $distance <= $range;
+    }
 }
