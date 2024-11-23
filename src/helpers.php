@@ -1,6 +1,7 @@
 <?php
 
 use Xin\Support\HigherOrderTapProxy;
+use Xin\Support\Path;
 
 if (!function_exists('tap')) {
 	/**
@@ -10,7 +11,7 @@ if (!function_exists('tap')) {
 	 * @param callable|null $callback
 	 * @return mixed
 	 */
-	function tap($value, $callback = null)
+	function tap($value, callable $callback = null)
 	{
 		if (is_null($callback)) {
 			return new HigherOrderTapProxy($value);
@@ -249,7 +250,6 @@ if (!function_exists('class_uses_recursive')) {
 	}
 }
 
-
 if (!function_exists('trait_uses_recursive')) {
 	/**
 	 * 获取一个trait里所有引用到的trait
@@ -268,19 +268,55 @@ if (!function_exists('trait_uses_recursive')) {
 	}
 }
 
-if (! function_exists('with')) {
-    /**
-     * 返回给定的值，可以选择通过给定的回调传递。
-     *
-     * @template TValue
-     * @template TReturn
-     *
-     * @param  TValue  $value
-     * @param  (callable(TValue): (TReturn))|null  $callback
-     * @return ($callback is null ? TValue : TReturn)
-     */
-    function with($value, callable $callback = null)
-    {
-        return is_null($callback) ? $value : $callback($value);
-    }
+if (!function_exists('with')) {
+	/**
+	 * 返回给定的值，可以选择通过给定的回调传递。
+	 *
+	 * @template TValue
+	 * @template TReturn
+	 *
+	 * @param TValue $value
+	 * @param (callable(TValue): (TReturn))|null $callback
+	 * @return ($callback is null ? TValue : TReturn)
+	 */
+	function with($value, callable $callback = null)
+	{
+		return is_null($callback) ? $value : $callback($value);
+	}
+}
+
+if (!function_exists('suffix')) {
+	/**
+	 * 获取文件后缀
+	 * @param string $file
+	 * @return string
+	 */
+	function path_suffix($file)
+	{
+		return Path::suffix($file);
+	}
+}
+
+if (!function_exists('replace_suffix')) {
+	/**
+	 * 替换文件后缀
+	 * @param string $file
+	 * @return string
+	 */
+	function path_replace_suffix($file, $suffix)
+	{
+		return Path::replaceSuffix($file, $suffix);
+	}
+}
+
+if (!function_exists('join_paths')) {
+	/**
+	 * 拼接路径
+	 * @param mixed ...$paths
+	 * @return string
+	 */
+	function join_paths(...$paths)
+	{
+		return Path::joins(...$paths);
+	}
 }
