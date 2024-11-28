@@ -647,7 +647,7 @@ final class Arr
 	 */
 	public static function sort(&$array)
 	{
-		if (static::isAssoc($array)) {
+		if (self::isAssoc($array)) {
 			ksort($array);
 		} else {
 			sort($array);
@@ -667,17 +667,33 @@ final class Arr
 	{
 		foreach ($array as &$value) {
 			if (is_array($value)) {
-				$value = static::sortRecursive($value);
+				$value = self::sortRecursive($value);
 			}
 		}
 
-		if (static::isAssoc($array)) {
+		if (self::isAssoc($array)) {
 			ksort($array);
 		} else {
 			sort($array);
 		}
 
 		return $array;
+	}
+
+	/**
+	 * 使用指定的键进行数组排序
+	 *
+	 * @param array $array
+	 * @param string $sortKey
+	 */
+	public static function sortWithKey(array &$array, string $sortKey = 'sort')
+	{
+		usort($array, function ($it1, $it2) use ($sortKey) {
+			$sort1 = $it1[$sortKey] ?? 0;
+			$sort2 = $it2[$sortKey] ?? 0;
+
+			return $sort1 == $sort2 ? 0 : ($sort1 > $sort2 ? 1 : -1);
+		});
 	}
 
 	/**
@@ -696,19 +712,19 @@ final class Arr
 	 *
 	 * @param array $array
 	 * @param string $column
-	 * @param string $index_key
+	 * @param string $indexKey
 	 * @return array
 	 */
-	public static function column(array $array, $column, $index_key = null)
+	public static function column(array $array, $column, $indexKey = null)
 	{
 		$result = [];
 
 		foreach ($array as $row) {
 			$key = $value = null;
 			$keySet = $valueSet = false;
-			if ($index_key !== null && array_key_exists($index_key, $row)) {
+			if ($indexKey !== null && array_key_exists($indexKey, $row)) {
 				$keySet = true;
-				$key = (string)$row[$index_key];
+				$key = (string)$row[$indexKey];
 			}
 			if ($column === null) {
 				$valueSet = true;
@@ -796,9 +812,9 @@ final class Arr
 	public static function tree(array $list, callable $itemHandler = null, $pid = 0, array $options = [])
 	{
 		$options = array_merge([
-			'id' => 'id', // 要检索的ID键名
-			'parent' => 'pid', // 要检索的parent键名
-			'child' => 'child', // 要存放的子结果集
+			'id'           => 'id', // 要检索的ID键名
+			'parent'       => 'pid', // 要检索的parent键名
+			'child'        => 'child', // 要存放的子结果集
 			'with_unknown' => false, // 是否把未知的上级当成1级返回
 		], $options);
 
@@ -878,6 +894,70 @@ final class Arr
 		};
 
 		return $handler($list, $child);
+	}
+
+	/**
+	 * 遍历树形数据
+	 *
+	 * @param array $data
+	 * @param callable $callback
+	 * @param mixed $parent
+	 * @param array $options
+	 * @return array
+	 */
+	public static function treeEach(array $data, callable $callback, &$parent = null, array $options = [])
+	{
+		$options = array_merge([
+			'child' => 'child', // 要存放的子结果集
+		], $options);
+
+		$childKey = $options['child'];
+
+		$handler = function (&$data, &$parent) use (&$handler, &$callback, &$childKey) {
+			foreach ($data as &$item) {
+				call_user_func_array($callback, [&$item, &$parent]);
+				if (isset($item[$childKey])) {
+					$handler($item[$childKey], $item);
+				}
+			}
+			unset($item);
+
+			return $data;
+		};
+
+		return $handler($data, $parent);
+	}
+
+	/**
+	 * 遍历过滤菜单
+	 *
+	 * @param array $data
+	 * @param callable $filter
+	 * @param array $options
+	 * @return array
+	 */
+	public static function treeFilter(array $data, callable $filter, array $options = [])
+	{
+		$options = array_merge([
+			'child' => 'child', // 要存放的子结果集
+		], $options);
+
+		$childKey = $options['child'];
+
+		$handler = function (&$data) use (&$handler, &$filter, &$childKey) {
+			foreach ($data as $key => &$item) {
+				if (call_user_func_array($filter, [$item]) === false) {
+					unset($data[$key]);
+				} elseif (isset($item[$childKey])) {
+					$item[$childKey] = $handler($item[$childKey]);
+				}
+			}
+			unset($item);
+
+			return $data;
+		};
+
+		return $handler($data);
 	}
 
 	/**
