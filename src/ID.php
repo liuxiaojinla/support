@@ -177,7 +177,7 @@ class ID
     /**
      *  Get UNIX timestamp in millisecond
      *
-     * @return int Timestamp in millisecond, for example: 1501780592275
+     * @return float Timestamp in millisecond, for example: 1501780592275
      */
     public function getUnixTimestamp()
     {
