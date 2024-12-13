@@ -49,7 +49,7 @@ class ConsolePrinter
         echo $this->getPrefixColor($type) . $this->getPrefix($type) . self::RESET_COLOR, " ";
 
         if ($this->isShowDateTime()) {
-            echo now()->format("Y-m-d H:i:s"), " ";
+	        echo "\033[37m" . now()->format("Y-m-d H:i:s") . " \033[0m", " ";
         }
 
         foreach ($data as $value) {
