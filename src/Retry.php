@@ -33,6 +33,18 @@ class Retry
 	}
 
 	/**
+	 * 实例化
+	 *
+	 * @param callable $callback
+	 * @param int $count
+	 * @return static
+	 */
+	public static function make($callback, $count = 3)
+	{
+		return new static($callback, $count);
+	}
+
+	/**
 	 * @param mixed ...$args
 	 * @return false|mixed
 	 * @throws \Throwable
@@ -80,18 +92,6 @@ class Retry
 		$this->bindParams = $params;
 
 		return $this;
-	}
-
-	/**
-	 * 实例化
-	 *
-	 * @param callable $callback
-	 * @param int $count
-	 * @return static
-	 */
-	public static function make($callback, $count = 3)
-	{
-		return new static($callback, $count);
 	}
 
 }

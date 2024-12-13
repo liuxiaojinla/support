@@ -10,44 +10,6 @@ final class Arr
 {
 
 	/**
-	 * 给定值是否可由数组访问
-	 *
-	 * @param mixed $value
-	 * @return bool
-	 */
-	public static function accessible($value)
-	{
-		return is_array($value) || $value instanceof \ArrayAccess;
-	}
-
-	/**
-	 * 给定值是否为关联数组
-	 *
-	 * @param array $arr 数组
-	 * @return bool
-	 */
-	public static function isAssoc($arr)
-	{
-		return array_keys($arr) !== range(0, count($arr) - 1);
-	}
-
-	/**
-	 * 确定给定的键是否存在于提供的数组中
-	 *
-	 * @param \ArrayAccess|array $array
-	 * @param string|int $key
-	 * @return bool
-	 */
-	public static function exists($array, $key)
-	{
-		if ($array instanceof \ArrayAccess) {
-			return $array->offsetExists($key);
-		}
-
-		return array_key_exists($key, $array);
-	}
-
-	/**
 	 * 如果元素不存在，则使用“点”表示法将其添加到数组中
 	 *
 	 * @param array $array
@@ -102,37 +64,30 @@ final class Arr
 	}
 
 	/**
-	 * 支持使用“点”表示法检查数组中是否存在一个或多个项
+	 * 给定值是否可由数组访问
 	 *
-	 * @param \ArrayAccess|array $array
-	 * @param string|array $keys
+	 * @param mixed $value
 	 * @return bool
 	 */
-	public static function has($array, $keys)
+	public static function accessible($value)
 	{
-		$keys = (array)$keys;
+		return is_array($value) || $value instanceof \ArrayAccess;
+	}
 
-		if (!$array || $keys === []) {
-			return false;
+	/**
+	 * 确定给定的键是否存在于提供的数组中
+	 *
+	 * @param \ArrayAccess|array $array
+	 * @param string|int $key
+	 * @return bool
+	 */
+	public static function exists($array, $key)
+	{
+		if ($array instanceof \ArrayAccess) {
+			return $array->offsetExists($key);
 		}
 
-		foreach ($keys as $key) {
-			$subKeyArray = $array;
-
-			if (self::exists($array, $key)) {
-				continue;
-			}
-
-			foreach (explode('.', $key) as $segment) {
-				if (self::accessible($subKeyArray) && self::exists($subKeyArray, $segment)) {
-					$subKeyArray = $subKeyArray[$segment];
-				} else {
-					return false;
-				}
-			}
-		}
-
-		return true;
+		return array_key_exists($key, $array);
 	}
 
 	/**
@@ -171,6 +126,54 @@ final class Arr
 		} else {
 			$array[$key] = $value;
 		}
+
+		return $array;
+	}
+
+	/**
+	 * 支持使用“点”表示法检查数组中是否存在一个或多个项
+	 *
+	 * @param \ArrayAccess|array $array
+	 * @param string|array $keys
+	 * @return bool
+	 */
+	public static function has($array, $keys)
+	{
+		$keys = (array)$keys;
+
+		if (!$array || $keys === []) {
+			return false;
+		}
+
+		foreach ($keys as $key) {
+			$subKeyArray = $array;
+
+			if (self::exists($array, $key)) {
+				continue;
+			}
+
+			foreach (explode('.', $key) as $segment) {
+				if (self::accessible($subKeyArray) && self::exists($subKeyArray, $segment)) {
+					$subKeyArray = $subKeyArray[$segment];
+				} else {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * 获取除指定的键数组以外的所有给定数组
+	 *
+	 * @param array $array
+	 * @param array|string $keys
+	 * @return array
+	 */
+	public static function except($array, $keys)
+	{
+		static::forget($array, $keys);
 
 		return $array;
 	}
@@ -217,20 +220,6 @@ final class Arr
 
 			unset($array[array_shift($parts)]);
 		}
-	}
-
-	/**
-	 * 获取除指定的键数组以外的所有给定数组
-	 *
-	 * @param array $array
-	 * @param array|string $keys
-	 * @return array
-	 */
-	public static function except($array, $keys)
-	{
-		static::forget($array, $keys);
-
-		return $array;
 	}
 
 	/**
@@ -330,6 +319,23 @@ final class Arr
 	}
 
 	/**
+	 * 返回数组中通过给定真值测试的最后一个元素
+	 *
+	 * @param array $array
+	 * @param callable|null $callback
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public static function last($array, callable $callback = null, $default = null)
+	{
+		if (is_null($callback)) {
+			return empty($array) ? value($default) : end($array);
+		}
+
+		return self::first(array_reverse($array, true), $callback, $default);
+	}
+
+	/**
 	 * 返回数组中通过给定真值测试的第一个元素
 	 *
 	 * @param array|iterable $array
@@ -356,23 +362,6 @@ final class Arr
 		}
 
 		return value($default);
-	}
-
-	/**
-	 * 返回数组中通过给定真值测试的最后一个元素
-	 *
-	 * @param array $array
-	 * @param callable|null $callback
-	 * @param mixed $default
-	 * @return mixed
-	 */
-	public static function last($array, callable $callback = null, $default = null)
-	{
-		if (is_null($callback)) {
-			return empty($array) ? value($default) : end($array);
-		}
-
-		return self::first(array_reverse($array, true), $callback, $default);
 	}
 
 	/**
@@ -598,6 +587,17 @@ final class Arr
 		}
 
 		return true;
+	}
+
+	/**
+	 * 给定值是否为关联数组
+	 *
+	 * @param array $arr 数组
+	 * @return bool
+	 */
+	public static function isAssoc($arr)
+	{
+		return array_keys($arr) !== range(0, count($arr) - 1);
 	}
 
 	/**

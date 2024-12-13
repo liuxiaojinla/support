@@ -35,7 +35,7 @@ class Collection extends Fluent implements \Countable, \IteratorAggregate
 	 * @return \ArrayIterator An instance of an object implementing <b>Iterator</b> or
 	 *                        <b>Traversable</b>
 	 */
-    #[\ReturnTypeWillChange]
+	#[\ReturnTypeWillChange]
 	public function getIterator()
 	{
 		return new \ArrayIterator($this->items);
@@ -51,7 +51,7 @@ class Collection extends Fluent implements \Countable, \IteratorAggregate
 	 *             <p>
 	 *             The return value is cast to an integer
 	 */
-    #[\ReturnTypeWillChange]
+	#[\ReturnTypeWillChange]
 	public function count()
 	{
 		return count($this->items);

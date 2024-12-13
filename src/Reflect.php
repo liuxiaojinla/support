@@ -18,90 +18,6 @@ final class Reflect
 	public const VISIBLE_PRIVATE = 2;
 
 	/**
-	 * 获取类方法可见范围
-	 *
-	 * @param mixed $objectOrMethod
-	 * @param string $method
-	 * @return int
-	 * @throws \ReflectionException
-	 * @deprecated
-	 */
-	public static function getMethodVisible($objectOrMethod, $method, $throw = true)
-	{
-		try {
-			$ref = new \ReflectionMethod($objectOrMethod, $method);
-			if ($ref->isPublic()) {
-				return self::VISIBLE_PUBLIC;
-			}
-
-			if ($ref->isProtected()) {
-				return self::VISIBLE_PROTECTED;
-			}
-
-			return self::VISIBLE_PRIVATE;
-		} catch (\ReflectionException $e) {
-			if ($throw) {
-				throw $e;
-			}
-		}
-
-		return self::VISIBLE_PRIVATE;
-	}
-
-	/**
-	 * 方法可见范围 - 无异常模式
-	 *
-	 * @param string|object $objectOrMethod
-	 * @param string $method
-	 * @return int
-	 * @noinspection PhpDocMissingThrowsInspection
-	 * @deprecated
-	 */
-	public static function methodVisible($objectOrMethod, $method)
-	{
-		return self::getMethodVisible($objectOrMethod, $method, false);
-	}
-
-	/**
-	 * 是否是公共方法
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
-	 * @return bool
-	 * @throws \ReflectionException
-	 */
-	public function isPublicMethod($objectOrMethod, $method = null)
-	{
-		$ref = new \ReflectionMethod($objectOrMethod, $method);
-		return $ref->isPublic();
-	}
-
-	/**
-	 * 是否是保护方法
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
-	 * @return bool
-	 * @throws \ReflectionException
-	 */
-	public function isProtectedMethod($objectOrMethod, $method = null)
-	{
-		$ref = new \ReflectionMethod($objectOrMethod, $method);
-		return $ref->isProtected();
-	}
-
-	/**
-	 * 是否是私有方法
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
-	 * @return bool
-	 * @throws \ReflectionException
-	 */
-	public function isPrivateMethod($objectOrMethod, $method = null)
-	{
-		$ref = new \ReflectionMethod($objectOrMethod, $method);
-		return $ref->isPrivate();
-	}
-
-	/**
 	 * 获取方法的修饰符
 	 * 使用 ReflectionMethod::getModifiers() 可以返回一个位掩码（bitmask），表示方法的访问修饰符和非访问修饰符。
 	 * 这个返回值是一个整数，你可以使用位运算符来检查特定的修饰符。
@@ -145,6 +61,17 @@ final class Reflect
 	}
 
 	/**
+	 * 获取类或对象的公共方法
+	 * @param string|object $objectOrClass
+	 * @return \ReflectionMethod[]
+	 * @throws \ReflectionException
+	 */
+	public static function getPublicMethods($objectOrClass)
+	{
+		return self::getMethods($objectOrClass, \ReflectionMethod::IS_PUBLIC);
+	}
+
+	/**
 	 * 获取类的方法
 	 * @param string|object $objectOrClass
 	 * @return \ReflectionMethod[]
@@ -154,17 +81,6 @@ final class Reflect
 	{
 		$reflectionClass = new \ReflectionClass($objectOrClass);
 		return $reflectionClass->getMethods($filter);
-	}
-
-	/**
-	 * 获取类或对象的公共方法
-	 * @param string|object $objectOrClass
-	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
-	 */
-	public static function getPublicMethods($objectOrClass)
-	{
-		return self::getMethods($objectOrClass, \ReflectionMethod::IS_PUBLIC);
 	}
 
 	/**
@@ -232,18 +148,64 @@ final class Reflect
 	}
 
 	/**
-	 * 获取类属性
-	 * @param string|object $class
-	 * @param string $propertyName
-	 * @return \ReflectionProperty
-	 * @throws \ReflectionException
+	 * 方法可见范围 - 无异常模式
+	 *
+	 * @param string|object $objectOrMethod
+	 * @param string $method
+	 * @return int
+	 * @noinspection PhpDocMissingThrowsInspection
+	 * @deprecated
 	 */
-	public static function getProperty($class, $propertyName)
+	public static function methodVisible($objectOrMethod, $method)
 	{
-		$property = new \ReflectionProperty($class, $propertyName);
-		$property->setAccessible(true);
+		return self::getMethodVisible($objectOrMethod, $method, false);
+	}
 
-		return $property;
+	/**
+	 * 获取类方法可见范围
+	 *
+	 * @param mixed $objectOrMethod
+	 * @param string $method
+	 * @return int
+	 * @throws \ReflectionException
+	 * @deprecated
+	 */
+	public static function getMethodVisible($objectOrMethod, $method, $throw = true)
+	{
+		try {
+			$ref = new \ReflectionMethod($objectOrMethod, $method);
+			if ($ref->isPublic()) {
+				return self::VISIBLE_PUBLIC;
+			}
+
+			if ($ref->isProtected()) {
+				return self::VISIBLE_PROTECTED;
+			}
+
+			return self::VISIBLE_PRIVATE;
+		} catch (\ReflectionException $e) {
+			if ($throw) {
+				throw $e;
+			}
+		}
+
+		return self::VISIBLE_PRIVATE;
+	}
+
+	/**
+	 * 获取属性值
+	 * @param object $classInstance
+	 * @param string $property
+	 * @return mixed
+	 * @deprecated
+	 */
+	public static function propertyValue($classInstance, $property, $default = null)
+	{
+		try {
+			return self::getPropertyValue($classInstance, $property);
+		} catch (\ReflectionException $e) {
+			return $default;
+		}
 	}
 
 	/**
@@ -267,19 +229,28 @@ final class Reflect
 	}
 
 	/**
-	 * 获取属性值
-	 * @param object $classInstance
-	 * @param string $property
-	 * @return mixed
-	 * @deprecated
+	 * 获取类属性
+	 * @param string|object $class
+	 * @param string $propertyName
+	 * @return \ReflectionProperty
+	 * @throws \ReflectionException
 	 */
-	public static function propertyValue($classInstance, $property, $default = null)
+	public static function getProperty($class, $propertyName)
 	{
-		try {
-			return self::getPropertyValue($classInstance, $property);
-		} catch (\ReflectionException $e) {
-			return $default;
-		}
+		$property = new \ReflectionProperty($class, $propertyName);
+		$property->setAccessible(true);
+
+		return $property;
+	}
+
+	/**
+	 * @param string|object $objectOrClass
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function hasDynamicProperty($objectOrClass, $propertyName)
+	{
+		return self::hasProperty($objectOrClass, $propertyName, false);
 	}
 
 	/**
@@ -306,16 +277,6 @@ final class Reflect
 		}
 
 		return false;
-	}
-
-	/**
-	 * @param string|object $objectOrClass
-	 * @return bool
-	 * @throws \ReflectionException
-	 */
-	public static function hasDynamicProperty($objectOrClass, $propertyName)
-	{
-		return self::hasProperty($objectOrClass, $propertyName, false);
 	}
 
 	/**
@@ -374,5 +335,44 @@ final class Reflect
 
 			return false;
 		}
+	}
+
+	/**
+	 * 是否是公共方法
+	 * @param string|object $objectOrMethod
+	 * @param string|null $method
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public function isPublicMethod($objectOrMethod, $method = null)
+	{
+		$ref = new \ReflectionMethod($objectOrMethod, $method);
+		return $ref->isPublic();
+	}
+
+	/**
+	 * 是否是保护方法
+	 * @param string|object $objectOrMethod
+	 * @param string|null $method
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public function isProtectedMethod($objectOrMethod, $method = null)
+	{
+		$ref = new \ReflectionMethod($objectOrMethod, $method);
+		return $ref->isProtected();
+	}
+
+	/**
+	 * 是否是私有方法
+	 * @param string|object $objectOrMethod
+	 * @param string|null $method
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public function isPrivateMethod($objectOrMethod, $method = null)
+	{
+		$ref = new \ReflectionMethod($objectOrMethod, $method);
+		return $ref->isPrivate();
 	}
 }

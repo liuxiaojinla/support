@@ -50,7 +50,7 @@ class Enum extends BaseEnum
 		$result = [];
 		foreach ($constants as $val) {
 			$result[] = [
-				'name' => static::$TEXT_MAP[$val],
+				'name'  => static::$TEXT_MAP[$val],
 				'value' => $val,
 			];
 		}

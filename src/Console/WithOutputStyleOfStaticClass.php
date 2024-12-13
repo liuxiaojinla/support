@@ -11,20 +11,20 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 trait WithOutputStyleOfStaticClass
 {
-    /**
-     * @var OutputStyle
-     */
-    private static $outputStyle;
+	/**
+	 * @var OutputStyle
+	 */
+	private static $outputStyle;
 
-    /**
-     * @return OutputInterface|StyleInterface
-     */
-    public static function outputStyle()
-    {
-        if (self::$outputStyle === null) {
-            self::$outputStyle = new SymfonyStyle(new ArgvInput(), new ConsoleOutput());
-        }
+	/**
+	 * @return OutputInterface|StyleInterface
+	 */
+	public static function outputStyle()
+	{
+		if (self::$outputStyle === null) {
+			self::$outputStyle = new SymfonyStyle(new ArgvInput(), new ConsoleOutput());
+		}
 
-        return self::$outputStyle;
-    }
+		return self::$outputStyle;
+	}
 }

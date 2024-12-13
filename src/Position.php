@@ -13,240 +13,239 @@ namespace Xin\Support;
  */
 final class Position
 {
-    // 百度坐标系
-    public const  BAIDU_LBS_TYPE = "bd09ll";
+	// 百度坐标系
+	public const  BAIDU_LBS_TYPE = "bd09ll";
 
-    // PI
-    public const  PI = 3.1415926535897932384626;
+	// PI
+	public const  PI = 3.1415926535897932384626;
 
-    // 地球半径
-    public const  A = 6378245.0;
+	// 地球半径
+	public const  A = 6378245.0;
 
-    public const  EE = 0.00669342162296594323;
+	public const  EE = 0.00669342162296594323;
 
-    /**
-     * 84 to 火星坐标系 (GCJ-02) World Geodetic System ==> Mars Geodetic System
-     *
-     * @param float $lat
-     * @param float $lon
-     * @return array
-     */
-    public static function gps84ToGcj02($lat, $lon)
-    {
-        if (self::outOfChina($lat, $lon)) {
-            return null;
-        }
-        $dLat = self::transformLat($lon - 105.0, $lat - 35.0);
-        $dLon = self::transformLon($lon - 105.0, $lat - 35.0);
-        $radLat = $lat / 180.0 * self::PI;
-        $magic = sin($radLat);
-        $magic = 1 - self::EE * $magic * $magic;
-        $sqrtMagic = sqrt($magic);
-        $dLat = ($dLat * 180.0) / ((self::A * (1 - self::EE)) / ($magic * $sqrtMagic) * self::PI);
-        $dLon = ($dLon * 180.0) / (self::A / $sqrtMagic * cos($radLat) * self::PI);
-        $mgLat = $lat + $dLat;
-        $mgLon = $lon + $dLon;
+	/**
+	 * 84 to 火星坐标系 (GCJ-02) World Geodetic System ==> Mars Geodetic System
+	 *
+	 * @param float $lat
+	 * @param float $lon
+	 * @return array
+	 */
+	public static function gps84ToGcj02($lat, $lon)
+	{
+		if (self::outOfChina($lat, $lon)) {
+			return null;
+		}
+		$dLat = self::transformLat($lon - 105.0, $lat - 35.0);
+		$dLon = self::transformLon($lon - 105.0, $lat - 35.0);
+		$radLat = $lat / 180.0 * self::PI;
+		$magic = sin($radLat);
+		$magic = 1 - self::EE * $magic * $magic;
+		$sqrtMagic = sqrt($magic);
+		$dLat = ($dLat * 180.0) / ((self::A * (1 - self::EE)) / ($magic * $sqrtMagic) * self::PI);
+		$dLon = ($dLon * 180.0) / (self::A / $sqrtMagic * cos($radLat) * self::PI);
+		$mgLat = $lat + $dLat;
+		$mgLon = $lon + $dLon;
 
-        return [$mgLat, $mgLon];
-    }
+		return [$mgLat, $mgLon];
+	}
 
-    /**
-     * 是否在中国
-     *
-     * @param double $lat
-     * @param double $lon
-     * @return bool
-     */
-    public static function outOfChina($lat, $lon)
-    {
-        if ($lon < 72.004 || $lon > 137.8347)
-            return true;
-        if ($lat < 0.8293 || $lat > 55.8271)
-            return true;
+	/**
+	 * 是否在中国
+	 *
+	 * @param double $lat
+	 * @param double $lon
+	 * @return bool
+	 */
+	public static function outOfChina($lat, $lon)
+	{
+		if ($lon < 72.004 || $lon > 137.8347)
+			return true;
+		if ($lat < 0.8293 || $lat > 55.8271)
+			return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    /**
-     * 转换维度
-     *
-     * @param float $x
-     * @param float $y
-     * @return float
-     */
-    public static function transformLat($x, $y)
-    {
-        $ret = -100.0 + 2.0 * $x + 3.0 * $y + 0.2 * $y * $y + 0.1 * $x * $y
-            + 0.2 * sqrt(abs($x));
-        $ret += (20.0 * sin(6.0 * $x * self::PI) + 20.0 * sin(2.0 * $x * self::PI)) * 2.0 / 3.0;
-        $ret += (20.0 * sin($y * self::PI) + 40.0 * sin($y / 3.0 * self::PI)) * 2.0 / 3.0;
-        $ret += (160.0 * sin($y / 12.0 * self::PI) + 320 * sin($y * self::PI / 30.0)) * 2.0 / 3.0;
+	/**
+	 * 转换维度
+	 *
+	 * @param float $x
+	 * @param float $y
+	 * @return float
+	 */
+	public static function transformLat($x, $y)
+	{
+		$ret = -100.0 + 2.0 * $x + 3.0 * $y + 0.2 * $y * $y + 0.1 * $x * $y
+			+ 0.2 * sqrt(abs($x));
+		$ret += (20.0 * sin(6.0 * $x * self::PI) + 20.0 * sin(2.0 * $x * self::PI)) * 2.0 / 3.0;
+		$ret += (20.0 * sin($y * self::PI) + 40.0 * sin($y / 3.0 * self::PI)) * 2.0 / 3.0;
+		$ret += (160.0 * sin($y / 12.0 * self::PI) + 320 * sin($y * self::PI / 30.0)) * 2.0 / 3.0;
 
-        return $ret;
-    }
+		return $ret;
+	}
 
-    /**
-     * 转换经度
-     *
-     * @param float $x
-     * @param float $y
-     * @return float
-     */
-    public static function transformLon($x, $y)
-    {
-        $ret = 300.0 + $x + 2.0 * $y + 0.1 * $x * $x + 0.1 * $x * $y + 0.1
-            * sqrt(abs($x));
-        $ret += (20.0 * sin(6.0 * $x * self::PI) + 20.0 * sin(2.0 * $x * self::PI)) * 2.0 / 3.0;
-        $ret += (20.0 * sin($x * self::PI) + 40.0 * sin($x / 3.0 * self::PI)) * 2.0 / 3.0;
-        $ret += (150.0 * sin($x / 12.0 * self::PI) + 300.0 * sin($x / 30.0
-                    * self::PI)) * 2.0 / 3.0;
+	/**
+	 * 转换经度
+	 *
+	 * @param float $x
+	 * @param float $y
+	 * @return float
+	 */
+	public static function transformLon($x, $y)
+	{
+		$ret = 300.0 + $x + 2.0 * $y + 0.1 * $x * $x + 0.1 * $x * $y + 0.1
+			* sqrt(abs($x));
+		$ret += (20.0 * sin(6.0 * $x * self::PI) + 20.0 * sin(2.0 * $x * self::PI)) * 2.0 / 3.0;
+		$ret += (20.0 * sin($x * self::PI) + 40.0 * sin($x / 3.0 * self::PI)) * 2.0 / 3.0;
+		$ret += (150.0 * sin($x / 12.0 * self::PI) + 300.0 * sin($x / 30.0
+					* self::PI)) * 2.0 / 3.0;
 
-        return $ret;
-    }
+		return $ret;
+	}
 
-    /**
-     * 火星坐标系 (GCJ-02) 与百度坐标系 (BD-09) 的转换算法 将 GCJ-02 坐标转换成 BD-09 坐标
-     *
-     * @param float $gg_lat
-     * @param float $gg_lon
-     * @return array
-     */
-    public static function gcj02ToBD09($gg_lat, $gg_lon)
-    {
-        $x = $gg_lon;
-        $y = $gg_lat;
-        $z = sqrt($x * $x + $y * $y) + 0.00002 * sin($y * self::PI);
-        $theta = atan2($y, $x) + 0.000003 * cos($x * self::PI);
-        $bd_lon = $z * cos($theta) + 0.0065;
-        $bd_lat = $z * sin($theta) + 0.006;
+	/**
+	 * 火星坐标系 (GCJ-02) 与百度坐标系 (BD-09) 的转换算法 将 GCJ-02 坐标转换成 BD-09 坐标
+	 *
+	 * @param float $gg_lat
+	 * @param float $gg_lon
+	 * @return array
+	 */
+	public static function gcj02ToBD09($gg_lat, $gg_lon)
+	{
+		$x = $gg_lon;
+		$y = $gg_lat;
+		$z = sqrt($x * $x + $y * $y) + 0.00002 * sin($y * self::PI);
+		$theta = atan2($y, $x) + 0.000003 * cos($x * self::PI);
+		$bd_lon = $z * cos($theta) + 0.0065;
+		$bd_lat = $z * sin($theta) + 0.006;
 
-        return [$bd_lat, $bd_lon];
-    }
+		return [$bd_lat, $bd_lon];
+	}
 
-    /**
-     * (BD-09)-->84
-     *
-     * @param double $bd_lat
-     * @param double $bd_lon
-     * @return array
-     */
-    public static function bd09ToGps84($bd_lat, $bd_lon)
-    {
-        $gcj02 = self::bd09ToGcj02($bd_lat, $bd_lon);
+	/**
+	 * (BD-09)-->84
+	 *
+	 * @param double $bd_lat
+	 * @param double $bd_lon
+	 * @return array
+	 */
+	public static function bd09ToGps84($bd_lat, $bd_lon)
+	{
+		$gcj02 = self::bd09ToGcj02($bd_lat, $bd_lon);
 
-        return self::gcjToGps84($gcj02[0], $gcj02[1]);
-    }
+		return self::gcjToGps84($gcj02[0], $gcj02[1]);
+	}
 
-    /**
-     * * 火星坐标系 (GCJ-02) 与百度坐标系 (BD-09) 的转换算法 * * 将 BD-09 坐标转换成GCJ-02 坐标 * *
-     *
-     * @param float $bd_lat
-     * @param float $bd_lon
-     * @return array
-     */
-    public static function bd09ToGcj02($bd_lat, $bd_lon)
-    {
-        $x = $bd_lon - 0.0065;
-        $y = $bd_lat - 0.006;
-        $z = sqrt($x * $x + $y * $y) - 0.00002 * sin($y * self::PI);
-        $theta = atan2($y, $x) - 0.000003 * cos($x * self::PI);
-        $gg_lon = $z * cos($theta);
-        $gg_lat = $z * sin($theta);
+	/**
+	 * * 火星坐标系 (GCJ-02) 与百度坐标系 (BD-09) 的转换算法 * * 将 BD-09 坐标转换成GCJ-02 坐标 * *
+	 *
+	 * @param float $bd_lat
+	 * @param float $bd_lon
+	 * @return array
+	 */
+	public static function bd09ToGcj02($bd_lat, $bd_lon)
+	{
+		$x = $bd_lon - 0.0065;
+		$y = $bd_lat - 0.006;
+		$z = sqrt($x * $x + $y * $y) - 0.00002 * sin($y * self::PI);
+		$theta = atan2($y, $x) - 0.000003 * cos($x * self::PI);
+		$gg_lon = $z * cos($theta);
+		$gg_lat = $z * sin($theta);
 
-        return [$gg_lat, $gg_lon];
-    }
+		return [$gg_lat, $gg_lon];
+	}
 
-    /**
-     * 火星坐标系 (GCJ-02) to 84
-     *
-     * @param float $lat
-     * @param float $lon
-     * @return array
-     **/
-    public static function gcjToGps84($lat, $lon)
-    {
-        $gps = self::transform($lat, $lon);
-        $latitude = $lat * 2 - $gps[0];
-        $longitude = $lon * 2 - $gps[1];
+	/**
+	 * 火星坐标系 (GCJ-02) to 84
+	 *
+	 * @param float $lat
+	 * @param float $lon
+	 * @return array
+	 **/
+	public static function gcjToGps84($lat, $lon)
+	{
+		$gps = self::transform($lat, $lon);
+		$latitude = $lat * 2 - $gps[0];
+		$longitude = $lon * 2 - $gps[1];
 
-        return [$latitude, $longitude];
-    }
+		return [$latitude, $longitude];
+	}
 
-    /**
-     * 变换坐标
-     *
-     * @param double $lat
-     * @param double $lon
-     * @return array
-     */
-    public static function transform($lat, $lon)
-    {
-        if (self::outOfChina($lat, $lon)) {
-            return [$lat, $lon];
-        }
-        $dLat = self::transformLat($lon - 105.0, $lat - 35.0);
-        $dLon = self::transformLon($lon - 105.0, $lat - 35.0);
-        $radLat = $lat / 180.0 * self::PI;
-        $magic = sin($radLat);
-        $magic = 1 - self::EE * $magic * $magic;
-        $sqrtMagic = sqrt($magic);
-        $dLat = ($dLat * 180.0) / ((self::A * (1 - self::EE)) / ($magic * $sqrtMagic) * self::PI);
-        $dLon = ($dLon * 180.0) / (self::A / $sqrtMagic * cos($radLat) * self::PI);
-        $mgLat = $lat + $dLat;
-        $mgLon = $lon + $dLon;
+	/**
+	 * 变换坐标
+	 *
+	 * @param double $lat
+	 * @param double $lon
+	 * @return array
+	 */
+	public static function transform($lat, $lon)
+	{
+		if (self::outOfChina($lat, $lon)) {
+			return [$lat, $lon];
+		}
+		$dLat = self::transformLat($lon - 105.0, $lat - 35.0);
+		$dLon = self::transformLon($lon - 105.0, $lat - 35.0);
+		$radLat = $lat / 180.0 * self::PI;
+		$magic = sin($radLat);
+		$magic = 1 - self::EE * $magic * $magic;
+		$sqrtMagic = sqrt($magic);
+		$dLat = ($dLat * 180.0) / ((self::A * (1 - self::EE)) / ($magic * $sqrtMagic) * self::PI);
+		$dLon = ($dLon * 180.0) / (self::A / $sqrtMagic * cos($radLat) * self::PI);
+		$mgLat = $lat + $dLat;
+		$mgLon = $lon + $dLon;
 
-        return [$mgLat, $mgLon];
-    }
+		return [$mgLat, $mgLon];
+	}
 
-    /**
-     * 计算两点地理坐标之间的距离
-     *
-     * @param float $longitude1 起点经度
-     * @param float $latitude1 起点纬度
-     * @param float $longitude2 终点经度
-     * @param float $latitude2 终点纬度
-     * @param int $unit 单位 1:米 2:公里
-     * @param int $decimal 精度 保留小数位数
-     * @return float
-     */
-    public static function calcDistance($longitude1, $latitude1, $longitude2, $latitude2, $unit = 2, $decimal = 2)
-    {
-        $EARTH_RADIUS = 6370.996; // 地球半径系数
-        $PI = 3.1415926;
+	/**
+	 * 是否在范围内
+	 * @param float $lng1 经度1
+	 * @param float $lat1 纬度1
+	 * @param float $lng2 经度2
+	 * @param float $lat2 纬度2
+	 * @param float $range 范围
+	 * @return bool
+	 */
+	public static function isWithinRange($lng1, $lat1, $lng2, $lat2, $range)
+	{
+		$distance = self::calcDistance($lng1, $lat1, $lng2, $lat2);
 
-        $radLat1 = $latitude1 * $PI / 180.0;
-        $radLat2 = $latitude2 * $PI / 180.0;
+		return $distance <= $range;
+	}
 
-        $radLng1 = $longitude1 * $PI / 180.0;
-        $radLng2 = $longitude2 * $PI / 180.0;
+	/**
+	 * 计算两点地理坐标之间的距离
+	 *
+	 * @param float $longitude1 起点经度
+	 * @param float $latitude1 起点纬度
+	 * @param float $longitude2 终点经度
+	 * @param float $latitude2 终点纬度
+	 * @param int $unit 单位 1:米 2:公里
+	 * @param int $decimal 精度 保留小数位数
+	 * @return float
+	 */
+	public static function calcDistance($longitude1, $latitude1, $longitude2, $latitude2, $unit = 2, $decimal = 2)
+	{
+		$EARTH_RADIUS = 6370.996; // 地球半径系数
+		$PI = 3.1415926;
 
-        $a = $radLat1 - $radLat2;
-        $b = $radLng1 - $radLng2;
+		$radLat1 = $latitude1 * $PI / 180.0;
+		$radLat2 = $latitude2 * $PI / 180.0;
 
-        $distance = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
-        $distance *= $EARTH_RADIUS * 1000;
+		$radLng1 = $longitude1 * $PI / 180.0;
+		$radLng2 = $longitude2 * $PI / 180.0;
 
-        if ($unit == 2) {
-            $distance /= 1000;
-        }
+		$a = $radLat1 - $radLat2;
+		$b = $radLng1 - $radLng2;
 
-        return round($distance, $decimal);
-    }
+		$distance = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
+		$distance *= $EARTH_RADIUS * 1000;
 
+		if ($unit == 2) {
+			$distance /= 1000;
+		}
 
-    /**
-     * 是否在范围内
-     * @param float $lng1 经度1
-     * @param float $lat1 纬度1
-     * @param float $lng2 经度2
-     * @param float $lat2 纬度2
-     * @param float $range 范围
-     * @return bool
-     */
-    public static function isWithinRange($lng1, $lat1, $lng2, $lat2, $range)
-    {
-        $distance = self::calcDistance($lng1, $lat1, $lng2, $lat2);
-
-        return $distance <= $range;
-    }
+		return round($distance, $decimal);
+	}
 }

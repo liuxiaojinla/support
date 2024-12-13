@@ -17,55 +17,55 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class Printer
 {
-    use WithOutputStyleOfStaticClass;
+	use WithOutputStyleOfStaticClass;
 
-    private static $consolePrinter;
+	private static $consolePrinter;
 
-    /**
-     * @param string $name
-     * @return ConsolePrinter
-     */
-    public static function printer($name = null)
-    {
-        return new ConsolePrinter($name);
-    }
+	public static function setPrefixName($name)
+	{
+		self::getConsolePrinter()->useNamePrefix($name);
+	}
 
-    /**
-     * @return ConsolePrinter
-     */
-    protected static function getConsolePrinter()
-    {
-        if (!self::$consolePrinter) {
-            self::$consolePrinter = self::printer();
-        }
+	/**
+	 * @return ConsolePrinter
+	 */
+	protected static function getConsolePrinter()
+	{
+		if (!self::$consolePrinter) {
+			self::$consolePrinter = self::printer();
+		}
 
-        return self::$consolePrinter;
-    }
+		return self::$consolePrinter;
+	}
 
-    /**
-     * @param mixed $consolePrinter
-     */
-    public static function setConsolePrinter(ConsolePrinter $consolePrinter)
-    {
-        self::$consolePrinter = $consolePrinter;
-    }
+	/**
+	 * @param mixed $consolePrinter
+	 */
+	public static function setConsolePrinter(ConsolePrinter $consolePrinter)
+	{
+		self::$consolePrinter = $consolePrinter;
+	}
 
-    public static function setPrefixName($name)
-    {
-        self::getConsolePrinter()->useNamePrefix($name);
-    }
+	/**
+	 * @param string $name
+	 * @return ConsolePrinter
+	 */
+	public static function printer($name = null)
+	{
+		return new ConsolePrinter($name);
+	}
 
-    /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public static function __callStatic(string $name, array $arguments)
-    {
-        if (method_exists(self::getConsolePrinter(), $name)) {
-            return call_user_func_array([self::getConsolePrinter(), $name], $arguments);
-        }
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 * @return mixed
+	 */
+	public static function __callStatic(string $name, array $arguments)
+	{
+		if (method_exists(self::getConsolePrinter(), $name)) {
+			return call_user_func_array([self::getConsolePrinter(), $name], $arguments);
+		}
 
-        return call_user_func_array([self::outputStyle(), $name], $arguments);
-    }
+		return call_user_func_array([self::outputStyle(), $name], $arguments);
+	}
 }

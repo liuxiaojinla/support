@@ -18,25 +18,6 @@ class Javascript
 	}
 
 	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return $this->content;
-	}
-
-	/**
-	 * 发送到浏览器中
-	 * @return void
-	 */
-	public function sendBrowser()
-	{
-		echo "<script type=\"text/javascript\">{$this->content}</script>";
-		flush();
-		ob_flush();
-	}
-
-	/**
 	 * 调用浏览器端的JS函数
 	 * @param string $callbackName
 	 * @param array $params
@@ -55,5 +36,24 @@ class Javascript
 		$paramsStr = implode(",", $params);
 		$js = new static("{$callbackName} ( " . json_encode($paramsStr) . " )");
 		$js->sendBrowser();
+	}
+
+	/**
+	 * 发送到浏览器中
+	 * @return void
+	 */
+	public function sendBrowser()
+	{
+		echo "<script type=\"text/javascript\">{$this->content}</script>";
+		flush();
+		ob_flush();
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->content;
 	}
 }

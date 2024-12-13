@@ -44,57 +44,6 @@ class ClassMapManager implements \ArrayAccess
 	}
 
 	/**
-	 * 绑定关联类型
-	 *
-	 * @param string $type
-	 * @param string $class
-	 */
-	public function bind($type, $class)
-	{
-		if ($this->has($type)) {
-			throw new \LogicException("class map {$type} duplicate defined.");
-		}
-
-		$this->mapping[$type] = $class;
-	}
-
-	/**
-	 * 判断类型是否存在
-	 *
-	 * @param string $type
-	 * @return bool
-	 */
-	public function has($type)
-	{
-		return isset($this->mapping[$type]);
-	}
-
-	/**
-	 * 获取类型指定的类
-	 *
-	 * @param string $type
-	 * @return string
-	 */
-	public function get($type)
-	{
-		if (!$this->has($type)) {
-			throw new \LogicException("class map {$type} not defined.");
-		}
-
-		return $this->mapping[$type];
-	}
-
-	/**
-	 * 移除类型映射
-	 * @param string $type
-	 * @return void
-	 */
-	public function forget($type)
-	{
-		unset($this->mapping[$type]);
-	}
-
-	/**
 	 * 清除类型映射
 	 * @return void
 	 */
@@ -123,10 +72,36 @@ class ClassMapManager implements \ArrayAccess
 	}
 
 	/**
+	 * 获取类型指定的类
+	 *
+	 * @param string $type
+	 * @return string
+	 */
+	public function get($type)
+	{
+		if (!$this->has($type)) {
+			throw new \LogicException("class map {$type} not defined.");
+		}
+
+		return $this->mapping[$type];
+	}
+
+	/**
+	 * 判断类型是否存在
+	 *
+	 * @param string $type
+	 * @return bool
+	 */
+	public function has($type)
+	{
+		return isset($this->mapping[$type]);
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	#[ReturnTypeWillChange]
-    public function offsetExists($offset)
+	public function offsetExists($offset)
 	{
 		return $this->has($offset);
 	}
@@ -135,7 +110,7 @@ class ClassMapManager implements \ArrayAccess
 	 * @inheritDoc
 	 */
 	#[ReturnTypeWillChange]
-    public function offsetGet($offset)
+	public function offsetGet($offset)
 	{
 		return $this->get($offset);
 	}
@@ -143,19 +118,44 @@ class ClassMapManager implements \ArrayAccess
 	/**
 	 * @inheritDoc
 	 */
-    #[ReturnTypeWillChange]
+	#[ReturnTypeWillChange]
 	public function offsetSet($offset, $value)
 	{
 		$this->bind($offset, $value);
 	}
 
 	/**
+	 * 绑定关联类型
+	 *
+	 * @param string $type
+	 * @param string $class
+	 */
+	public function bind($type, $class)
+	{
+		if ($this->has($type)) {
+			throw new \LogicException("class map {$type} duplicate defined.");
+		}
+
+		$this->mapping[$type] = $class;
+	}
+
+	/**
 	 * @inheritDoc
 	 */
-    #[ReturnTypeWillChange]
+	#[ReturnTypeWillChange]
 	public function offsetUnset($offset)
 	{
 		$this->forget($offset);
+	}
+
+	/**
+	 * 移除类型映射
+	 * @param string $type
+	 * @return void
+	 */
+	public function forget($type)
+	{
+		unset($this->mapping[$type]);
 	}
 
 }

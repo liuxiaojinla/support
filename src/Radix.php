@@ -9,24 +9,21 @@ class Radix
 {
 
 	/**
+	 * @var static
+	 */
+	protected static $instance62 = null;
+	/**
 	 * @var array
 	 */
 	protected $chars = [];
-
 	/**
 	 * @var array
 	 */
 	protected $chars2 = [];
-
 	/**
 	 * @var int
 	 */
 	protected $radix = 0;
-
-	/**
-	 * @var static
-	 */
-	protected static $instance62 = null;
 
 	/**
 	 * IDGenerator constructor.
@@ -38,6 +35,22 @@ class Radix
 		$this->chars = str_split($sequence);
 		$this->chars2 = array_flip($this->chars);
 		$this->radix = strlen($sequence);
+	}
+
+	/**
+	 * 使用 62 进制转化器
+	 *
+	 * @return $this|null
+	 */
+	public static function radix62()
+	{
+		if (static::$instance62 === null) {
+			static::$instance62 = new static(
+				'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+			);
+		}
+
+		return static::$instance62;
 	}
 
 	/**
@@ -93,22 +106,6 @@ class Radix
 		} while (--$strLastIndex >= 0);
 
 		return $result;
-	}
-
-	/**
-	 * 使用 62 进制转化器
-	 *
-	 * @return $this|null
-	 */
-	public static function radix62()
-	{
-		if (static::$instance62 === null) {
-			static::$instance62 = new static(
-				'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-			);
-		}
-
-		return static::$instance62;
 	}
 
 }

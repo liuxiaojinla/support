@@ -69,6 +69,30 @@ final class Str
 	}
 
 	/**
+	 * 截取字符串
+	 *
+	 * @param string $string
+	 * @param int $start
+	 * @param int|null $length
+	 * @return string
+	 */
+	public static function substr($string, $start, $length = null)
+	{
+		return mb_substr($string, $start, $length, 'UTF-8');
+	}
+
+	/**
+	 * 获取字符串的长度
+	 *
+	 * @param string $value
+	 * @return int
+	 */
+	public static function length($value)
+	{
+		return mb_strlen($value);
+	}
+
+	/**
 	 * 检查字符串是否以某些字符串开头
 	 *
 	 * @param string $haystack
@@ -120,17 +144,6 @@ final class Str
 	}
 
 	/**
-	 * 字符串转小写
-	 *
-	 * @param string $value
-	 * @return string
-	 */
-	public static function lower($value)
-	{
-		return mb_strtolower($value, 'UTF-8');
-	}
-
-	/**
 	 * 字符串转大写
 	 *
 	 * @param string $value
@@ -139,17 +152,6 @@ final class Str
 	public static function upper($value)
 	{
 		return mb_strtoupper($value, 'UTF-8');
-	}
-
-	/**
-	 * 获取字符串的长度
-	 *
-	 * @param string $value
-	 * @return int
-	 */
-	public static function length($value)
-	{
-		return mb_strlen($value);
 	}
 
 	/**
@@ -175,6 +177,17 @@ final class Str
 		}
 
 		return $isCache ? self::$snakeCache[$key][$delimiter] = $value : $value;
+	}
+
+	/**
+	 * 字符串转小写
+	 *
+	 * @param string $value
+	 * @return string
+	 */
+	public static function lower($value)
+	{
+		return mb_strtolower($value, 'UTF-8');
 	}
 
 	/**
@@ -204,14 +217,6 @@ final class Str
 	}
 
 	/**
-	 * 清除下划线转驼峰(首字母小写)缓存
-	 */
-	public static function clearCamelCache()
-	{
-		self::$snakeCache = [];
-	}
-
-	/**
 	 * 下划线转驼峰(首字母大写)
 	 *
 	 * @param string $value
@@ -230,6 +235,14 @@ final class Str
 		$value = str_replace(' ', '', $value);
 
 		return $isCache ? self::$studlyCache[$key] = $value : $value;
+	}
+
+	/**
+	 * 清除下划线转驼峰(首字母小写)缓存
+	 */
+	public static function clearCamelCache()
+	{
+		self::$snakeCache = [];
 	}
 
 	/**
@@ -252,18 +265,6 @@ final class Str
 	}
 
 	/**
-	 * Get the plural form of an English word.
-	 *
-	 * @param string $value
-	 * @param int $count
-	 * @return string
-	 */
-	public static function plural($value, $count = 2)
-	{
-		return Pluralizer::plural($value, $count);
-	}
-
-	/**
 	 * Pluralize the last word of an English, studly caps case string.
 	 *
 	 * @param string $value
@@ -277,6 +278,18 @@ final class Str
 		$lastWord = array_pop($parts);
 
 		return implode('', $parts) . self::plural($lastWord, $count);
+	}
+
+	/**
+	 * Get the plural form of an English word.
+	 *
+	 * @param string $value
+	 * @param int $count
+	 * @return string
+	 */
+	public static function plural($value, $count = 2)
+	{
+		return Pluralizer::plural($value, $count);
 	}
 
 	/**
@@ -360,19 +373,6 @@ final class Str
 		}
 
 		return self::substr(str_shuffle(str_repeat($poolStr, $length)), 0, $length);
-	}
-
-	/**
-	 * 截取字符串
-	 *
-	 * @param string $string
-	 * @param int $start
-	 * @param int|null $length
-	 * @return string
-	 */
-	public static function substr($string, $start, $length = null)
-	{
-		return mb_substr($string, $start, $length, 'UTF-8');
 	}
 
 	/**
@@ -509,6 +509,26 @@ final class Str
 	}
 
 	/**
+	 * 安全处理-数组转字符串
+	 *
+	 * @param mixed $value
+	 * @param string $format
+	 * @param string $delimiter
+	 * @return string
+	 */
+	public static function implode($value, $format = 'intval', $delimiter = ',')
+	{
+		//先转换为数组，进行安全过滤
+		$value = self::explode($value, $format, $delimiter);
+
+		//去除重复
+		$value = array_unique($value);
+
+		//再次转换为字符串
+		return implode(",", $value);
+	}
+
+	/**
 	 * 安全处理-字符串或数组转数组
 	 *
 	 * @param mixed $value
@@ -534,26 +554,6 @@ final class Str
 		}
 
 		return array_values($value);
-	}
-
-	/**
-	 * 安全处理-数组转字符串
-	 *
-	 * @param mixed $value
-	 * @param string $format
-	 * @param string $delimiter
-	 * @return string
-	 */
-	public static function implode($value, $format = 'intval', $delimiter = ',')
-	{
-		//先转换为数组，进行安全过滤
-		$value = self::explode($value, $format, $delimiter);
-
-		//去除重复
-		$value = array_unique($value);
-
-		//再次转换为字符串
-		return implode(",", $value);
 	}
 
 	/**

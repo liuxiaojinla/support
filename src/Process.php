@@ -6,90 +6,90 @@ use Symfony\Component\Process\Process as SymfonyProcess;
 
 final class Process
 {
-    /**
-     * 生成进程实例
-     * @param array $commands
-     * @param array $options
-     * @return SymfonyProcess
-     */
-    public static function make(array $commands, array $options = [])
-    {
-        $options = self::pretreatmentOptions($options);
-        return new SymfonyProcess($commands, $options['cwd'], $options['env'], $options['input'], $options['timeout']);
-    }
+	/**
+	 * 使用当前进程进行执行进程（exec）
+	 * @param array $commands
+	 * @param callable $processHandlerCallback
+	 * @param callable|null $makeProcessCallback
+	 * @param array $options
+	 * @return SymfonyProcess
+	 */
+	public static function run(array $commands, callable $processHandlerCallback, callable $makeProcessCallback = null, array $options = []): SymfonyProcess
+	{
+		$process = self::make($commands, $options);
 
-    /**
-     * 根据命令行生成进程实例
-     * @param string $command
-     * @param array $options
-     * @return SymfonyProcess
-     */
-    public static function fromShellCommandline(string $command, array $options = [])
-    {
-        $options = self::pretreatmentOptions($options);
-        return SymfonyProcess::fromShellCommandline($command, $options['cwd'], $options['env'], $options['input'], $options['timeout']);
-    }
+		return self::runProcess($process, $processHandlerCallback, $makeProcessCallback);
+	}
 
-    /**
-     * 预处理参数
-     * @param array $options
-     * @return array
-     */
-    public static function pretreatmentOptions(array $options = [])
-    {
-        return array_merge([
-            'cwd' => null,
-            'env' => null,
-            'input' => null,
-            'timeout' => 0,
-        ], $options);
-    }
+	/**
+	 * 生成进程实例
+	 * @param array $commands
+	 * @param array $options
+	 * @return SymfonyProcess
+	 */
+	public static function make(array $commands, array $options = [])
+	{
+		$options = self::pretreatmentOptions($options);
+		return new SymfonyProcess($commands, $options['cwd'], $options['env'], $options['input'], $options['timeout']);
+	}
 
-    /**
-     * 使用当前进程进行执行进程（exec）
-     * @param array $commands
-     * @param callable $processHandlerCallback
-     * @param callable|null $makeProcessCallback
-     * @param array $options
-     * @return SymfonyProcess
-     */
-    public static function run(array $commands, callable $processHandlerCallback, callable $makeProcessCallback = null, array $options = []): SymfonyProcess
-    {
-        $process = self::make($commands, $options);
+	/**
+	 * 预处理参数
+	 * @param array $options
+	 * @return array
+	 */
+	public static function pretreatmentOptions(array $options = [])
+	{
+		return array_merge([
+			'cwd'     => null,
+			'env'     => null,
+			'input'   => null,
+			'timeout' => 0,
+		], $options);
+	}
 
-        return self::runProcess($process, $processHandlerCallback, $makeProcessCallback);
-    }
+	/**
+	 * 执行进程
+	 * @param SymfonyProcess $process
+	 * @param callable $processHandlerCallback
+	 * @param callable|null $makeProcessCallback
+	 * @return SymfonyProcess
+	 */
+	protected static function runProcess(SymfonyProcess $process, callable $processHandlerCallback, callable $makeProcessCallback = null)
+	{
+		if ($makeProcessCallback) {
+			call_user_func($makeProcessCallback, $process);
+		}
 
-    /**
-     * 根据命令行执行进程
-     * @param string $command
-     * @param callable $processHandlerCallback
-     * @param callable|null $makeProcessCallback
-     * @param array $options
-     * @return SymfonyProcess
-     */
-    public static function runShellCommandline(string $command, callable $processHandlerCallback, callable $makeProcessCallback = null, array $options = [])
-    {
-        $process = self::fromShellCommandline($command, $options);
+		$process->run($processHandlerCallback);
 
-        return self::runProcess($process, $processHandlerCallback, $makeProcessCallback);
-    }
+		return $process;
+	}
 
-    /**
-     * 执行进程
-     * @param SymfonyProcess $process
-     * @param callable $processHandlerCallback
-     * @param callable|null $makeProcessCallback
-     * @return SymfonyProcess
-     */
-    protected static function runProcess(SymfonyProcess $process, callable $processHandlerCallback, callable $makeProcessCallback = null)
-    {
-        if ($makeProcessCallback) {
-            call_user_func($makeProcessCallback, $process);
-        }
+	/**
+	 * 根据命令行执行进程
+	 * @param string $command
+	 * @param callable $processHandlerCallback
+	 * @param callable|null $makeProcessCallback
+	 * @param array $options
+	 * @return SymfonyProcess
+	 */
+	public static function runShellCommandline(string $command, callable $processHandlerCallback, callable $makeProcessCallback = null, array $options = [])
+	{
+		$process = self::fromShellCommandline($command, $options);
 
-        $process->run($processHandlerCallback);
+		return self::runProcess($process, $processHandlerCallback, $makeProcessCallback);
+	}
 
-        return $process;
-    }
+	/**
+	 * 根据命令行生成进程实例
+	 * @param string $command
+	 * @param array $options
+	 * @return SymfonyProcess
+	 */
+	public static function fromShellCommandline(string $command, array $options = [])
+	{
+		$options = self::pretreatmentOptions($options);
+		return SymfonyProcess::fromShellCommandline($command, $options['cwd'], $options['env'], $options['input'], $options['timeout']);
+	}
 }

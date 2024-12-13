@@ -5,6 +5,17 @@ namespace Xin\Support;
 class Path
 {
 	/**
+	 * 替换文件后缀
+	 * @param string $file
+	 * @param string $suffix
+	 * @return string
+	 */
+	public static function replaceSuffix($file, $suffix)
+	{
+		return self::basename($file) . "." . $suffix;
+	}
+
+	/**
 	 * 获取文件路径的名字
 	 * @param string $file
 	 * @return string
@@ -27,17 +38,6 @@ class Path
 		}
 
 		return substr($file, $dotIndex + 1);
-	}
-
-	/**
-	 * 替换文件后缀
-	 * @param string $file
-	 * @param string $suffix
-	 * @return string
-	 */
-	public static function replaceSuffix($file, $suffix)
-	{
-		return self::basename($file) . "." . $suffix;
 	}
 
 	/**

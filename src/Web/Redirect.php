@@ -35,6 +35,18 @@ class Redirect
 	}
 
 	/**
+	 * @param string $url 重定向的URL地址
+	 * @param integer $time 重定向的等待时间（秒）
+	 * @param string $msg 重定向前的提示信息
+	 * @return void
+	 */
+	public static function redirect($url, $time = 0, $msg = '')
+	{
+		$redirect = new static($url, $time, $msg);
+		$redirect->send();
+	}
+
+	/**
 	 * URL重定向
 	 *
 	 * @return void
@@ -43,9 +55,9 @@ class Redirect
 	{
 		//多行URL地址支持
 		$url = str_replace(["\n", "\r"], '', $this->url);
-//		if (empty($this->msg)) {
-//			$msg = "系统将在{$this->time}秒之后自动跳转到{$this->url}！";
-//		}
+		//		if (empty($this->msg)) {
+		//			$msg = "系统将在{$this->time}秒之后自动跳转到{$this->url}！";
+		//		}
 
 		if (!headers_sent()) {
 			// redirect
@@ -65,17 +77,5 @@ class Redirect
 
 		echo $str;
 		die(0);
-	}
-
-	/**
-	 * @param string $url 重定向的URL地址
-	 * @param integer $time 重定向的等待时间（秒）
-	 * @param string $msg 重定向前的提示信息
-	 * @return void
-	 */
-	public static function redirect($url, $time = 0, $msg = '')
-	{
-		$redirect = new static($url, $time, $msg);
-		$redirect->send();
 	}
 }
