@@ -681,12 +681,17 @@ final class Str
 	 * @param array $data
 	 * @return array|string|string[]
 	 */
-	public static function stub($tpl, $data)
+	public static function stub($tpl, $data, $options = [])
 	{
+		$options = array_replace_recursive([
+			'tag_start' => '{',
+			'tag_end' => '}',
+		], $options);
+
 		$variables = [];
 		$values = [];
 		foreach ($data as $key => $value) {
-			$variables[] = "{%{$key}%}";
+			$variables[] = "{$options['tag_start']}{$key}{$options['tag_end']}";
 			$values[] = $value;
 		}
 

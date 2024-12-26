@@ -22,6 +22,10 @@ trait WithOutputStyle
 	public function outputStyle()
 	{
 		if ($this->outputStyle === null) {
+			if (!class_exists(SymfonyStyle::class)) {
+				throw new \RuntimeException('You need to run "composer require symfony/console".');
+			}
+
 			$this->outputStyle = new SymfonyStyle(new ArgvInput(), new ConsoleOutput());
 		}
 

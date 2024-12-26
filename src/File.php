@@ -15,7 +15,6 @@ use RecursiveIteratorIterator;
  */
 final class File
 {
-
 	/**
 	 * 获取指定目录下所有的文件，包括子目录下的文件
 	 *
@@ -23,6 +22,17 @@ final class File
 	 * @return array
 	 */
 	public static function getFiles($dir)
+	{
+		return self::files($dir);
+	}
+
+	/**
+	 * 获取指定目录下所有的文件，包括子目录下的文件
+	 *
+	 * @param string $dir
+	 * @return array
+	 */
+	public static function files($dir)
 	{
 		$files = [];
 
@@ -188,6 +198,64 @@ final class File
 		$realPath = $config->get('root', $config->get('path', '')) . DIRECTORY_SEPARATOR . $path;
 
 		return $pathNormalizer->normalizePath($realPath);
+	}
+
+	/**
+	 * 写入文件
+	 * @param string $path
+	 * @param mixed $data
+	 * @return false|int
+	 */
+	public static function put(string $path, $data)
+	{
+		$directory = dirname($path);
+		self::mkdirOrExists($directory);
+
+		if (is_object($data) || is_array($data)) {
+			$data = JSON::encode($data);
+		}
+
+		return file_put_contents($path, $data);
+	}
+
+	/**
+	 * 读取文件
+	 * @param string $path
+	 * @return false|string
+	 */
+	public static function get(string $path)
+	{
+		return file_get_contents($path);
+	}
+
+	/**
+	 * 创建目录
+	 * @param string $directory
+	 * @param int $permissions
+	 * @param bool $recursive
+	 * @param mixed $context
+	 * @return bool
+	 */
+	public static function mkdir(string $directory, int $permissions = 0777, bool $recursive = true, $context = null)
+	{
+		return mkdir($directory, $permissions, $recursive, $context);
+	}
+
+	/**
+	 * 不存在则创建目录
+	 * @param string $directory
+	 * @param int $permissions
+	 * @param bool $recursive
+	 * @param mixed $context
+	 * @return bool
+	 */
+	public static function mkdirOrExists(string $directory, int $permissions = 0777, bool $recursive = true, $context = null)
+	{
+		if (is_dir($directory)) {
+			return true;
+		}
+
+		return self::mkdir($directory, $permissions, $recursive, $context);
 	}
 
 }

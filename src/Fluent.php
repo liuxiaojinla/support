@@ -27,6 +27,17 @@ class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
 	}
 
 	/**
+	 * 创建
+	 * @param array $items
+	 * @param Fluent|null $instance
+	 * @return static
+	 */
+	public static function make(array $items = [], Fluent $instance = null)
+	{
+		return new static($items);
+	}
+
+	/**
 	 * Set the item value.
 	 *
 	 * @param string $key
@@ -55,7 +66,7 @@ class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
 			}
 		}
 
-		return new static($return);
+		return static::make($return, $this);
 	}
 
 	/**
@@ -80,7 +91,7 @@ class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
 	{
 		$keys = is_array($keys) ? $keys : func_get_args();
 
-		return new static(Arr::except($this->items, $keys));
+		return static::make(Arr::except($this->items, $keys), $this);
 	}
 
 	/**
@@ -91,7 +102,7 @@ class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
 	 */
 	public function merge($items)
 	{
-		$clone = new static($this->all());
+		$clone = static::make($this->all());
 
 		foreach ($items as $key => $value) {
 			$clone->set($key, $value);
