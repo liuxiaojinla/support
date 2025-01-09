@@ -635,6 +635,7 @@ final class Reflect
 	 * @param mixed $value
 	 * @return \ReflectionProperty
 	 * @throws \ReflectionException
+	 * @deprecated
 	 */
 	public static function setPropertyValue($classInstance, $propertyName, $value)
 	{

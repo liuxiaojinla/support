@@ -191,9 +191,9 @@ final class File
 	public static function filesystemRealpath(string $path, Filesystem $filesystem)
 	{
 		/** @var Config $config */
-		$config = Reflect::getPropertyValue($filesystem, 'config');
+		$config = Reflect::get($filesystem, 'config');
 		/** @var PathNormalizer $pathNormalizer */
-		$pathNormalizer = Reflect::getPropertyValue($filesystem, 'pathNormalizer');
+		$pathNormalizer = Reflect::get($filesystem, 'pathNormalizer');
 
 		$realPath = $config->get('root', $config->get('path', '')) . DIRECTORY_SEPARATOR . $path;
 
