@@ -18,6 +18,287 @@ final class Reflect
 	public const VISIBLE_PRIVATE = 2;
 
 	/**
+	 * 内部方法，是否抛出异常
+	 * @param callable $callback
+	 * @param mixed $default
+	 * @param bool $throw
+	 * @return mixed|null
+	 * @throws \ReflectionException
+	 */
+	protected static function throwIf($callback, $default = null, $throw = false)
+	{
+		try {
+			return $callback();
+		} catch (\ReflectionException $e) {
+			if ($throw) {
+				throw $e;
+			}
+		}
+
+		return value($default);
+	}
+
+	/**
+	 * 转换为 ReflectionClass
+	 * @param object|string $objectOrClass
+	 * @return \ReflectionClass
+	 * @throws \ReflectionException
+	 */
+	public static function asClassRef($objectOrClass)
+	{
+		return (new \ReflectionClass($objectOrClass));
+	}
+
+	/**
+	 * 转换为 ReflectionMethod
+	 * @param object|string $objectOrClass
+	 * @param string $methodName
+	 * @return \ReflectionMethod
+	 * @throws \ReflectionException
+	 */
+	public static function asMethodRef($objectOrClass, $methodName)
+	{
+		$ref = new \ReflectionMethod($objectOrClass, $methodName);
+		/** @noinspection PhpExpressionResultUnusedInspection */
+		$ref->setAccessible(true);
+
+		return $ref;
+	}
+
+	/**
+	 * 转换为 ReflectionFunction
+	 * @param Closure|string $function
+	 * @return \ReflectionFunction
+	 * @throws \ReflectionException
+	 */
+	public static function asFunctionRef($function)
+	{
+		return new \ReflectionFunction($function);
+	}
+
+	/**
+	 * 转换为 ReflectionProperty
+	 * @param object|string $objectOrClass
+	 * @param string $propertyName
+	 * @return \ReflectionProperty
+	 * @throws \ReflectionException
+	 */
+	public static function asPropertyRef($objectOrClass, $propertyName)
+	{
+		$property = new \ReflectionProperty($objectOrClass, $propertyName);
+		/** @noinspection PhpExpressionResultUnusedInspection */
+		$property->setAccessible(true);
+
+		return $property;
+	}
+
+	/**
+	 * 转换为 ReflectionParameter
+	 * @param string|array|object $function
+	 * @param int|string $parameterName
+	 * @return \ReflectionParameter
+	 * @throws \ReflectionException
+	 */
+	public static function asParameterRef($function, $parameterName)
+	{
+		return new \ReflectionParameter($function, $parameterName);
+	}
+
+	/**
+	 * 获取类中指定的方法
+	 * @param string|object|callable $objectOrClass
+	 * @param string|null $methodName
+	 * @param bool $throw
+	 * @return \ReflectionMethod|\ReflectionFunction|null
+	 * @throws \ReflectionException
+	 */
+	public static function method($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			if (is_callable($objectOrClass)) {
+				return self::asFunctionRef($objectOrClass);
+			}
+
+			return self::asMethodRef($objectOrClass, $methodName);
+		}, null, $throw);
+	}
+
+	/**
+	 * 方法可见范围 - 无异常模式
+	 *
+	 * @param string|object $objectOrClass
+	 * @param string $methodName
+	 * @param bool $throw
+	 * @return int
+	 * @throws \ReflectionException
+	 * @deprecated
+	 * @see self::methodModifiers()
+	 */
+	public static function methodVisible($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			$ref = new \ReflectionMethod($objectOrClass, $methodName);
+			if ($ref->isPublic()) {
+				return self::VISIBLE_PUBLIC;
+			}
+
+			if ($ref->isProtected()) {
+				return self::VISIBLE_PROTECTED;
+			}
+
+			return self::VISIBLE_PRIVATE;
+		}, self::VISIBLE_PRIVATE, $throw);
+	}
+
+	/**
+	 * 获取类方法可见范围
+	 *
+	 * @param mixed $objectOrClass
+	 * @param string $methodName
+	 * @return int
+	 * @throws \ReflectionException
+	 * @deprecated
+	 * @see self::methodModifiers()
+	 */
+	public static function getMethodVisible($objectOrClass, $methodName, $throw = true)
+	{
+		return self::methodVisible($objectOrClass, $methodName, $throw);
+	}
+
+	/**
+	 * 是否是生成器函数
+	 * @param callable $callback
+	 * @param bool $throw
+	 * @return bool
+	 * @noinspection PhpDocMissingThrowsInspection
+	 */
+	public static function isGenerator(callable $callback, $throw = false)
+	{
+		return self::throwIf(function () use ($callback) {
+			if (is_array($callback)) {
+				// 对于数组形式的回调，例如 [$object, 'methodName']
+				$reflection = new \ReflectionMethod($callback[0], $callback[1]);
+			} else {
+				// 对于普通函数
+				$reflection = new \ReflectionFunction($callback);
+			}
+			return $reflection->isGenerator();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是公共方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isPublicMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isPublic();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是保护方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isProtectedMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isProtected();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是私有方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isPrivateMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isPrivate();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是静态方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isStaticMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isStatic();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是抽象方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isAbstractMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isAbstract();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是构造方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isConstructorMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isConstructor();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是析构方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isDestructorMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isDestructor();
+		}, false, $throw);
+	}
+
+	/**
+	 * 是否是闭包方法
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
+	 * @return bool
+	 * @throws \ReflectionException
+	 */
+	public static function isClosureMethod($objectOrClass, $methodName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			return self::method($objectOrClass, $methodName)->isClosure();
+		}, false, $throw);
+	}
+
+	/**
 	 * 获取方法的修饰符
 	 * 使用 ReflectionMethod::getModifiers() 可以返回一个位掩码（bitmask），表示方法的访问修饰符和非访问修饰符。
 	 * 这个返回值是一个整数，你可以使用位运算符来检查特定的修饰符。
@@ -40,224 +321,254 @@ final class Reflect
 	 * if ($modifiers & ReflectionMethod::IS_ABSTRACT) {
 	 * echo "Method is abstract.\n";
 	 * }
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
+	 * @param string|object $objectOrClass
+	 * @param string|null $methodName
 	 * @param bool $throw
 	 * @return int
 	 * @throws \ReflectionException
 	 */
-	public static function getMethodModifiers($objectOrMethod, $method = null, $throw = false)
+	public static function methodModifiers($objectOrClass, $methodName, $throw = false)
 	{
-		try {
-			$ref = new \ReflectionMethod($objectOrMethod, $method);
-			return $ref->getModifiers();
-		} catch (\ReflectionException $e) {
-			if ($throw) {
-				throw $e;
-			}
-		}
-
-		return \ReflectionMethod::IS_PRIVATE;
-	}
-
-	/**
-	 * 获取类或对象的公共方法
-	 * @param string|object $objectOrClass
-	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
-	 */
-	public static function getPublicMethods($objectOrClass)
-	{
-		return self::getMethods($objectOrClass, \ReflectionMethod::IS_PUBLIC);
+		return self::throwIf(function () use ($objectOrClass, $methodName) {
+			$methodName = self::method($objectOrClass, $methodName, true);
+			return $methodName->getModifiers();
+		}, \ReflectionMethod::IS_PRIVATE, $throw);
 	}
 
 	/**
 	 * 获取类的方法
 	 * @param string|object $objectOrClass
+	 * @param bool $throw
 	 * @return \ReflectionMethod[]
 	 * @throws \ReflectionException
 	 */
-	public static function getMethods($objectOrClass, $filter = null)
+	public static function methods($objectOrClass, $filter = null, $default = [], $throw = false)
 	{
-		$reflectionClass = new \ReflectionClass($objectOrClass);
-		return $reflectionClass->getMethods($filter);
+		return self::throwIf(function () use ($objectOrClass, $filter) {
+			$reflectionClass = new \ReflectionClass($objectOrClass);
+			return $reflectionClass->getMethods($filter);
+		}, $default, $throw);
+	}
+
+	/**
+	 * 获取类或对象的公共方法
+	 * @param string|object $objectOrClass
+	 * @param bool $throw
+	 * @return \ReflectionMethod[]
+	 * @throws \ReflectionException
+	 */
+	public static function publicMethods($objectOrClass, $default = [], $throw = false)
+	{
+		return self::methods($objectOrClass, \ReflectionMethod::IS_PUBLIC, $default, $throw);
 	}
 
 	/**
 	 * 获取类或对象的受保护方法
 	 * @param string|object $objectOrClass
+	 * @param bool $throw
 	 * @return \ReflectionMethod[]
 	 * @throws \ReflectionException
 	 */
-	public static function getProtectedMethods($objectOrClass)
+	public static function protectedMethods($objectOrClass, $default = [], $throw = false)
 	{
-		return self::getMethods($objectOrClass, \ReflectionMethod::IS_PROTECTED);
+		return self::methods($objectOrClass, \ReflectionMethod::IS_PROTECTED, $default, $throw);
 	}
 
 	/**
 	 * 获取类或对象的私有方法
 	 * @param string|object $objectOrClass
+	 * @param bool $throw
 	 * @return \ReflectionMethod[]
 	 * @throws \ReflectionException
 	 */
-	public static function getPrivateMethods($objectOrClass)
+	public static function privateMethods($objectOrClass, $default = [], $throw = false)
 	{
-		return self::getMethods($objectOrClass, \ReflectionMethod::IS_PRIVATE);
+		return self::methods($objectOrClass, \ReflectionMethod::IS_PRIVATE, $default, $throw);
 	}
 
 	/**
-	 * 获取类或对象的最终方法
+	 * 获取类或对象的终态方法
 	 * @param string|object $objectOrClass
+	 * @param bool $throw
 	 * @return \ReflectionMethod[]
 	 * @throws \ReflectionException
 	 */
-	public static function getFinalMethods($objectOrClass)
+	public static function finalMethods($objectOrClass, $default = [], $throw = false)
 	{
-		return self::getMethods($objectOrClass, \ReflectionMethod::IS_FINAL);
+		return self::methods($objectOrClass, \ReflectionMethod::IS_FINAL, $default, $throw);
 	}
 
 	/**
 	 * 获取类或对象的抽象方法
 	 * @param string|object $objectOrClass
+	 * @param bool $throw
 	 * @return \ReflectionMethod[]
 	 * @throws \ReflectionException
 	 */
-	public static function getAbstractMethods($objectOrClass)
+	public static function abstractMethods($objectOrClass, $default = [], $throw = false)
 	{
-		return self::getMethods($objectOrClass, \ReflectionMethod::IS_ABSTRACT);
+		return self::methods($objectOrClass, \ReflectionMethod::IS_ABSTRACT, $default, $throw);
 	}
 
 	/**
-	 * 回退试调用类方法
-	 *
-	 * @param mixed $class
-	 * @param array $methods
-	 * @param array $args
-	 * @return mixed
-	 * @noinspection PhpDocMissingThrowsInspection
-	 */
-	public static function fallbackCalls($class, array $methods, array $args = [])
-	{
-		foreach ($methods as $method) {
-			if (self::VISIBLE_PUBLIC === self::methodVisible($class, $method)) {
-				return call_user_func_array([$class, $method], $args);
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * 方法可见范围 - 无异常模式
-	 *
-	 * @param string|object $objectOrMethod
-	 * @param string $method
-	 * @return int
-	 * @noinspection PhpDocMissingThrowsInspection
-	 * @deprecated
-	 */
-	public static function methodVisible($objectOrMethod, $method)
-	{
-		return self::getMethodVisible($objectOrMethod, $method, false);
-	}
-
-	/**
-	 * 获取类方法可见范围
-	 *
-	 * @param mixed $objectOrMethod
-	 * @param string $method
-	 * @return int
+	 * 获取类或对象的静态方法
+	 * @param string|object $objectOrClass
+	 * @param bool $throw
+	 * @return \ReflectionMethod[]
 	 * @throws \ReflectionException
-	 * @deprecated
 	 */
-	public static function getMethodVisible($objectOrMethod, $method, $throw = true)
+	public static function staticMethods($objectOrClass, $default = [], $throw = false)
 	{
-		try {
-			$ref = new \ReflectionMethod($objectOrMethod, $method);
-			if ($ref->isPublic()) {
-				return self::VISIBLE_PUBLIC;
-			}
-
-			if ($ref->isProtected()) {
-				return self::VISIBLE_PROTECTED;
-			}
-
-			return self::VISIBLE_PRIVATE;
-		} catch (\ReflectionException $e) {
-			if ($throw) {
-				throw $e;
-			}
-		}
-
-		return self::VISIBLE_PRIVATE;
-	}
-
-	/**
-	 * 获取属性值
-	 * @param object $classInstance
-	 * @param string $property
-	 * @return mixed
-	 * @deprecated
-	 */
-	public static function propertyValue($classInstance, $property, $default = null)
-	{
-		try {
-			return self::getPropertyValue($classInstance, $property);
-		} catch (\ReflectionException $e) {
-			return $default;
-		}
-	}
-
-	/**
-	 * 获取属性值
-	 * @param object $classInstance
-	 * @param string $property
-	 * @return mixed
-	 * @noinspection PhpDocMissingThrowsInspection
-	 */
-	public static function getPropertyValue($classInstance, $property, $default = null, $throw = false)
-	{
-		try {
-			return self::getProperty($classInstance, $property)->getValue($classInstance);
-		} catch (\ReflectionException $e) {
-			if ($throw) {
-				throw $e;
-			}
-		}
-
-		return $default;
+		return self::methods($objectOrClass, \ReflectionMethod::IS_STATIC, $default, $throw);
 	}
 
 	/**
 	 * 获取类属性
-	 * @param string|object $class
+	 * @param string|object $objectOrClass
 	 * @param string $propertyName
 	 * @return \ReflectionProperty
 	 * @throws \ReflectionException
+	 * @deprecated
+	 * @see self::property()
 	 */
-	public static function getProperty($class, $propertyName)
+	public static function getProperty($objectOrClass, $propertyName)
 	{
-		$property = new \ReflectionProperty($class, $propertyName);
-		$property->setAccessible(true);
-
-		return $property;
+		return self::property($objectOrClass, $propertyName, true);
 	}
 
 	/**
+	 * 获取类属性
 	 * @param string|object $objectOrClass
-	 * @return bool
+	 * @param string $propertyName
+	 * @param bool $throw
+	 * @return \ReflectionProperty
 	 * @throws \ReflectionException
 	 */
-	public static function hasDynamicProperty($objectOrClass, $propertyName)
+	public static function property($objectOrClass, $propertyName, $throw = false)
 	{
-		return self::hasProperty($objectOrClass, $propertyName, false);
+		return self::throwIf(function () use ($objectOrClass, $propertyName) {
+			return self::asPropertyRef($objectOrClass, $propertyName);
+		}, null, $throw);
+	}
+
+	/**
+	 * 获取类属性值
+	 * @param string|object $objectOrClass
+	 * @param string $propertyName
+	 * @param mixed|null $default
+	 * @param bool $throw
+	 * @return mixed|null
+	 * @throws \ReflectionException
+	 */
+	public static function get($objectOrClass, $propertyName, $default = null, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $propertyName) {
+			return self::property($objectOrClass, $propertyName, true)->getValue(is_object($objectOrClass) ? $objectOrClass : null);
+		}, $default, $throw);
+	}
+
+	/**
+	 * 获取属性值
+	 * @param object $classInstance
+	 * @param string $property
+	 * @param mixed|null $default
+	 * @return mixed
+	 * @throws \ReflectionException
+	 * @deprecated
+	 * @see self::get()
+	 */
+	public static function propertyValue($classInstance, $property, $default = null)
+	{
+		return self::get($classInstance, $property, $default, false);
+	}
+
+	/**
+	 * 获取属性值
+	 * @param object $classInstance
+	 * @param string $property
+	 * @return mixed
+	 * @noinspection PhpDocMissingThrowsInspection
+	 * @deprecated
+	 * @see          self::get()
+	 */
+	public static function getPropertyValue($classInstance, $property, $default = null, $throw = false)
+	{
+		return self::get($classInstance, $property, $default, $throw);
 	}
 
 	/**
 	 * 属性是否存在
 	 * @param string|object $objectOrClass
+	 * @param string $propertyName
+	 * @param bool $throw
 	 * @return bool
 	 * @throws \ReflectionException
+	 */
+	public static function has($objectOrClass, $propertyName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $propertyName) {
+			return self::asClassRef($objectOrClass)->hasProperty($propertyName);
+		}, false, $throw);
+	}
+
+	/**
+	 * 指定的类或对象中是否包含指定的静态属性
+	 * @param string|object $objectOrClass
+	 * @param string $propertyName
+	 * @param bool $throw
+	 * @return mixed|null
+	 * @throws \ReflectionException
+	 */
+	public static function staticHas($objectOrClass, $propertyName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $propertyName) {
+			if (!self::has($objectOrClass, $propertyName)) {
+				return false;
+			}
+
+			return self::property($objectOrClass, $propertyName, true)->isStatic();
+		}, false, $throw);
+	}
+
+	/**
+	 * 指定的类或对象中是否包含指定的动态成员属性
+	 * @param string|object $objectOrClass
+	 * @param string $propertyName
+	 * @param bool $throw
+	 * @return mixed|null
+	 * @throws \ReflectionException
+	 */
+	public static function dynamicHas($objectOrClass, $propertyName, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $propertyName) {
+			if (!self::has($objectOrClass, $propertyName)) {
+				return false;
+			}
+
+			return !self::property($objectOrClass, $propertyName, true)->isStatic();
+		}, false, $throw);
+	}
+
+	/**
+	 * 指定的类或对象中是否包含指定的动态成员属性
+	 * @param string|object $objectOrClass
+	 * @return bool
+	 * @throws \ReflectionException
+	 * @deprecated
+	 */
+	public static function hasDynamicProperty($objectOrClass, $propertyName)
+	{
+		return self::dynamicHas($objectOrClass, $propertyName, false);
+	}
+
+	/**
+	 * 属性是否存在
+	 * @param string|object $objectOrClass
+	 * @param string $propertyName
+	 * @param bool|null $isStatic 是否检测静态成员属性：true检测静态成员属性，false排除静态成员属性，null检测所有的成员属性
+	 * @return bool
+	 * @throws \ReflectionException
+	 * @deprecated
 	 */
 	public static function hasProperty($objectOrClass, $propertyName, $isStatic = null)
 	{
@@ -280,13 +591,41 @@ final class Reflect
 	}
 
 	/**
+	 * 指定的类或对象中是否包含指定的静态属性
 	 * @param string|object $objectOrClass
 	 * @return bool
 	 * @throws \ReflectionException
+	 * @deprecated
 	 */
 	public static function hasStaticProperty($objectOrClass, $propertyName)
 	{
-		return self::hasProperty($objectOrClass, $propertyName, true);
+		return self::staticHas($objectOrClass, $propertyName, false);
+	}
+
+	/**
+	 * 设置属性值
+	 * @param string|object $objectOrClass
+	 * @param string $propertyName
+	 * @param mixed $value
+	 * @param bool $throw
+	 * @return \ReflectionProperty
+	 * @throws \ReflectionException
+	 */
+	public static function set($objectOrClass, $propertyName, $value, $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $propertyName, $value) {
+			$ref = self::property($objectOrClass, $propertyName);
+
+			if (is_callable($value)) {
+				$value = $value($ref->getValue());
+			}
+
+			if ($ref->isStatic()) {
+				$ref->setValue($value);
+			}
+
+			$ref->setValue($objectOrClass, $value);
+		}, null, $throw);
 	}
 
 	/**
@@ -299,80 +638,188 @@ final class Reflect
 	 */
 	public static function setPropertyValue($classInstance, $propertyName, $value)
 	{
-		$property = self::getProperty($classInstance, $propertyName);
-
-		if (is_callable($value)) {
-			$value = $value($property->getValue());
-		}
-
-		$property->setValue($classInstance, $value);
-
-		return $property;
+		return self::set($classInstance, $propertyName, $value, true);
 	}
 
 	/**
-	 * 是否是生成器函数
-	 * @param callable $callback
+	 * 获取类属性列表
+	 * @param string|object $objectOrClass
+	 * @param int|null $filter
 	 * @param bool $throw
+	 * @return \ReflectionProperty
+	 * @throws \ReflectionException
+	 */
+	public static function properties($objectOrClass, $filter = null, $default = [], $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $filter) {
+			return self::asClassRef($objectOrClass)->getProperties($filter);
+		}, $default, $throw);
+	}
+
+	/**
+	 * 获取类或对象中是否包含的动态属性列表
+	 * @param string|object $objectOrClass
 	 * @return bool
+	 * @throws \ReflectionException
+	 * @deprecated
+	 */
+	public static function dynamicProperties($objectOrClass, $default = [], $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass) {
+			return array_filter(self::asClassRef($objectOrClass)->getProperties(), function (\ReflectionProperty $property) {
+				return !$property->isStatic();
+			});
+		}, $default, $throw);
+	}
+
+	/**
+	 * 获取类或对象中是否包含的静态属性列表
+	 * @param string|object $objectOrClass
+	 * @return bool
+	 * @throws \ReflectionException
+	 * @deprecated
+	 */
+	public static function staticProperties($objectOrClass, $default = [], $throw = false)
+	{
+		return self::throwIf(function () use ($objectOrClass, $default) {
+			return self::asClassRef($objectOrClass)->getProperties(\ReflectionProperty::IS_STATIC);
+		}, $default, $throw);
+	}
+
+	/**
+	 * 回退试调用类方法
+	 *
+	 * @param string|object $objectOrClass
+	 * @param array $methodNames
+	 * @param array $args
+	 * @return mixed
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public static function isGenerator(callable $callback, $throw = false)
+	public static function fallbackCalls($objectOrClass, array $methodNames, array $args = [])
 	{
-		try {
-			if (is_array($callback)) {
-				// 对于数组形式的回调，例如 [$object, 'methodName']
-				$reflection = new \ReflectionMethod($callback[0], $callback[1]);
-			} else {
-				// 对于普通函数
-				$reflection = new \ReflectionFunction($callback);
+		foreach ($methodNames as $methodName) {
+			if (\ReflectionMethod::IS_PUBLIC == self::methodModifiers($objectOrClass, $methodName)) {
+				return call_user_func_array([$objectOrClass, $methodName], $args);
 			}
-			return $reflection->isGenerator();
-		} catch (\ReflectionException $e) {
-			if ($throw) {
-				throw $e;
-			}
-
-			return false;
 		}
+
+		return null;
 	}
 
 	/**
-	 * 是否是公共方法
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
-	 * @return bool
+	 * 调用类方法
+	 * @param string|object $objectOrClass
+	 * @param string $methodName
+	 * @param array $args
+	 * @param bool $throw
+	 * @return mixed|null
 	 * @throws \ReflectionException
 	 */
-	public function isPublicMethod($objectOrMethod, $method = null)
+	public static function call($objectOrClass, $methodName, array $args = [], $throw = false)
 	{
-		$ref = new \ReflectionMethod($objectOrMethod, $method);
-		return $ref->isPublic();
+		return self::throwIf(function () use ($objectOrClass, $methodName, $args) {
+			$methodRef = self::method($objectOrClass, $methodName);
+			return $methodRef->invokeArgs($methodRef->isStatic() ? null : $objectOrClass, $args);
+		}, null, $throw);
 	}
 
 	/**
-	 * 是否是保护方法
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
-	 * @return bool
+	 * 获取父级
+	 * @param string|object $objectOrClass
+	 * @return false|\ReflectionClass
 	 * @throws \ReflectionException
 	 */
-	public function isProtectedMethod($objectOrMethod, $method = null)
+	public static function parent($objectOrClass, $throw = false)
 	{
-		$ref = new \ReflectionMethod($objectOrMethod, $method);
-		return $ref->isProtected();
+		return self::throwIf(function () use ($objectOrClass) {
+			return self::asClassRef($objectOrClass)->getParentClass();
+		}, false, $throw);
 	}
 
 	/**
-	 * 是否是私有方法
-	 * @param string|object $objectOrMethod
-	 * @param string|null $method
-	 * @return bool
+	 * 获取父级列表
+	 * @param string|object $objectOrClass
+	 * @return array
 	 * @throws \ReflectionException
 	 */
-	public function isPrivateMethod($objectOrMethod, $method = null)
+	public static function parents($objectOrClass, $throw = false)
 	{
-		$ref = new \ReflectionMethod($objectOrMethod, $method);
-		return $ref->isPrivate();
+		return self::throwIf(function () use ($objectOrClass) {
+			$parents = [];
+			$parent = self::parent($objectOrClass);
+
+			while ($parent) {
+				$parents[] = $parent;
+				$parent = $parent->getParentClass();
+			}
+
+			return $parents;
+		}, [], $throw);
+	}
+
+	/**
+	 * 获取方法或函数的参数
+	 * @param string|array|object $function
+	 * @param int|string $parameterName
+	 * @param bool $throw
+	 * @return \ReflectionParameter|null
+	 * @throws \ReflectionException
+	 */
+	public static function parameter($function, $parameterName, $throw = false)
+	{
+		return self::throwIf(function () use ($function, $parameterName) {
+			return self::asParameterRef($function, $parameterName);
+		}, null, $throw);
+	}
+
+	/**
+	 * 获取方法或函数的参数类型
+	 * @param string|array|object $function
+	 * @param int|string $parameterName
+	 * @param bool $throw
+	 * @return \ReflectionParameter|null
+	 * @throws \ReflectionException
+	 */
+	public static function parameterType($function, $parameterName, $throw = false)
+	{
+		return self::throwIf(function () use ($function, $parameterName) {
+			self::parameter($function, $parameterName)->getType();
+		}, null, $throw);
+	}
+
+	/**
+	 * 获取方法或函数的参数位置
+	 * @param string|array|object $function
+	 * @param int|string $parameterName
+	 * @param bool $throw
+	 * @return \ReflectionParameter|null
+	 * @throws \ReflectionException
+	 */
+	public static function parameterPosition($function, $parameterName, $throw = false)
+	{
+		return self::throwIf(function () use ($function, $parameterName) {
+			self::parameter($function, $parameterName)->getPosition();
+		}, -1, $throw);
+	}
+
+	/**
+	 * 获取方法或函数的参数是否存在
+	 * @param string|array|object $function
+	 * @param int|string $parameterName
+	 * @param bool $throw
+	 * @return \ReflectionParameter|null
+	 * @throws \ReflectionException
+	 */
+	public static function hasParameter($function, $parameterName, $throw = false)
+	{
+		return self::throwIf(function () use ($function, $parameterName) {
+			$parameters = self::method($function, null)->getParameters();
+			foreach ($parameters as $parameter) {
+				if ($parameter->getName() == $parameterName) {
+					return true;
+				}
+			}
+			return false;
+		}, -1, $throw);
 	}
 }
