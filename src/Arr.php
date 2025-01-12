@@ -970,11 +970,14 @@ final class Arr
 	public static function transformKeys(array $arr, $keyMaps)
 	{
 		if (is_callable($keyMaps)) {
+			$newArr = [];
 			foreach ($arr as $oldKey => &$value) {
 				$newKey = call_user_func($keyMaps, $oldKey, $value, $arr);
-				$arr[$newKey] = $value;
+				$newArr[$newKey] = $value;
+
 				unset($arr[$oldKey]);
 			}
+			return $newArr;
 		} else {
 			foreach ($keyMaps as $oldKey => $newKey) {
 				if (!array_key_exists($oldKey, $arr)) {
@@ -990,9 +993,9 @@ final class Arr
 
 				unset($arr[$oldKey]);
 			}
-		}
 
-		return $arr;
+			return $arr;
+		}
 	}
 
 	/**
