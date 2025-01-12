@@ -812,9 +812,9 @@ final class Arr
 	public static function tree(array $list, callable $itemHandler = null, $pid = 0, array $options = [])
 	{
 		$options = array_merge([
-			'id'           => 'id', // 要检索的ID键名
-			'parent'       => 'pid', // 要检索的parent键名
-			'child'        => 'child', // 要存放的子结果集
+			'id' => 'id', // 要检索的ID键名
+			'parent' => 'pid', // 要检索的parent键名
+			'child' => 'child', // 要存放的子结果集
 			'with_unknown' => false, // 是否把未知的上级当成1级返回
 		], $options);
 
@@ -964,21 +964,32 @@ final class Arr
 	 * 转换指定数组里面的 key
 	 *
 	 * @param array $arr
-	 * @param array $keyMaps
+	 * @param array|callable $keyMaps
 	 * @return array
 	 */
-	public static function transformKeys(array $arr, array $keyMaps)
+	public static function transformKeys(array $arr, $keyMaps)
 	{
-		foreach ($keyMaps as $oldKey => $newKey) {
-			if (!array_key_exists($oldKey, $arr)) continue;
-
-			if (is_callable($newKey)) {
-				[$newKey, $value] = call_user_func($newKey, $arr[$oldKey], $oldKey, $arr);
+		if (is_callable($keyMaps)) {
+			foreach ($arr as $oldKey => &$value) {
+				$newKey = call_user_func($keyMaps, $oldKey, $value, $arr);
 				$arr[$newKey] = $value;
-			} else {
-				$arr[$newKey] = $arr[$oldKey];
+				unset($arr[$oldKey]);
 			}
-			unset($arr[$oldKey]);
+		} else {
+			foreach ($keyMaps as $oldKey => $newKey) {
+				if (!array_key_exists($oldKey, $arr)) {
+					continue;
+				}
+
+				if (is_callable($newKey)) {
+					[$newKey, $value] = call_user_func($newKey, $arr[$oldKey], $oldKey, $arr);
+					$arr[$newKey] = $value;
+				} else {
+					$arr[$newKey] = $arr[$oldKey];
+				}
+
+				unset($arr[$oldKey]);
+			}
 		}
 
 		return $arr;
