@@ -503,6 +503,7 @@ final class Arr
 		return $array;
 	}
 
+
 	/**
 	 * 根据字段规则判断给定的数组是否满足条件
 	 *
@@ -511,7 +512,7 @@ final class Arr
 	 * @param bool $any
 	 * @return bool
 	 */
-	public static function where($array, $condition, $any = false)
+	public static function is($array, $condition, $any = false)
 	{
 		if (self::isAssoc($condition)) {
 			$temp = [];
@@ -587,6 +588,49 @@ final class Arr
 		}
 
 		return true;
+	}
+
+
+	/**
+	 * 筛选的项目。
+	 * @param array $arrays
+	 * @param array|callable $condition
+	 * @param bool $any
+	 * @return array
+	 */
+	public static function where($arrays, $condition, $any = false)
+	{
+		$isAssoc = self::isAssoc($condition);
+
+		if (is_callable($condition)) {
+			$result = array_filter($arrays, $condition, ARRAY_FILTER_USE_BOTH);
+		} else {
+			$result = [];
+			foreach ($arrays as $key => $array) {
+				if (self::is($array, $condition, $any)) {
+					if ($isAssoc) {
+						$result[$key] = $array;
+					} else {
+						$result[] = $array;
+					}
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 筛选值不为 null 的数据。
+	 *
+	 * @param array $arrays
+	 * @return array
+	 */
+	public static function whereNotNull($arrays)
+	{
+		return self::where($arrays, function ($value) {
+			return !is_null($value);
+		});
 	}
 
 	/**
@@ -705,6 +749,35 @@ final class Arr
 	public static function query($array)
 	{
 		return http_build_query($array, null, '&', PHP_QUERY_RFC3986);
+	}
+
+	/**
+	 * 在每个项目上运行关联映射。
+	 *
+	 * 回调应返回一个具有单个键/值对的关联数组。
+	 *
+	 * @template TKey
+	 * @template TValue
+	 * @template TMapWithKeysKey of array-key
+	 * @template TMapWithKeysValue
+	 *
+	 * @param array<TKey, TValue> $array
+	 * @param callable(TValue, TKey): array<TMapWithKeysKey, TMapWithKeysValue> $callback
+	 * @return array
+	 */
+	public static function mapWithKeys(array $array, callable $callback)
+	{
+		$result = [];
+
+		foreach ($array as $key => $value) {
+			$assoc = $callback($value, $key);
+
+			foreach ($assoc as $mapKey => $mapValue) {
+				$result[$mapKey] = $mapValue;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
