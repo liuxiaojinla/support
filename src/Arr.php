@@ -308,14 +308,31 @@ final class Arr
 	public static function only($data, array $keys)
 	{
 		return array_intersect_key($data, array_flip((array)$keys));
-		//		$result = [];
-		//		foreach($keys as $key){
-		//			if(isset($data[$key])){
-		//				$result[$key] = $data[$key];
-		//			}
-		//		}
-		//
-		//		return $result;
+	}
+
+	/**
+	 * 从数组里面获取指定的数据，如果指定的key不存在，则赋值为默认值
+	 *
+	 * @param array $data
+	 * @param array $keys
+	 * @param mixed $default
+	 * @return array
+	 */
+	public static function onlyWithDefault($data, array $keys, $default = null)
+	{
+		$result = [];
+
+		foreach ($keys as $key) {
+			if (isset($data[$key])) {
+				$result[$key] = $data[$key];
+			} elseif (strpos($key, '.')) {
+				$result = self::get($data, $key);
+			} else {
+				$result[$key] = $default;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -525,10 +542,12 @@ final class Arr
 		foreach ($condition as $item) {
 			[$field, $operator, $value] = $item;
 
-			if (strpos($field, '.')) {
+			if ($array[$field]) {
+				$result = $array[$field];
+			} elseif (strpos($field, '.')) {
 				$result = self::get($array, $field);
 			} else {
-				$result = $array[$field] ?? null;
+				$result = null;
 			}
 
 			switch (strtolower($operator)) {
