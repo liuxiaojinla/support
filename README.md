@@ -35,22 +35,205 @@
 
 #### 使用说明
 
+以下是一些简单的使用示例：
+
+- **字符串操作**
+
 ```php
 <?php
 $hello = "hello world!";
-Str::startsWith($hello,'hello'); // true
-Str::endsWith($hello ,'world!'); // true
+Str::startsWith($hello, 'hello'); // true
+Str::endsWith($hello, 'world!'); // true
 ```
 
-更多请参考源代码
 
-#### 参与贡献
+- **数组操作**
 
-1. Fork 本仓库
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
+```php
+<?php
+$array = [1, 2, 3, 4, 5];
+Arr::contains($array, 3); // true
+Arr::pluck($array, function ($item) { return $item * 2; }); // [2, 4, 6, 8, 10]
+```
 
-#### 特技
 
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
+- **集合操作**
+
+```php
+<?php
+$collection = new Collection([1, 2, 3, 4, 5]);
+$collection->map(function ($item) { return $item * 2; })->all(); // [2, 4, 6, 8, 10]
+$collection->filter(function ($item) { return $item > 2; })->all(); // [3, 4, 5]
+```
+
+
+- **文件操作**
+
+```php
+<?php
+File::exists('path/to/file.txt'); // true or false
+File::get('path/to/file.txt'); // 文件内容
+```
+
+
+- **时间操作**
+
+```php
+<?php
+Time::now(); // 当前时间
+Time::parse('2023-10-01')->format('Y-m-d'); // 格式化时间
+```
+
+
+- **加密操作**
+
+```php
+<?php
+$encrypted = SimpleEncrypt::encrypt('secret message');
+$decrypted = SimpleEncrypt::decrypt($encrypted);
+```
+
+
+- **反射操作**
+
+```php
+<?php
+$reflection = Reflect::on('SomeClass');
+$reflection->call('someMethod');
+```
+
+
+- **重试机制**
+
+```php
+<?php
+Retry::times(3)->run(function () {
+    // 可能会失败的操作
+});
+```
+
+
+- **限流器**
+
+```php
+<?php
+LimitThrottle::allowIf(function () {
+    // 判断是否允许操作
+})->then(function () {
+    // 允许操作时执行的代码
+})->otherwise(function () {
+    // 不允许操作时执行的代码
+});
+```
+
+
+- **版本判断**
+
+```php
+<?php
+Version::compare('1.0.0', '1.0.1'); // -1
+Version::compare('1.0.1', '1.0.0'); // 1
+Version::compare('1.0.0', '1.0.0'); // 0
+```
+
+
+- **XML操作**
+
+```php
+<?php
+$xml = XML::parse('<root><child>value</child></root>');
+$xml->child; // value
+```
+
+
+- **UBB代码解析**
+
+```php
+<?php
+$ubb = '[b]Bold Text[/b]';
+UBB::parse($ubb); // <strong>Bold Text</strong>
+```
+
+
+- **Fluent接口**
+
+```php
+<?php
+$fluent = new Fluent(['key' => 'value']);
+$fluent->get('key'); // value
+$fluent->set('newKey', 'newValue');
+$fluent->all(); // ['key' => 'value', 'newKey' => 'newValue']
+```
+
+
+- **高阶对象代理**
+
+```php
+<?php
+$proxy = new HigherOrderTapProxy($object);
+$proxy->method(function ($item) {
+    // 对对象进行操作
+});
+```
+
+
+- **对象微代理器**
+
+```php
+<?php
+// 删除: $proxy = new MacroProxy($object);
+// 删除: $proxy->macro('macroName', function ($item) {
+// 删除:     // 定义宏
+// 删除: });
+```
+
+
+- **常用正则**
+
+```php
+<?php
+Regex::isEmail('example@example.com'); // true
+Regex::isUrl('https://example.com'); // true
+```
+
+
+- **服务器操作**
+
+```php
+<?php
+Server::isLocalhost(); // true or false
+Server::ip(); // 服务器IP地址
+```
+
+
+- **JavaScript交互**
+
+```php
+<?php
+Javascript::render('console.log("Hello, World!");'); // 渲染JavaScript代码
+```
+
+
+- **距离转换**
+
+```php
+<?php
+Position::distance(34.052235, -118.243683, 40.712776, -74.005974); // 距离计算
+```
+
+
+- **进制转换**
+
+```php
+<?php
+Radix::toBase64('Hello, World!'); // 转换为Base64
+Radix::fromBase64('SGVsbG8sIFdvcmxkIQ=='); // 从Base64转换
+```
+
+
+- **跳转**
+
+```php
+<?php
+Redirect::to('https://example.com'); // 重定向到指定URL
+```

@@ -1,6 +1,6 @@
 {
   "name": "xin/support",
-  "description": "日常开发必备基础库【字符串、集合、数值、加密、时间、文件、反射、重试、服务器、XML】",
+  "description": "一个功能全面的 PHP 基础库，旨在为开发者提供日常开发中所需的各类工具和实用功能。无论是处理字符串、操作集合、进行加密、管理文件，还是处理时间、反射和 XML， 都能为你提供简洁高效的解决方案。",
   "type": "library",
   "authors": [
     {
@@ -8,10 +8,10 @@
       "email": "657306123@qq.com"
     }
   ],
-  "license":"Apache-2.0",
+  "license": "Apache-2.0",
   "require": {
     "php": ">=7.1.9",
-    "nesbot/carbon": "^2.0",
+    "nesbot/carbon": "^2.0 | ^3.0",
     "ramsey/uuid": "^3.5 | ^4.0",
     "doctrine/inflector": "^2.0"
   },
