@@ -2,7 +2,7 @@
 
 namespace Xin\Support;
 
-class Path
+final class Path
 {
 	/**
 	 * 替换文件后缀
@@ -10,7 +10,7 @@ class Path
 	 * @param string $suffix
 	 * @return string
 	 */
-	public static function replaceSuffix($file, $suffix)
+	public static function replaceSuffix(string $file, string $suffix)
 	{
 		return self::basename($file) . "." . $suffix;
 	}
@@ -20,7 +20,7 @@ class Path
 	 * @param string $file
 	 * @return string
 	 */
-	public static function basename($file)
+	public static function basename(string $file)
 	{
 		return basename($file, '.' . self::suffix($file));
 	}
@@ -30,7 +30,7 @@ class Path
 	 * @param string $file
 	 * @return string
 	 */
-	public static function suffix($file)
+	public static function suffix(string $file)
 	{
 		$dotIndex = strrpos($file, ".");
 		if ($dotIndex === false) {

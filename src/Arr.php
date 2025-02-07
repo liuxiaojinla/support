@@ -19,8 +19,8 @@ final class Arr
 	 */
 	public static function add($array, $key, $value)
 	{
-		if (is_null(static::get($array, $key))) {
-			static::set($array, $key, $value);
+		if (is_null(self::get($array, $key))) {
+			self::set($array, $key, $value);
 		}
 
 		return $array;

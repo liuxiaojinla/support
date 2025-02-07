@@ -4,9 +4,9 @@
 namespace Xin\Support;
 
 use FilesystemIterator;
-use League\Flysystem\Config;
-use League\Flysystem\Filesystem;
-use League\Flysystem\PathNormalizer;
+use League\Flysystem\Config as FlysystemConfig;
+use League\Flysystem\Filesystem as FlysystemFilesystem;
+use League\Flysystem\PathNormalizer as FlysystemPathNormalizer;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -18,21 +18,23 @@ final class File
 	/**
 	 * 获取指定目录下所有的文件，包括子目录下的文件
 	 *
-	 * @param string $dir
+	 * @param string $directory
 	 * @return array
+	 * @deprecated
+	 * @see self::files()
 	 */
-	public static function getFiles($dir)
+	public static function getFiles(string $directory)
 	{
-		return self::files($dir);
+		return self::files($directory);
 	}
 
 	/**
 	 * 获取指定目录下所有的文件，包括子目录下的文件
 	 *
-	 * @param string $dir
+	 * @param string $directory
 	 * @return array
 	 */
-	public static function files($dir)
+	public static function files(string $directory)
 	{
 		$files = [];
 
@@ -47,7 +49,7 @@ final class File
 				}
 			}
 		};
-		$each($dir);
+		$each($directory);
 
 		return $files;
 	}
@@ -55,10 +57,10 @@ final class File
 	/**
 	 * 递归指定目录下所有的文件，包括子目录下的文件
 	 *
-	 * @param string $dir
+	 * @param string $directory
 	 * @param callable $callback
 	 */
-	public static function each($dir, callable $callback)
+	public static function each(string $directory, callable $callback)
 	{
 		$each = function ($dir) use (&$each, $callback) {
 			$it = new \FilesystemIterator($dir);
@@ -79,24 +81,24 @@ final class File
 			return true;
 		};
 
-		$each($dir);
+		$each($directory);
 	}
 
 	/**
 	 * 删除文件或目录
 	 *
-	 * @param string $dir
+	 * @param string $directory
 	 * @return bool
 	 */
-	public static function delete($dir)
+	public static function delete(string $directory)
 	{
-		$iterator = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+		$iterator = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
 		$files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
 		foreach ($files as $fileInfo) {
 			$fileInfo->isDir() ? rmdir($fileInfo->getRealPath()) : unlink($fileInfo->getRealPath());
 		}
 
-		return rmdir($dir);
+		return rmdir($directory);
 
 		//		$each = function ($dir) use (&$each) {
 		//			if (!is_dir($dir)) {
@@ -184,15 +186,15 @@ final class File
 	/**
 	 * 获取上传的真实路径
 	 * @param string $path
-	 * @param Filesystem $filesystem
+	 * @param FlysystemFilesystem $filesystem
 	 * @return string
 	 * @throws \ReflectionException
 	 */
-	public static function filesystemRealpath(string $path, Filesystem $filesystem)
+	public static function filesystemRealpath(string $path, FlysystemFilesystem $filesystem)
 	{
-		/** @var Config $config */
+		/** @var FlysystemConfig $config */
 		$config = Reflect::get($filesystem, 'config');
-		/** @var PathNormalizer $pathNormalizer */
+		/** @var FlysystemPathNormalizer $pathNormalizer */
 		$pathNormalizer = Reflect::get($filesystem, 'pathNormalizer');
 
 		$realPath = $config->get('root', $config->get('path', '')) . DIRECTORY_SEPARATOR . $path;

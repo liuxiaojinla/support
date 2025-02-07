@@ -38,7 +38,7 @@ class MacroProxy
 	 * @return mixed
 	 * @throws \BadMethodCallException
 	 */
-	public function __call($method, $parameters)
+	public function __call(string $method, array $parameters)
 	{
 		if (!static::hasMacro($method)) {
 			throw new \BadMethodCallException(sprintf(

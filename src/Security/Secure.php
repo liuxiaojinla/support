@@ -16,7 +16,7 @@ final class Secure
 	 * @param string $certPassword 签名证书密码
 	 * @return mixed
 	 */
-	public static function getSignCertId($certPath, $certPassword)
+	public static function getSignCertId(string $certPath, string $certPassword)
 	{
 		$pkcs12CertData = file_get_contents($certPath);
 		openssl_pkcs12_read($pkcs12CertData, $certs, $certPassword);
@@ -34,7 +34,7 @@ final class Secure
 	 * @param string $certPassword
 	 * @return mixed
 	 */
-	public static function getPrivateKey($certPath, $certPassword)
+	public static function getPrivateKey(string $certPath, string $certPassword)
 	{
 		$pkcs12 = file_get_contents($certPath);
 		openssl_pkcs12_read($pkcs12, $certificates, $certPassword);
@@ -49,7 +49,7 @@ final class Secure
 	 * @param string $certDir
 	 * @return string
 	 */
-	public static function getPublicKeyByCertId($certId, $certDir)
+	public static function getPublicKeyByCertId(string $certId, string $certDir)
 	{
 		$handle = opendir($certDir);
 		if (!$handle) {
@@ -77,7 +77,7 @@ final class Secure
 	 * @param string $certPath 证书路径
 	 * @return string
 	 */
-	public static function getCertIdByCerPath($certPath)
+	public static function getCertIdByCerPath(string $certPath)
 	{
 		$x509data = file_get_contents($certPath);
 		openssl_x509_read($x509data);
@@ -93,7 +93,7 @@ final class Secure
 	 * @param string $publicKey 证书公钥
 	 * @return string
 	 */
-	public static function rsaSign($content, $publicKey)
+	public static function rsaSign(string $content, string $publicKey)
 	{
 		$pKeyId = openssl_get_privatekey($publicKey);
 		openssl_sign($content, $sign, $pKeyId);
@@ -109,7 +109,7 @@ final class Secure
 	 * @param string $public_key 证书公钥
 	 * @return bool
 	 */
-	public static function rsaVerify($content, $sign, $public_key)
+	public static function rsaVerify(string $content, string $sign, string $public_key)
 	{
 		$sign = base64_decode($sign);
 		$pKeyId = openssl_get_publickey($public_key);

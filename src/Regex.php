@@ -59,7 +59,7 @@ final class Regex
 	}
 
 	/**
-	 * 验证eamil
+	 * 验证 Email
 	 *
 	 * @param string $value 验证的值
 	 * @return bool
@@ -195,7 +195,7 @@ final class Regex
 	 * 说明:如果字符串中含有非法字符返回假，没有返回真
 	 *
 	 * @param string $value 验证的值
-	 * @return int
+	 * @return bool
 	 */
 	public static function hasNumber($value)
 	{

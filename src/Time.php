@@ -3,9 +3,39 @@
 namespace Xin\Support;
 
 use Carbon\Carbon;
+use DateTime;
+use DateTimeZone;
 
 final class Time
 {
+	/**
+	 * 返回当前时间
+	 * @param DateTimeZone|string|null $tz
+	 * @return Carbon|DateTime
+	 * @noinspection PhpUnhandledExceptionInspection
+	 * @noinspection PhpDocMissingThrowsInspection
+	 */
+	public static function now($tz = null)
+	{
+		if (!class_exists('Carbon\Carbon')) {
+			return new DateTime($tz);
+		}
+
+		return Carbon::now($tz);
+	}
+
+	/**
+	 * 获取DateTime实例
+	 * @param DateTime $dateTime
+	 * @param string|DateTimeZone $timezone
+	 * @return DateTime
+	 * @noinspection PhpUnhandledExceptionInspection
+	 * @noinspection PhpDocMissingThrowsInspection
+	 */
+	public static function datetimeOf(DateTime $dateTime, $timezone = null)
+	{
+		return new DateTime($dateTime->format('Y-m-d H:i:s.u'), $timezone ?: $dateTime->getTimezone());
+	}
 
 	/**
 	 * 返回今日开始和结束的时间戳
@@ -282,6 +312,8 @@ final class Time
 	 */
 	public static function daysUntilOfTimestamp($startTime, $endTime)
 	{
+		self::checkCarbonInstalled();
+
 		$startTime = Carbon::createFromTimestamp($startTime);
 		$endTime = Carbon::createFromTimestamp($endTime);
 
@@ -304,6 +336,59 @@ final class Time
 		});
 
 		return $times;
+	}
+
+	/**
+	 * 检查 Carbon 是否安装
+	 * @return void
+	 */
+	protected static function checkCarbonInstalled()
+	{
+		if (!class_exists('Carbon\Carbon')) {
+			throw new \RuntimeException('Carbon is not installed. Please run `composer require nesbot/carbon`.');
+		}
+	}
+
+	/**
+	 * 添加秒数
+	 * @param DateTime $target
+	 * @param \DateInterval|\DateTimeInterface|int $seconds
+	 * @return DateTime
+	 */
+	public static function addSeconds(DateTime $target, \DateInterval|\DateTimeInterface|int $seconds = 1)
+	{
+		if ($seconds instanceof \DateInterval) {
+			$target->add($seconds);
+		} elseif ($seconds instanceof \DateTimeInterface) {
+			$target->add($seconds->getTimestamp());
+		} elseif (is_int($seconds)) {
+			$target->modify('+' . $seconds . ' seconds');
+		} else {
+			throw new \InvalidArgumentException('Invalid seconds');
+		}
+
+		return $target;
+	}
+
+	/**
+	 * 减少秒数
+	 * @param DateTime $target
+	 * @param \DateInterval|\DateTimeInterface|int $seconds
+	 * @return DateTime
+	 */
+	public static function subSeconds(DateTime $target, \DateInterval|\DateTimeInterface|int $seconds = 1)
+	{
+		if ($seconds instanceof \DateInterval) {
+			$target->sub($seconds);
+		} elseif ($seconds instanceof \DateTimeInterface) {
+			$target->sub($seconds->getTimestamp());
+		} elseif (is_int($seconds)) {
+			$target->modify('-' . $seconds . ' seconds');
+		} else {
+			throw new \InvalidArgumentException('Invalid seconds');
+		}
+
+		return $target;
 	}
 
 }

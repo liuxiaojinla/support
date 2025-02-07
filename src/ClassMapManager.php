@@ -60,7 +60,7 @@ class ClassMapManager implements \ArrayAccess
 	 * @param array $args
 	 * @return false|mixed
 	 */
-	public function call($type, $method, $args = [])
+	public function call(string $type, string $method, array $args = [])
 	{
 		$class = $this->get($type);
 
@@ -77,7 +77,7 @@ class ClassMapManager implements \ArrayAccess
 	 * @param string $type
 	 * @return string
 	 */
-	public function get($type)
+	public function get(string $type)
 	{
 		if (!$this->has($type)) {
 			throw new \LogicException("class map {$type} not defined.");
@@ -92,7 +92,7 @@ class ClassMapManager implements \ArrayAccess
 	 * @param string $type
 	 * @return bool
 	 */
-	public function has($type)
+	public function has(string $type)
 	{
 		return isset($this->mapping[$type]);
 	}
@@ -130,7 +130,7 @@ class ClassMapManager implements \ArrayAccess
 	 * @param string $type
 	 * @param string $class
 	 */
-	public function bind($type, $class)
+	public function bind(string $type, string $class)
 	{
 		if ($this->has($type)) {
 			throw new \LogicException("class map {$type} duplicate defined.");
@@ -153,7 +153,7 @@ class ClassMapManager implements \ArrayAccess
 	 * @param string $type
 	 * @return void
 	 */
-	public function forget($type)
+	public function forget(string $type)
 	{
 		unset($this->mapping[$type]);
 	}

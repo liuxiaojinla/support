@@ -32,15 +32,15 @@ class ServerInfo
 	 * @param bool $isExportStyle
 	 * @return string
 	 */
-	public static function serializeParams($isExportStyle = true)
+	public static function serializeParams(bool $isExportStyle = true)
 	{
 		if ($isExportStyle) {
 			return var_export([
-				"GET"     => $_GET,
-				"POST"    => $_POST,
-				"COOKIE"  => $_COOKIE,
+				"GET" => $_GET,
+				"POST" => $_POST,
+				"COOKIE" => $_COOKIE,
 				"SESSION" => $_SESSION,
-				"SERVER"  => $_SERVER,
+				"SERVER" => $_SERVER,
 			], true);
 		}
 

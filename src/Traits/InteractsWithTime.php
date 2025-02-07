@@ -2,10 +2,10 @@
 
 namespace Xin\Support\Traits;
 
-use Carbon\Carbon;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
+use Xin\Support\Time;
 
 trait InteractsWithTime
 {
@@ -13,7 +13,7 @@ trait InteractsWithTime
 	/**
 	 * Get the number of seconds until the given DateTime.
 	 *
-	 * @param \DateTimeInterface|\DateInterval|int $delay
+	 * @param DateTimeInterface|DateInterval|int $delay
 	 * @return int
 	 */
 	protected function secondsUntil($delay)
@@ -28,13 +28,13 @@ trait InteractsWithTime
 	/**
 	 * If the given value is an interval, convert it to a DateTime instance.
 	 *
-	 * @param \DateTimeInterface|\DateInterval|int $delay
-	 * @return \DateTimeInterface|int
+	 * @param DateTimeInterface|DateInterval|int $delay
+	 * @return DateTimeInterface|int
 	 */
 	protected function parseDateInterval($delay)
 	{
 		if ($delay instanceof DateInterval) {
-			$delay = Carbon::now()->add($delay)->toDateTime();
+			$delay = Time::datetimeOf(Time::now()->add($delay));
 		}
 
 		return $delay;
@@ -47,13 +47,13 @@ trait InteractsWithTime
 	 */
 	protected function currentTime()
 	{
-		return Carbon::now()->getTimestamp();
+		return Time::now()->getTimestamp();
 	}
 
 	/**
 	 * Get the "available at" UNIX timestamp.
 	 *
-	 * @param \DateTimeInterface|\DateInterval|int $delay
+	 * @param DateTimeInterface|DateInterval|int $delay
 	 * @return int
 	 */
 	protected function availableAt($delay = 0)
@@ -62,7 +62,7 @@ trait InteractsWithTime
 
 		return $delay instanceof DateTimeInterface
 			? $delay->getTimestamp()
-			: Carbon::now()->addRealSeconds($delay)->getTimestamp();
+			: Time::addSeconds(Time::now(),$delay)->getTimestamp();
 	}
 
 	/**

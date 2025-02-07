@@ -14,7 +14,7 @@ final class Json
 	 * @param int $depth
 	 * @return false|int
 	 */
-	public static function encodeToFile($file, $value, int $flags = self::ENCODE_DEFAULT, int $depth = 512)
+	public static function encodeToFile(string $file, $value, int $flags = self::ENCODE_DEFAULT, int $depth = 512)
 	{
 		return file_put_contents($file, self::encode($value, $flags, $depth));
 	}
@@ -39,7 +39,7 @@ final class Json
 	 * @param int $depth
 	 * @return false|int
 	 */
-	public static function prettyToFile($file, $value, int $flags = self::ENCODE_DEFAULT, int $depth = 512)
+	public static function prettyToFile(string $file, $value, int $flags = self::ENCODE_DEFAULT, int $depth = 512)
 	{
 		return file_put_contents($file, self::pretty($value, $flags, $depth));
 	}

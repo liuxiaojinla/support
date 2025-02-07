@@ -7,22 +7,22 @@ class Collection extends Fluent implements \Countable, \IteratorAggregate
 
 	/**
 	 * 过滤器
-	 * @param callable $callback
+	 * @param callable|null $callback
 	 * @param int $mode
 	 * @return $this
 	 */
-	public function filter($callback = null, $mode = 0)
+	public function filter(callable$callback = null, int$mode = 0)
 	{
 		return new static(array_filter($this->items, $callback, $mode));
 	}
 
 	/**
 	 * 获取一列数据
-	 * @param string $key
-	 * @param string $index
+	 * @param string|null $key
+	 * @param string|null $index
 	 * @return $this
 	 */
-	public function column($key = null, $index = null)
+	public function column(string$key = null, string$index = null)
 	{
 		return new static(array_column($this->items, $key, $index));
 	}

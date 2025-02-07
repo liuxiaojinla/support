@@ -40,12 +40,12 @@ class CallbackUrl
 
 	/**
 	 * 公共回调
-	 * @param $url
+	 * @param string $url
 	 * @param array $params
 	 * @param bool $async
 	 * @return mixed
 	 */
-	public static function callback($url, $params = [], $async = true)
+	public static function callback(string $url, array $params = [], bool $async = true)
 	{
 		if (class_exists($url)) {
 			$instance = app($url);
@@ -68,8 +68,8 @@ class CallbackUrl
 	public static function postSync(string $url, array $data = [], array $options = []): PromiseInterface
 	{
 		self::hook("request", [
-			'url'     => $url,
-			'async'   => true,
+			'url' => $url,
+			'async' => true,
 			'options' => $options,
 		]);
 		$promise = self::client()->postAsync($url, self::buildRequestOptions($data, $options))->then(function (Response $response) {
@@ -100,7 +100,7 @@ class CallbackUrl
 	{
 		if (self::$client === null) {
 			self::$client = new Client([
-				'timeout'         => 5,
+				'timeout' => 5,
 				'connect_timeout' => 5,
 			]);
 		}
@@ -130,8 +130,8 @@ class CallbackUrl
 		try {
 			$options = self::buildRequestOptions($data, $options);
 			self::hook("request", [
-				'url'     => $url,
-				'async'   => false,
+				'url' => $url,
+				'async' => false,
 				'options' => $options,
 			]);
 			return self::client()->post($url, $options)->getBody()->getContents();

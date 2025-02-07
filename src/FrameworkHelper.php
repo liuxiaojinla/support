@@ -11,7 +11,7 @@ use think\App as ThinkApp;
 use think\Container as ThinkContainer;
 use Webman\App as WebmanApp;
 
-final class Framework
+final class FrameworkHelper
 {
 	/**
 	 * 获取框架的容器.
@@ -77,15 +77,15 @@ final class Framework
 	}
 
 	/**
-	 * @return FrameworkWhen
+	 * @return FrameworkHelperWhen
 	 */
 	public static function when()
 	{
-		return new FrameworkWhen();
+		return new FrameworkHelperWhen();
 	}
 }
 
-class FrameworkWhen
+class FrameworkHelperWhen
 {
 	/**
 	 * @var array
@@ -125,7 +125,7 @@ class FrameworkWhen
 	 */
 	public function laravel(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(Framework::isLaravel(), $callback, $otherwise);
+		return $this->when(FrameworkHelper::isLaravel(), $callback, $otherwise);
 	}
 
 	/**
@@ -148,7 +148,7 @@ class FrameworkWhen
 	 */
 	public function thinkphp(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(Framework::isThinkPHP(), $callback, $otherwise);
+		return $this->when(FrameworkHelper::isThinkPHP(), $callback, $otherwise);
 	}
 
 	/**
@@ -158,7 +158,7 @@ class FrameworkWhen
 	 */
 	public function webman(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(Framework::isWebman(), $callback, $otherwise);
+		return $this->when(FrameworkHelper::isWebman(), $callback, $otherwise);
 	}
 
 	/**
@@ -168,7 +168,7 @@ class FrameworkWhen
 	 */
 	public function hyperf(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(Framework::isHyperf(), $callback, $otherwise);
+		return $this->when(FrameworkHelper::isHyperf(), $callback, $otherwise);
 	}
 
 	/**

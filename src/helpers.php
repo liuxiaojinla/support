@@ -128,6 +128,8 @@ if (!function_exists('build_mysql_distance_field')) {
 	 * @param string $lat_name
 	 * @param string $as_name
 	 * @return string
+	 * @deprecated
+	 * @see SQL::mysqlDistance
 	 */
 	function build_mysql_distance_field(
 		$longitude, $latitude,
@@ -209,7 +211,7 @@ if (!function_exists('now')) {
 	 */
 	function now($tz = null)
 	{
-		return \Carbon\Carbon::now($tz);
+		return \Xin\Support\Time::now($tz);
 	}
 }
 

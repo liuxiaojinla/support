@@ -16,7 +16,7 @@ final class SimpleEncrypt
 	 * @return string
 	 * @author 麦当苗儿 <zuojiazi@vip.qq.com>
 	 */
-	public static function encrypt($data, $key = '', $expire = 0)
+	public static function encrypt(string $data, string $key = '', int $expire = 0)
 	{
 		$key = md5($key);
 		$data = base64_encode($data);
@@ -50,7 +50,7 @@ final class SimpleEncrypt
 	 * @return string
 	 * @author 麦当苗儿 <zuojiazi@vip.qq.com>
 	 */
-	public static function decrypt($data, $key = '')
+	public static function decrypt(string $data, string $key = '')
 	{
 		$key = md5($key);
 		$data = str_replace(['-', '_'], ['+', '/'], $data);

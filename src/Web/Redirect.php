@@ -27,7 +27,7 @@ class Redirect
 	 * @param integer $time 重定向的等待时间（秒）
 	 * @param string $msg 重定向前的提示信息
 	 */
-	public function __construct($url, $time = 0, $msg = '')
+	public function __construct(string $url, int $time = 0, string $msg = '')
 	{
 		$this->url = $url;
 		$this->time = $time;
@@ -40,7 +40,7 @@ class Redirect
 	 * @param string $msg 重定向前的提示信息
 	 * @return void
 	 */
-	public static function redirect($url, $time = 0, $msg = '')
+	public static function redirect(string $url, $time = 0, string $msg = '')
 	{
 		$redirect = new static($url, $time, $msg);
 		$redirect->send();

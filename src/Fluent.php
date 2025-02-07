@@ -102,7 +102,7 @@ class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
 	 */
 	public function merge($items)
 	{
-		$clone = static::make($this->all());
+		$clone = static::make($this->all(), $this);
 
 		foreach ($items as $key => $value) {
 			$clone->set($key, $value);

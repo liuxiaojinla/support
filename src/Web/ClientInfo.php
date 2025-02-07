@@ -1,6 +1,6 @@
 <?php
 
-namespace Xin\Support;
+namespace Xin\Support\Web;
 
 /**
  * 获取客户端的信息
@@ -85,7 +85,7 @@ final class ClientInfo
 	 * @param bool $isVersion 是否要返回版本号
 	 * @return string
 	 */
-	public static function getClientName($isVersion = true)
+	public static function getClientName(bool $isVersion = true)
 	{
 		$info = self::getClientInfo();
 		if (strpos($info ['info_str'], 'windows phone') !== false) {
@@ -175,7 +175,7 @@ final class ClientInfo
 	 * @param string $checkName
 	 * @return string
 	 */
-	public static function getVersion($str, $checkName)
+	public static function getVersion(string $str, string $checkName)
 	{
 		$pos = strpos($str, $checkName);
 		$len = strpos($str, ';', $pos);

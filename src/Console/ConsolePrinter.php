@@ -30,9 +30,9 @@ class ConsolePrinter
 	protected $showDateTime = true;
 
 	/**
-	 * @param string $name
+	 * @param string|null $name
 	 */
-	public function __construct($name = null)
+	public function __construct(string $name = null)
 	{
 		if ($name) {
 			$this->useNamePrefix($name);
@@ -43,7 +43,7 @@ class ConsolePrinter
 	 * @param string $name
 	 * @return void
 	 */
-	public function useNamePrefix($name)
+	public function useNamePrefix(string $name)
 	{
 		$this->setPrefixResolver(function ($type) use ($name) {
 			return "[$name.$type]";

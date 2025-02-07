@@ -21,12 +21,18 @@ class Printer
 
 	private static $consolePrinter;
 
-	public static function setPrefixName($name)
+	/**
+	 * 设置前缀名称
+	 * @param string $name
+	 * @return void
+	 */
+	public static function setPrefixName(string $name)
 	{
 		self::getConsolePrinter()->useNamePrefix($name);
 	}
 
 	/**
+	 * 获取控制台输出
 	 * @return ConsolePrinter
 	 */
 	protected static function getConsolePrinter()
@@ -39,6 +45,7 @@ class Printer
 	}
 
 	/**
+	 * 设置控制台输出
 	 * @param mixed $consolePrinter
 	 */
 	public static function setConsolePrinter(ConsolePrinter $consolePrinter)
@@ -47,15 +54,17 @@ class Printer
 	}
 
 	/**
-	 * @param string $name
+	 * 创建控制台输出
+	 * @param string|null $name
 	 * @return ConsolePrinter
 	 */
-	public static function printer($name = null)
+	public static function printer(string $name = null)
 	{
 		return new ConsolePrinter($name);
 	}
 
 	/**
+	 * 静态方法代理
 	 * @param string $name
 	 * @param array $arguments
 	 * @return mixed

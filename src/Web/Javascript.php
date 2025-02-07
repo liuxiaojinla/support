@@ -12,7 +12,7 @@ class Javascript
 	/**
 	 * @param string $content
 	 */
-	public function __construct($content)
+	public function __construct(string $content)
 	{
 		$this->content = $content;
 	}
@@ -23,7 +23,7 @@ class Javascript
 	 * @param array $params
 	 * @return void
 	 */
-	public static function call($callbackName, array $params = [])
+	public static function call(string $callbackName, array $params = [])
 	{
 		$params = array_map(static function ($param) {
 			if (is_object($param) || is_array($param)) {
