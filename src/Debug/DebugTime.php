@@ -28,6 +28,16 @@ class DebugTime
 	protected static $counter;
 
 	/**
+	 * @var callable
+	 */
+	protected static $defaultDumperResolver = null;
+
+	/**
+	 * @var callable
+	 */
+	protected $dumperResolver = null;
+
+	/**
 	 * @param string $name
 	 */
 	public function __construct(string $name = '')
@@ -59,7 +69,7 @@ class DebugTime
 	/**
 	 * 开始标记
 	 * @param string $label
-	 * @return void
+	 * @return object
 	 */
 	public function begin(string $label = 'default')
 	{
@@ -68,6 +78,22 @@ class DebugTime
 			'begin' => $beginTime,
 			'end' => $beginTime,
 		];
+
+		return new class($this) {
+			private DebugTime $debugTime;
+			private $label;
+
+			public function __construct(DebugTime $debugTime, $label)
+			{
+				$this->debugTime = $debugTime;
+				$this->label = $label;
+			}
+
+			public function end(bool $asMillisecond = true, bool $print = true)
+			{
+				$this->debugTime->end($this->label, $asMillisecond, $print);
+			}
+		};
 	}
 
 	/**
@@ -76,7 +102,7 @@ class DebugTime
 	 * @param bool $asMillisecond 转换为毫秒
 	 * @return float|int
 	 */
-	public function end(string $label = 'default', bool $asMillisecond = false, bool $print = true)
+	public function end(string $label = 'default', bool $asMillisecond = true, bool $print = true)
 	{
 		$this->times[$label]['end'] = microtime(true);
 
@@ -117,12 +143,61 @@ class DebugTime
 	 */
 	protected function dump(string $label, ...$messages)
 	{
-		echo "[{$this->name}.{$label}] ";
-		foreach ($messages as $message) {
-			echo $message;
-		}
-		echo "\n";
+		call_user_func($this->getDumperResolver(), $label, ...$messages);
 	}
+
+	/**
+	 * 获取打印器
+	 * @return callable|\Closure|null
+	 */
+	public function getDumperResolver()
+	{
+		if ($this->dumperResolver) {
+			return $this->dumperResolver;
+		}
+
+		return static::getDefaultDumperResolver();
+	}
+
+	/**
+	 * 设置打印器
+	 * @param callable $dumperResolver
+	 * @return void
+	 */
+	public function setDumperResolver(callable $dumperResolver)
+	{
+		$this->dumperResolver = $dumperResolver;
+	}
+
+	/**
+	 * 获取默认的打印器
+	 * @return callable|\Closure|null
+	 */
+	public static function getDefaultDumperResolver()
+	{
+		if (self::$defaultDumperResolver) {
+			return self::$defaultDumperResolver;
+		}
+
+		return self::$defaultDumperResolver = function ($label, ...$messages) {
+			echo "[{$this->name}.{$label}] ";
+			foreach ($messages as $message) {
+				echo $message;
+			}
+			echo "\n";
+		};
+	}
+
+	/**
+	 * 设置默认的打印器
+	 * @param callable $dumperResolver
+	 * @return void
+	 */
+	public static function setDefaultDumperResolver(callable $dumperResolver)
+	{
+		self::$defaultDumperResolver = $dumperResolver;
+	}
+
 
 	/**
 	 * @return self
@@ -147,11 +222,13 @@ class DebugTime
 
 	/**
 	 * @param string $label
+	 * @param bool $asMillisecond
+	 * @param bool $print
 	 * @return void
 	 */
-	public static function endTime(string $label = 'default')
+	public static function endTime(string $label = 'default', bool $asMillisecond = true, bool $print = true)
 	{
-		self::instance()->end($label);
+		self::instance()->end($label, $asMillisecond, $print);
 	}
 
 	/**

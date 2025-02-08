@@ -115,6 +115,39 @@ final class OS
 	}
 
 	/**
+	 * 当前环境是否是 Workerman
+	 * @return bool
+	 */
+	public static function isWorkerman(): bool
+	{
+		// Workerman 通常会设置一个特定的环境变量或命令行参数
+		if (isset($_SERVER['WORKERMAN_ENV'])) {
+			return true;
+		}
+
+		// 检查是否是通过命令行启动
+		if (php_sapi_name() === 'cli') {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * 当前环境是否是 Nginx
+	 * @return bool
+	 */
+	public static function isNginx(): bool
+	{
+		// Nginx 通常会设置 SERVER_SOFTWARE 环境变量
+		if (isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * 获取 CPU 数量
 	 * @return int
 	 */

@@ -84,6 +84,8 @@ if (!function_exists('windows_os')) {
 	 * Determine whether the current environment is Windows based.
 	 *
 	 * @return bool
+	 * @deprecated
+	 * @see \Xin\Support\OS::isWindows()
 	 */
 	function windows_os()
 	{
@@ -151,8 +153,8 @@ if (!function_exists('get_class_const_list')) {
 	function get_class_const_list($class)
 	{
 		try {
-			return (new \ReflectionClass($class))->getConstants();
-		} catch (\ReflectionException $e) {
+			return (new ReflectionClass($class))->getConstants();
+		} catch (ReflectionException $e) {
 		}
 
 		return false;
@@ -170,13 +172,13 @@ if (!function_exists('get_const_value')) {
 	function get_const_value($class, $name)
 	{
 		try {
-			$ref = new \ReflectionClass($class);
+			$ref = new ReflectionClass($class);
 			if (!$ref->hasConstant($name)) {
 				return null;
 			}
 
 			return $ref->getConstant($name);
-		} catch (\ReflectionException $e) {
+		} catch (ReflectionException $e) {
 		}
 
 		return false;
@@ -194,8 +196,8 @@ if (!function_exists('const_exist')) {
 	function const_exist($class, $name)
 	{
 		try {
-			return (new \ReflectionClass($class))->hasConstant($name);
-		} catch (\ReflectionException $e) {
+			return (new ReflectionClass($class))->hasConstant($name);
+		} catch (ReflectionException $e) {
 		}
 
 		return false;
@@ -207,11 +209,26 @@ if (!function_exists('now')) {
 	 * 获取当前时间实例
 	 *
 	 * @param DateTimeZone|string|null $tz $tz
-	 * @return \Carbon\Carbon
+	 * @return \Carbon\Carbon|DateTime
 	 */
 	function now($tz = null)
 	{
 		return \Xin\Support\Time::now($tz);
+	}
+}
+
+if (!function_exists('class_namespace')) {
+	/**
+	 * 获取命名空间名
+	 *
+	 * @param mixed $class 类名
+	 * @return string
+	 */
+	function class_namespace($class): string
+	{
+		$class = is_object($class) ? get_class($class) : $class;
+		$lastSlashIndex = strrpos($class, '\\');
+		return substr($class, 0, $lastSlashIndex);
 	}
 }
 
@@ -318,6 +335,18 @@ if (!function_exists('join_paths')) {
 	 * @return string
 	 */
 	function join_paths(...$paths)
+	{
+		return Path::joins(...$paths);
+	}
+}
+
+if (!function_exists('path_joins')) {
+	/**
+	 * 拼接路径
+	 * @param mixed ...$paths
+	 * @return string
+	 */
+	function path_joins(...$paths)
 	{
 		return Path::joins(...$paths);
 	}
