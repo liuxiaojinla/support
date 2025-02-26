@@ -60,7 +60,7 @@ class DebugTime
 		$second = $this->getEnd($endFlag) - $this->getBegin($beginFlag);
 
 		if ($asMillisecond) {
-			$second = (int)$second * 1000;
+			$second = (int)($second * 1000);
 		}
 
 		return $second;
@@ -79,7 +79,7 @@ class DebugTime
 			'end' => $beginTime,
 		];
 
-		return new class($this) {
+		return new class($this, $this->name) {
 			private DebugTime $debugTime;
 			private $label;
 
@@ -108,7 +108,7 @@ class DebugTime
 
 		$timeConsuming = $this->time($label, $label, $asMillisecond);
 		if ($print) {
-			$this->dump($label, "time consuming: $timeConsuming");
+			$this->dump($label, "time consuming: $timeConsuming".($asMillisecond?'ms':'us'));
 		}
 
 		return $timeConsuming;
@@ -179,8 +179,8 @@ class DebugTime
 			return self::$defaultDumperResolver;
 		}
 
-		return self::$defaultDumperResolver = function ($label, ...$messages) {
-			echo "[{$this->name}.{$label}] ";
+		return self::$defaultDumperResolver = function ($name, $label, ...$messages) {
+			echo "[{$name}.{$label}] ";
 			foreach ($messages as $message) {
 				echo $message;
 			}
@@ -228,7 +228,7 @@ class DebugTime
 	 */
 	public static function endTime(string $label = 'default', bool $asMillisecond = true, bool $print = true)
 	{
-		self::instance()->end($label, $asMillisecond, $print);
+		return self::instance()->end($label, $asMillisecond, $print);
 	}
 
 	/**

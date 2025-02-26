@@ -34,7 +34,7 @@ trait InteractsWithTime
 	protected function parseDateInterval($delay)
 	{
 		if ($delay instanceof DateInterval) {
-			$delay = Time::datetimeOf(Time::now()->add($delay));
+			$delay = Time::date(Time::now()->add($delay));
 		}
 
 		return $delay;
