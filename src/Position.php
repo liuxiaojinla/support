@@ -33,7 +33,7 @@ final class Position
 	 */
 	public static function gps84ToGcj02($lat, $lon)
 	{
-		if (self::outOfChina($lat, $lon)) {
+		if (self::isOutsideOfChina($lat, $lon)) {
 			return null;
 		}
 		$dLat = self::transformLat($lon - 105.0, $lat - 35.0);
@@ -55,9 +55,9 @@ final class Position
 	 *
 	 * @param double $lat
 	 * @param double $lon
-	 * @return bool
+	 * @return bool 返回true表示境外，false表示境内
 	 */
-	public static function outOfChina($lat, $lon)
+	public static function isOutsideOfChina($lat, $lon)
 	{
 		if ($lon < 72.004 || $lon > 137.8347)
 			return true;
@@ -181,7 +181,7 @@ final class Position
 	 */
 	public static function transform($lat, $lon)
 	{
-		if (self::outOfChina($lat, $lon)) {
+		if (self::isOutsideOfChina($lat, $lon)) {
 			return [$lat, $lon];
 		}
 		$dLat = self::transformLat($lon - 105.0, $lat - 35.0);
