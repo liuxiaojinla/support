@@ -1241,23 +1241,48 @@ final class Time
 	 *
 	 * @param string $rangeDatetime
 	 * @param int $maxRange 最大时间间隔
-	 * @param string $delimiter
+	 * @param string[] $delimiters
 	 * @return array
 	 */
-	public static function parseRange($rangeDatetime, $maxRange = 0, $delimiter = ' - ')
+	public static function parseRange($rangeDatetime, $maxRange = 0, $delimiters = ['-', ','])
 	{
+		$delimiters = !is_array($delimiters) ? [$delimiters] : $delimiters;
+		$delimiter = null;
+		foreach ($delimiters as $char) {
+			if (strpos($rangeDatetime, $char) !== false) {
+				$delimiter = $char;
+				break;
+			}
+		}
+		$delimiter = $delimiter ?: $delimiters[0];
+
+		// 获取时间间隔
 		$rangeDatetime = explode($delimiter, $rangeDatetime, 2);
-		$rangeDatetime[0] = strtotime($rangeDatetime[0]);
-		$rangeDatetime[1] = isset($rangeDatetime[1]) ? strtotime($rangeDatetime[1]) : time();
+		$rangeDatetime[0] = trim($rangeDatetime[0]);
+		$rangeDatetime[1] = isset($rangeDatetime[1]) ? trim($rangeDatetime[1]) : '';
+
+		// 转换为时间戳
+		$rangeDatetime[0] = is_numeric($rangeDatetime[0]) ? intval($rangeDatetime[0]) : strtotime($rangeDatetime[0]);
+		$rangeDatetime[1] = is_numeric($rangeDatetime[1]) ? intval($rangeDatetime[1]) : strtotime($rangeDatetime[1]);
+		$rangeDatetime[0] = intval($rangeDatetime[0]);
+		$rangeDatetime[1] = intval($rangeDatetime[1]);
+
+		// 兼容毫秒时间戳
+		if ($rangeDatetime[0] > 9999999999) {
+			$rangeDatetime[0] = intval($rangeDatetime[0] / 1000);
+		}
+
+		// 兼容毫秒时间戳
+		if ($rangeDatetime[1] > 9999999999) {
+			$rangeDatetime[1] = intval($rangeDatetime[1] / 1000);
+		}
+
+		// 确保开始时间小于等于结束时间
 		$rangeDatetime = [
 			min($rangeDatetime[0], $rangeDatetime[1]),
 			max($rangeDatetime[0], $rangeDatetime[1]),
 		];
 
-		// 如果结束时间小于或等于开始时间 直接返回null
-		//        if ($rangeDatetime[1] < $rangeDatetime[0]) {
-		//            return null;
-		//        }
 
 		// 如果大于最大时间间隔 则用结束时间减去最大时间间隔获得开始时间
 		if ($maxRange > 0 && $rangeDatetime[1] - $rangeDatetime[0] > $maxRange) {

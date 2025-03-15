@@ -698,4 +698,74 @@ final class Str
 		return str_replace($variables, $values, $tpl);
 	}
 
+	/**
+	 * 查找分割符在字符串中第一个出现的索引
+	 * @param string $str 要检查的字符串
+	 * @param array $delimiters 分隔符数组(单字符)
+	 * @return int 分隔符索引，未找到返回-1
+	 */
+	public static function findDelimiterIndex($str, array $delimiters)
+	{
+		// 构建快速查找的映射表 [分隔符 => 索引]
+		$map = array_flip($delimiters);
+
+		// 遍历字符串每个字符
+		for ($i = 0, $len = strlen($str); $i < $len; $i++) {
+			$char = $str[$i];
+			// 当找到第一个存在于映射表的字符时
+			if (isset($map[$char])) {
+				return $map[$char];
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * 查找分割符在字符串中最后一个出现的索引
+	 * @param string $str 要检查的字符串
+	 * @param array $delimiters 分隔符数组(单字符)
+	 * @return int 分隔符索引，未找到返回-1
+	 */
+	public static function findLastDelimiterIndex($str, array $delimiters)
+	{
+		// 构建快速查找的映射表 [分隔符 => 索引]
+		$map = array_flip($delimiters);
+
+		// 遍历字符串每个字符
+		for ($i = strlen($str) - 1; $i >= 0; $i--) {
+			$char = $str[$i];
+			// 当找到第一个存在于映射表的字符时
+			if (isset($map[$char])) {
+				return $map[$char];
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * 查找分割符在字符串中第一个出现的字符
+	 * @param string $str 要检查的字符串
+	 * @param array $delimiters 分隔符数组(单字符)
+	 * @return string|null 分隔符，未找到返回null
+	 */
+	public static function findDelimiter($str, array $delimiters)
+	{
+		$index = self::findDelimiterIndex($str, $delimiters);
+		return $index !== -1 ? $delimiters[$index] : null;
+	}
+
+	/**
+	 * 查找分割符在字符串中最后一个出现的字符
+	 * @param string $str 要检查的字符串
+	 * @param array $delimiters 分隔符数组(单字符)
+	 * @return string|null 分隔符，未找到返回null
+	 */
+	public static function findLastDelimiter($str, array $delimiters)
+	{
+		$index = self::findLastDelimiterIndex($str, $delimiters);
+		return $index !== -1 ? $delimiters[$index] : null;
+	}
+
 }
