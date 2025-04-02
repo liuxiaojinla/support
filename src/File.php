@@ -9,12 +9,58 @@ use League\Flysystem\Filesystem as FlysystemFilesystem;
 use League\Flysystem\PathNormalizer as FlysystemPathNormalizer;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 /**
  * 目录操作类
  */
 final class File
 {
+	/**
+	 * ETag 算法
+	 */
+	public const HASH_ETAG = 'etag';
+
+	/**
+	 * md5 算法
+	 */
+	public const HASH_MD5 = 'md5';
+
+	/**
+	 * Sha1 算法
+	 */
+	public const HASH_SHA1 = 'sha1';
+
+	/**
+	 * 获取文件hash
+	 * @param SplFileInfo|string $file
+	 * @param string|null $hashType
+	 * @return string
+	 */
+	public static function hash($file, $hashType = null)
+	{
+		$hashType = $hashType ?: self::HASH_ETAG;
+		$realPath = $file instanceof SplFileInfo ? $file->getRealPath() : $file;
+
+		if (self::HASH_ETAG === $hashType) {
+			return Etag::sum($realPath);
+		}
+
+		if (self::HASH_MD5 === $hashType) {
+			return md5_file($realPath);
+		}
+
+		if (self::HASH_SHA1 === $hashType) {
+			return sha1_file($realPath);
+		}
+
+		if (in_array($hashType, hash_algos(), true)) {
+			return hash_file($hashType, $realPath, true);
+		}
+
+		throw new \RuntimeException("hash_type[{$hashType}] is not support.");
+	}
+
 	/**
 	 * 获取指定目录下所有的文件，包括子目录下的文件
 	 *
@@ -260,4 +306,32 @@ final class File
 		return self::mkdir($directory, $permissions, $recursive, $context);
 	}
 
+	/**
+	 * 获取文件扩展
+	 * @return string
+	 */
+	public static function extension(SplFileInfo $file)
+	{
+		$extension = $file->getExtension();
+		if (empty($extension)) {
+			$mime = self::mime($file);
+			$mime = explode("/", $mime);
+			if (empty($mime)) {
+				return '';
+			}
+
+			return strtolower(end($mime));
+		}
+
+		return strtolower($extension);
+	}
+
+	/**
+	 * 获取mime类型
+	 * @return string
+	 */
+	public static function mime(SplFileInfo $file)
+	{
+		return mime_content_type($file->getPathname());
+	}
 }

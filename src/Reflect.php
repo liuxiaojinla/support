@@ -23,7 +23,7 @@ final class Reflect
 	 * @param mixed $default
 	 * @param bool $throw
 	 * @return mixed|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	protected static function throwIf($callback, $default = null, $throw = false)
 	{
@@ -31,6 +31,7 @@ final class Reflect
 			return $callback();
 		} catch (\ReflectionException $e) {
 			if ($throw) {
+				/** @noinspection PhpUnhandledExceptionInspection */
 				throw $e;
 			}
 		}
@@ -42,10 +43,11 @@ final class Reflect
 	 * 转换为 ReflectionClass
 	 * @param object|string $objectOrClass
 	 * @return \ReflectionClass
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function asClassRef($objectOrClass)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return (new \ReflectionClass($objectOrClass));
 	}
 
@@ -54,10 +56,11 @@ final class Reflect
 	 * @param object|string $objectOrClass
 	 * @param string $methodName
 	 * @return \ReflectionMethod
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function asMethodRef($objectOrClass, $methodName)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		$ref = new \ReflectionMethod($objectOrClass, $methodName);
 		/** @noinspection PhpExpressionResultUnusedInspection */
 		$ref->setAccessible(true);
@@ -69,10 +72,11 @@ final class Reflect
 	 * 转换为 ReflectionFunction
 	 * @param Closure|string $function
 	 * @return \ReflectionFunction
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function asFunctionRef($function)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return new \ReflectionFunction($function);
 	}
 
@@ -81,10 +85,11 @@ final class Reflect
 	 * @param object|string $objectOrClass
 	 * @param string $propertyName
 	 * @return \ReflectionProperty
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function asPropertyRef($objectOrClass, $propertyName)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		$property = new \ReflectionProperty($objectOrClass, $propertyName);
 		/** @noinspection PhpExpressionResultUnusedInspection */
 		$property->setAccessible(true);
@@ -97,10 +102,11 @@ final class Reflect
 	 * @param string|array|object $function
 	 * @param int|string $parameterName
 	 * @return \ReflectionParameter
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function asParameterRef($function, $parameterName)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return new \ReflectionParameter($function, $parameterName);
 	}
 
@@ -110,10 +116,11 @@ final class Reflect
 	 * @param string|null $methodName
 	 * @param bool $throw
 	 * @return \ReflectionMethod|\ReflectionFunction|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function method($objectOrClass, $methodName, $throw = false)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return self::throwIf(function () use ($objectOrClass, $methodName) {
 			if (is_callable($objectOrClass)) {
 				return self::asFunctionRef($objectOrClass);
@@ -174,6 +181,7 @@ final class Reflect
 	 */
 	public static function isGenerator(callable $callback, $throw = false)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return self::throwIf(function () use ($callback) {
 			if (is_array($callback)) {
 				// 对于数组形式的回调，例如 [$object, 'methodName']
@@ -191,7 +199,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isPublicMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -205,7 +213,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isProtectedMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -219,7 +227,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isPrivateMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -233,7 +241,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isStaticMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -247,7 +255,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isAbstractMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -261,7 +269,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isConstructorMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -275,7 +283,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isDestructorMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -289,7 +297,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param string|null $methodName
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function isClosureMethod($objectOrClass, $methodName, $throw = false)
 	{
@@ -325,7 +333,7 @@ final class Reflect
 	 * @param string|null $methodName
 	 * @param bool $throw
 	 * @return int
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function methodModifiers($objectOrClass, $methodName, $throw = false)
 	{
@@ -340,7 +348,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function methods($objectOrClass, $filter = null, $default = [], $throw = false)
 	{
@@ -355,7 +363,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function publicMethods($objectOrClass, $default = [], $throw = false)
 	{
@@ -367,7 +375,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function protectedMethods($objectOrClass, $default = [], $throw = false)
 	{
@@ -379,7 +387,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function privateMethods($objectOrClass, $default = [], $throw = false)
 	{
@@ -391,7 +399,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function finalMethods($objectOrClass, $default = [], $throw = false)
 	{
@@ -403,7 +411,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function abstractMethods($objectOrClass, $default = [], $throw = false)
 	{
@@ -415,7 +423,7 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param bool $throw
 	 * @return \ReflectionMethod[]
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function staticMethods($objectOrClass, $default = [], $throw = false)
 	{
@@ -442,7 +450,7 @@ final class Reflect
 	 * @param string $propertyName
 	 * @param bool $throw
 	 * @return \ReflectionProperty
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function property($objectOrClass, $propertyName, $throw = false)
 	{
@@ -458,7 +466,7 @@ final class Reflect
 	 * @param mixed|null $default
 	 * @param bool $throw
 	 * @return mixed|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function get($objectOrClass, $propertyName, $default = null, $throw = false)
 	{
@@ -502,7 +510,7 @@ final class Reflect
 	 * @param string $propertyName
 	 * @param bool $throw
 	 * @return bool
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function has($objectOrClass, $propertyName, $throw = false)
 	{
@@ -517,9 +525,9 @@ final class Reflect
 	 * @param string $propertyName
 	 * @param bool $throw
 	 * @return mixed|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public static function staticHas($objectOrClass, $propertyName, $throw = false)
+	public static function hasStaticProperty($objectOrClass, $propertyName, $throw = false)
 	{
 		return self::throwIf(function () use ($objectOrClass, $propertyName) {
 			if (!self::has($objectOrClass, $propertyName)) {
@@ -536,9 +544,9 @@ final class Reflect
 	 * @param string $propertyName
 	 * @param bool $throw
 	 * @return mixed|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public static function dynamicHas($objectOrClass, $propertyName, $throw = false)
+	public static function hasDynamicProperty($objectOrClass, $propertyName, $throw = false)
 	{
 		return self::throwIf(function () use ($objectOrClass, $propertyName) {
 			if (!self::has($objectOrClass, $propertyName)) {
@@ -550,18 +558,6 @@ final class Reflect
 	}
 
 	/**
-	 * 指定的类或对象中是否包含指定的动态成员属性
-	 * @param string|object $objectOrClass
-	 * @return bool
-	 * @throws \ReflectionException
-	 * @deprecated
-	 */
-	public static function hasDynamicProperty($objectOrClass, $propertyName)
-	{
-		return self::dynamicHas($objectOrClass, $propertyName, false);
-	}
-
-	/**
 	 * 属性是否存在
 	 * @param string|object $objectOrClass
 	 * @param string $propertyName
@@ -569,6 +565,7 @@ final class Reflect
 	 * @return bool
 	 * @throws \ReflectionException
 	 * @deprecated
+	 * @see self::has()
 	 */
 	public static function hasProperty($objectOrClass, $propertyName, $isStatic = null)
 	{
@@ -591,40 +588,29 @@ final class Reflect
 	}
 
 	/**
-	 * 指定的类或对象中是否包含指定的静态属性
-	 * @param string|object $objectOrClass
-	 * @return bool
-	 * @throws \ReflectionException
-	 * @deprecated
-	 */
-	public static function hasStaticProperty($objectOrClass, $propertyName)
-	{
-		return self::staticHas($objectOrClass, $propertyName, false);
-	}
-
-	/**
 	 * 设置属性值
 	 * @param string|object $objectOrClass
 	 * @param string $propertyName
 	 * @param mixed $value
 	 * @param bool $throw
 	 * @return \ReflectionProperty
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function set($objectOrClass, $propertyName, $value, $throw = false)
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return self::throwIf(function () use ($objectOrClass, $propertyName, $value) {
 			$ref = self::property($objectOrClass, $propertyName);
 
 			if (is_callable($value)) {
-				$value = $value($ref->getValue());
+				$value = $value($ref->getValue($ref->isStatic() ? null : $objectOrClass));
 			}
 
 			if ($ref->isStatic()) {
 				$ref->setValue($value);
+			} else {
+				$ref->setValue($objectOrClass, $value);
 			}
-
-			$ref->setValue($objectOrClass, $value);
 		}, null, $throw);
 	}
 
@@ -636,6 +622,7 @@ final class Reflect
 	 * @return \ReflectionProperty
 	 * @throws \ReflectionException
 	 * @deprecated
+	 * @see self::set()
 	 */
 	public static function setPropertyValue($classInstance, $propertyName, $value)
 	{
@@ -647,44 +634,43 @@ final class Reflect
 	 * @param string|object $objectOrClass
 	 * @param int|null $filter
 	 * @param bool $throw
-	 * @return \ReflectionProperty
-	 * @throws \ReflectionException
+	 * @return \ReflectionProperty[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function properties($objectOrClass, $filter = null, $default = [], $throw = false)
 	{
 		return self::throwIf(function () use ($objectOrClass, $filter) {
-			return self::asClassRef($objectOrClass)->getProperties($filter);
+			$results = self::asClassRef($objectOrClass)->getProperties($filter);
+			if (is_callable($filter)) {
+				return array_filter($results, $filter);
+			}
+
+			return $results;
 		}, $default, $throw);
 	}
 
 	/**
 	 * 获取类或对象中是否包含的动态属性列表
 	 * @param string|object $objectOrClass
-	 * @return bool
-	 * @throws \ReflectionException
-	 * @deprecated
+	 * @return \ReflectionProperty[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function dynamicProperties($objectOrClass, $default = [], $throw = false)
 	{
-		return self::throwIf(function () use ($objectOrClass) {
-			return array_filter(self::asClassRef($objectOrClass)->getProperties(), function (\ReflectionProperty $property) {
-				return !$property->isStatic();
-			});
+		return self::properties($objectOrClass, function (\ReflectionProperty $property) {
+			return !$property->isStatic();
 		}, $default, $throw);
 	}
 
 	/**
 	 * 获取类或对象中是否包含的静态属性列表
 	 * @param string|object $objectOrClass
-	 * @return bool
-	 * @throws \ReflectionException
-	 * @deprecated
+	 * @return \ReflectionProperty[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function staticProperties($objectOrClass, $default = [], $throw = false)
 	{
-		return self::throwIf(function () use ($objectOrClass, $default) {
-			return self::asClassRef($objectOrClass)->getProperties(\ReflectionProperty::IS_STATIC);
-		}, $default, $throw);
+		return self::properties($objectOrClass, \ReflectionProperty::IS_STATIC, $default, $throw);
 	}
 
 	/**
@@ -714,7 +700,7 @@ final class Reflect
 	 * @param array $args
 	 * @param bool $throw
 	 * @return mixed|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function call($objectOrClass, $methodName, array $args = [], $throw = false)
 	{
@@ -728,7 +714,7 @@ final class Reflect
 	 * 获取父级
 	 * @param string|object $objectOrClass
 	 * @return false|\ReflectionClass
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function parent($objectOrClass, $throw = false)
 	{
@@ -740,8 +726,8 @@ final class Reflect
 	/**
 	 * 获取父级列表
 	 * @param string|object $objectOrClass
-	 * @return array
-	 * @throws \ReflectionException
+	 * @return \ReflectionClass[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function parents($objectOrClass, $throw = false)
 	{
@@ -764,7 +750,7 @@ final class Reflect
 	 * @param int|string $parameterName
 	 * @param bool $throw
 	 * @return \ReflectionParameter|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function parameter($function, $parameterName, $throw = false)
 	{
@@ -779,7 +765,7 @@ final class Reflect
 	 * @param int|string $parameterName
 	 * @param bool $throw
 	 * @return \ReflectionParameter|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function parameterType($function, $parameterName, $throw = false)
 	{
@@ -794,7 +780,7 @@ final class Reflect
 	 * @param int|string $parameterName
 	 * @param bool $throw
 	 * @return \ReflectionParameter|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function parameterPosition($function, $parameterName, $throw = false)
 	{
@@ -809,7 +795,7 @@ final class Reflect
 	 * @param int|string $parameterName
 	 * @param bool $throw
 	 * @return \ReflectionParameter|null
-	 * @throws \ReflectionException
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function hasParameter($function, $parameterName, $throw = false)
 	{
