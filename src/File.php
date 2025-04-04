@@ -7,6 +7,7 @@ use FilesystemIterator;
 use League\Flysystem\Config as FlysystemConfig;
 use League\Flysystem\Filesystem as FlysystemFilesystem;
 use League\Flysystem\PathNormalizer as FlysystemPathNormalizer;
+use Psr\Http\Message\StreamInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -78,18 +79,21 @@ final class File
 	 * 获取指定目录下所有的文件，包括子目录下的文件
 	 *
 	 * @param string $directory
+	 * @param bool $recursive
 	 * @return array
 	 */
-	public static function files(string $directory)
+	public static function files(string $directory, bool $recursive = true)
 	{
 		$files = [];
 
-		$each = function ($dir) use (&$each, &$files) {
+		$each = function ($dir) use (&$each, &$files, $recursive) {
 			$it = new \FilesystemIterator($dir);
 			/**@var $file \SplFileInfo */
 			foreach ($it as $file) {
 				if ($file->isDir()) {
-					$each($file->getPathname());
+					if ($recursive) {
+						$each($file->getPathname());
+					}
 				} else {
 					$files[] = $file;
 				}
@@ -98,6 +102,17 @@ final class File
 		$each($directory);
 
 		return $files;
+	}
+
+	/**
+	 * 寻找与模式匹配的文件路径
+	 * @param string $glob
+	 * @param int $flags
+	 * @return array|false
+	 */
+	public static function glob(string $glob, int $flags = 0)
+	{
+		return glob($glob, $flags);
 	}
 
 	/**
@@ -252,28 +267,48 @@ final class File
 	 * 写入文件
 	 * @param string $path
 	 * @param mixed $data
+	 * @param int $flags
+	 * @param resource|null $context
 	 * @return false|int
 	 */
-	public static function put(string $path, $data)
+	public static function put(string $path, $data, int $flags = 0, $context = null)
 	{
 		$directory = dirname($path);
 		self::mkdirOrExists($directory);
 
-		if (is_object($data) || is_array($data)) {
+		if ($data instanceof StreamInterface) {
+			$data = $data->getContents();
+		} elseif (is_object($data) || is_array($data)) {
 			$data = JSON::encode($data);
 		}
 
-		return file_put_contents($path, $data);
+		return file_put_contents($path, $data, $flags, $context);
+	}
+
+	/**
+	 * 追加写入文件
+	 * @param string $path
+	 * @param mixed $data
+	 * @param mixed|null $context
+	 * @return false|int
+	 */
+	public static function append(string $path, $data, $context = null)
+	{
+		return self::put($path, $data, FILE_APPEND, $context);
 	}
 
 	/**
 	 * 读取文件
 	 * @param string $path
+	 * @param bool $useIncludePath
+	 * @param resource|null $context
+	 * @param int $offset
+	 * @param int|null $length
 	 * @return false|string
 	 */
-	public static function get(string $path)
+	public static function get(string $path, bool $useIncludePath = false, $context = null, int $offset = 0, int $length = null)
 	{
-		return file_get_contents($path);
+		return file_get_contents($path, $useIncludePath, $context, $offset, $length);
 	}
 
 	/**

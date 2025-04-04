@@ -18,11 +18,12 @@ final class Path
 	/**
 	 * 获取文件路径的名字
 	 * @param string $file
+	 * @param bool $withSuffix
 	 * @return string
 	 */
-	public static function basename(string $file)
+	public static function basename(string $file, bool $withSuffix = false)
 	{
-		return basename($file, '.' . self::suffix($file));
+		return basename($file, $withSuffix ? '' : '.' . self::suffix($file));
 	}
 
 	/**
