@@ -45,7 +45,6 @@ class DebugTime
 		$this->name = $name ?: "DebugTime." . self::newId();
 	}
 
-
 	/**
 	 * 计算耗时时间
 	 * @param string $beginFlag
@@ -134,7 +133,6 @@ class DebugTime
 		return $this->times[$label]['begin'];
 	}
 
-
 	/**
 	 * 打印控制台输出
 	 * @param string $label
@@ -197,7 +195,6 @@ class DebugTime
 	{
 		self::$defaultDumperResolver = $dumperResolver;
 	}
-
 
 	/**
 	 * @return self

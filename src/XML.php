@@ -2,6 +2,8 @@
 
 namespace Xin\Support;
 
+use SimpleXMLElement;
+
 final class XML
 {
 
@@ -11,12 +13,26 @@ final class XML
 	 * @param string $xml
 	 * @return mixed
 	 */
-	public static function parse($xml)
+	public static function parse($xml, int $options = LIBXML_NOCDATA)
 	{
-		//将XML转为array,禁止引用外部xml实体
-		libxml_disable_entity_loader(true);
+		return json_decode(json_encode(self::parseAsElement($xml, $options)), true);
+	}
 
-		return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+	/**
+	 * 将XML转换成SimpleXMLElement对象
+	 *
+	 * @param string $xml
+	 * @return SimpleXMLElement
+	 */
+	public static function parseAsElement($xml, int $options = LIBXML_NOCDATA)
+	{
+		// 检查 PHP 版本以决定是否需要调用 libxml_disable_entity_loader()
+		if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+			//将XML转为array,禁止引用外部xml实体
+			libxml_disable_entity_loader(true);
+		}
+
+		return simplexml_load_string($xml, 'SimpleXMLElement', $options);
 	}
 
 	/**
