@@ -416,7 +416,7 @@ final class Str
 		$nonceStr = substr(uniqid('', true), 7, 13);
 		$nonceStr = str_split($nonceStr, 1);
 		$nonceStr = array_map('ord', $nonceStr);
-		$nonceStr = substr(implode(null, $nonceStr), -8);
+		$nonceStr = substr(implode('', $nonceStr), -8);
 
 		return $prefix . $datetime . $microtime . $nonceStr;
 	}
