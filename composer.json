@@ -12,7 +12,8 @@
   "require": {
     "php": ">=7.1.9",
     "ramsey/uuid": "^3.5 | ^4.0",
-    "doctrine/inflector": "^2.0"
+    "doctrine/inflector": "^2.0",
+    "myclabs/php-enum": "^1.8"
   },
   "autoload": {
     "files": [

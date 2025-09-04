@@ -299,6 +299,27 @@ final class Arr
 	}
 
 	/**
+	 * 创建一个由键和值组成的数组，类似 Python 中 zip() 的内置函数，
+	 * 用于将多个可迭代对象（如列表、元组等）“打包”成一个个元组
+	 *
+	 * @param mixed ...$arrays
+	 * @return array
+	 */
+	public static function zip(...$arrays)
+	{
+		$result = [];
+		$minLength = min(array_map('count', $arrays));
+		for ($i = 0; $i < $minLength; $i++) {
+			$tuple = [];
+			foreach ($arrays as $arr) {
+				$tuple[] = $arr[$i];
+			}
+			$result[] = $tuple;
+		}
+		return $result;
+	}
+
+	/**
 	 * 从数组里面获取指定的数据
 	 *
 	 * @param array $data

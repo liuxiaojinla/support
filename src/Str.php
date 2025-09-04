@@ -768,4 +768,57 @@ final class Str
 		return $index !== -1 ? $delimiters[$index] : null;
 	}
 
+	/**
+	 * 对一段文本进行分段返回
+	 * @param string $text
+	 * @return array
+	 */
+	public static function semanticSegment(string $text)
+	{
+		// 使用 preg_split 按表情符号、问号、感叹号等来分割文本
+		$segments = preg_split('/([~？！；。!;]+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+		// 处理数组中的空值
+		$filteredSegments = array_filter($segments, function ($value) {
+			return !empty(trim($value));
+		});
+
+		// 合并分割符和其后的文本段落
+		$result = [];
+		for ($i = 0; $i < count($filteredSegments); $i++) {
+			if ($i % 2 == 0) { // 文本段落
+				if (isset($filteredSegments[$i + 1])) {
+					$result[] = $filteredSegments[$i] . $filteredSegments[$i + 1];
+					$i++;
+				} else {
+					$result[] = $filteredSegments[$i];
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 提取JSON数据
+	 * @param string $jsonCode
+	 * @return string
+	 */
+	public static function extractJson(string $jsonCode)
+	{
+		$start = strpos($jsonCode, "```json");
+
+		if ($start !== false) {
+			$end = strpos($jsonCode, "```", $start + 1);
+			if ($end === false) {
+				$jsonCode = substr($jsonCode, $start + 7);
+			} else {
+
+				$jsonCode = substr($jsonCode, $start + 7, $end - $start - 7);
+			}
+		}
+
+		return trim($jsonCode);
+	}
+
 }
