@@ -4,6 +4,7 @@
 namespace Xin\Support;
 
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * 字符串工具类
@@ -43,6 +44,24 @@ final class Str
 	{
 		foreach ((array)$needles as $needle) {
 			if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * 检查字符串是否以某些字符串开头
+	 *
+	 * @param string $haystack
+	 * @param string|array $needles
+	 * @return bool
+	 */
+	public static function startsWith($haystack, $needles)
+	{
+		foreach ((array)$needles as $needle) {
+			if ('' != $needle && mb_strpos($haystack, $needle) === 0) {
 				return true;
 			}
 		}
@@ -93,24 +112,6 @@ final class Str
 	}
 
 	/**
-	 * 检查字符串是否以某些字符串开头
-	 *
-	 * @param string $haystack
-	 * @param string|array $needles
-	 * @return bool
-	 */
-	public static function startsWith($haystack, $needles)
-	{
-		foreach ((array)$needles as $needle) {
-			if ('' != $needle && mb_strpos($haystack, $needle) === 0) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * 字符串截取，支持中文和其他编码
 	 *
 	 * @param string $value 验证的值
@@ -118,7 +119,7 @@ final class Str
 	 * @param int $length 截取长度
 	 * @param string $charset 字符编码
 	 * @return string
-	 * @deprecated
+	 * @deprecated 废弃，请使用 substr()，mb_substr()
 	 */
 	public static function subString($value, $start = 0, $length = null, $charset = null)
 	{
@@ -155,6 +156,17 @@ final class Str
 	}
 
 	/**
+	 * 字符串转小写
+	 *
+	 * @param string $value
+	 * @return string
+	 */
+	public static function lower($value)
+	{
+		return mb_strtolower($value, 'UTF-8');
+	}
+
+	/**
 	 * 驼峰转下划线
 	 *
 	 * @param string $value
@@ -177,25 +189,6 @@ final class Str
 		}
 
 		return $isCache ? self::$snakeCache[$key][$delimiter] = $value : $value;
-	}
-
-	/**
-	 * 字符串转小写
-	 *
-	 * @param string $value
-	 * @return string
-	 */
-	public static function lower($value)
-	{
-		return mb_strtolower($value, 'UTF-8');
-	}
-
-	/**
-	 * 清除驼峰转下划线缓存
-	 */
-	public static function clearSnakeCache()
-	{
-		self::$snakeCache = [];
 	}
 
 	/**
@@ -238,6 +231,14 @@ final class Str
 	}
 
 	/**
+	 * 清除驼峰转下划线缓存
+	 */
+	public static function clearSnakeCache()
+	{
+		self::$snakeCache = [];
+	}
+
+	/**
 	 * 清除下划线转驼峰(首字母小写)缓存
 	 */
 	public static function clearCamelCache()
@@ -265,7 +266,7 @@ final class Str
 	}
 
 	/**
-	 * Pluralize the last word of an English, studly caps case string.
+	 * 将英语的最后一个单词复数化，大写大小写字符串。
 	 *
 	 * @param string $value
 	 * @param int $count
@@ -281,7 +282,7 @@ final class Str
 	}
 
 	/**
-	 * Get the plural form of an English word.
+	 * 获取英语单词的复数形式。
 	 *
 	 * @param string $value
 	 * @param int $count
@@ -293,50 +294,36 @@ final class Str
 	}
 
 	/**
-	 * 实现多种字符编码方式
+	 * 获取英语单词的单数形式。
 	 *
-	 * @param string $input 数据源
-	 * @param string $_output_charset 输出的字符编码
-	 * @param string $_input_charset 输入的字符编码
+	 * @param string $value
 	 * @return string
 	 */
-	public static function charsetEncode($input, $_output_charset, $_input_charset)
+	public static function singular($value)
 	{
-		if (!isset ($_output_charset)) {
-			$_output_charset = $_input_charset;
-		}
-
-		if ($_input_charset == $_output_charset || $input == null) {
-			$output = $input;
-		} elseif (function_exists("mb_convert_encoding")) {
-			$output = mb_convert_encoding($input, $_output_charset, $_input_charset);
-		} elseif (function_exists("iconv")) {
-			$output = iconv($_input_charset, $_output_charset, $input);
-		} else {
-			throw new \RuntimeException("不支持 $_input_charset 到 $_output_charset 编码！");
-		}
-
-		return $output;
+		return Pluralizer::singular($value);
 	}
 
 	/**
-	 * 实现多种字符解码方式
+	 * 转换字符编码
 	 *
 	 * @param string $input 数据源
-	 * @param string $_input_charset 输入的字符编码
-	 * @param string $_output_charset 输出的字符编码
-	 * @return string
+	 * @param string $outputCharset 输出的字符编码
+	 * @param string $inputCharset 输入的字符编码
+	 * @return string|null
 	 */
-	public static function charsetDecode($input, $_input_charset, $_output_charset)
+	public static function encoding($input, $outputCharset, $inputCharset = null)
 	{
-		if ($_input_charset == $_output_charset || $input == null) {
-			$output = $input;
-		} elseif (function_exists("mb_convert_encoding")) {
-			$output = mb_convert_encoding($input, $_output_charset, $_input_charset);
+		if (is_null($input)) {
+			return null;
+		}
+
+		if (function_exists("mb_convert_encoding")) {
+			$output = mb_convert_encoding($input, $outputCharset, $inputCharset);
 		} elseif (function_exists("iconv")) {
-			$output = iconv($_input_charset, $_output_charset, $input);
+			$output = iconv($inputCharset, $outputCharset, $input);
 		} else {
-			throw new \RuntimeException("不支持 $_input_charset 到 $_output_charset 解码！");
+			throw new \RuntimeException("不支持 $inputCharset 到 $outputCharset 编码！");
 		}
 
 		return $output;
@@ -378,7 +365,7 @@ final class Str
 	/**
 	 * 生成一个 UUID (version 4).
 	 *
-	 * @return \Ramsey\Uuid\UuidInterface
+	 * @return UuidInterface
 	 */
 	public static function uuid()
 	{
@@ -388,6 +375,16 @@ final class Str
 		}
 
 		return null;
+	}
+
+	/**
+	 * 获取 UUID
+	 *
+	 * @return string
+	 */
+	public static function assignUuid()
+	{
+		return str_replace('-', '', self::uuid()->toString());
 	}
 
 	/**
@@ -407,8 +404,9 @@ final class Str
 	 * @param string $prefix
 	 * @return string
 	 */
-	public static function makeOrderSn($prefix = '')
-	{ // 取出订单编号
+	public static function orderNumber($prefix = '')
+	{
+		// 取出订单编号
 		$datetime = date('YmdHis');
 		$microtime = explode(' ', microtime());
 		$microtime = (int)($microtime[0] ? $microtime[0] * 100000 : 100000);
@@ -419,6 +417,18 @@ final class Str
 		$nonceStr = substr(implode('', $nonceStr), -8);
 
 		return $prefix . $datetime . $microtime . $nonceStr;
+	}
+
+	/**
+	 * 创建订单编号
+	 *
+	 * @param string $prefix
+	 * @return string
+	 * @deprecated
+	 */
+	public static function makeOrderSn($prefix = '')
+	{
+		return self::orderNumber($prefix);
 	}
 
 	/**
@@ -509,6 +519,17 @@ final class Str
 	}
 
 	/**
+	 * 将数组转换为查询字符串
+	 *
+	 * @param array $array
+	 * @return string
+	 */
+	public static function queryString($array)
+	{
+		return http_build_query($array, null, '&', PHP_QUERY_RFC3986);
+	}
+
+	/**
 	 * 安全处理-数组转字符串
 	 *
 	 * @param mixed $value
@@ -543,7 +564,9 @@ final class Str
 			$value = is_string($value) ? explode($delimiter, $value) : [$value];
 		}
 
-		$value = array_map($format, $value);
+		if ($format) {
+			$value = array_map($format, $value);
+		}
 
 		if ($filter !== false) {
 			if ($filter === true) {
@@ -557,7 +580,7 @@ final class Str
 	}
 
 	/**
-	 * Determine if a given string matches a given pattern.
+	 * 确定给定字符串是否与给定模式匹配。
 	 *
 	 * @param string|array $pattern
 	 * @param string $value
@@ -813,7 +836,6 @@ final class Str
 			if ($end === false) {
 				$jsonCode = substr($jsonCode, $start + 7);
 			} else {
-
 				$jsonCode = substr($jsonCode, $start + 7, $end - $start - 7);
 			}
 		}
@@ -821,4 +843,45 @@ final class Str
 		return trim($jsonCode);
 	}
 
+	/**
+	 * 解析UBB语法
+	 * @return string
+	 */
+	public static function ubbToHtml($content)
+	{
+		$content = trim($content);
+		$content = htmlspecialchars($content);
+		$content = preg_replace("/\\t/is", "  ", $content);
+		$content = preg_replace("/\\[h1\\](.+?)\\[\\/h1\\]/is", "<h1>\\1</h1>", $content);
+		$content = preg_replace("/\\[h2\\](.+?)\\[\\/h2\\]/is", "<h2>\\1</h2>", $content);
+		$content = preg_replace("/\\[h3\\](.+?)\\[\\/h3\\]/is", "<h3>\\1</h3>", $content);
+		$content = preg_replace("/\\[h4\\](.+?)\\[\\/h4\\]/is", "<h4>\\1</h4>", $content);
+		$content = preg_replace("/\\[h5\\](.+?)\\[\\/h5\\]/is", "<h5>\\1</h5>", $content);
+		$content = preg_replace("/\\[h6\\](.+?)\\[\\/h6\\]/is", "<h6>\\1</h6>", $content);
+		$content = preg_replace("/\\[separator\\]/is", "", $content);
+		$content = preg_replace("/\\[center\\](.+?)\\[\\/center\\]/is", "<span style=\"text-align: center\">\\1</span>", $content);
+		$content = preg_replace("/\\[url=http:\\/\\/([^\\[]*)\\](.+?)\\[\\/url\\]/is", "<a href=\"http://\\1\" target=\"_blank\">\\2</a>", $content);
+		$content = preg_replace("/\\[url=([^\\[]*)\\](.+?)\\[\\/url\\]/is", "<a href=\"http://\\1\" target=\"_blank\">\\2</a>", $content);
+		$content = preg_replace("/\\[url\\]http:\\/\\/([^\\[]*)\\[\\/url\\]/is", "<a href=\"http://\\1\" target=\"_blank\">\\1</a>", $content);
+		$content = preg_replace("/\\[url\\]([^\\[]*)\\[\\/url\\]/is", "<a href=\"\\1\" target=\"_blank\">\\1</a>", $content);
+		$content = preg_replace("/\\[img\\](.+?)\\[\\/img\\]/is", "<img src=\"\\1\">", $content);
+		$content = preg_replace("/\\[color=(.+?)\\](.+?)\\[\\/color\\]/is", "<span style=\"color: \\1\">\\2</span>", $content);
+		$content = preg_replace("/\\[size=(.+?)\\](.+?)\\[\\/size\\]/is", "<span style=\"font-size: \\1\">\\2</span>", $content);
+		$content = preg_replace("/\\[sup\\](.+?)\\[\\/sup\\]/is", "<sup>\\1</sup>", $content);
+		$content = preg_replace("/\\[sub\\](.+?)\\[\\/sub\\]/is", "<sub>\\1</sub>", $content);
+		$content = preg_replace("/\\[pre\\](.+?)\\[\\/pre\\]/is", "<pre>\\1</pre>", $content);
+		$content = preg_replace("/\\[email\\](.+?)\\[\\/email\\]/is", "<a href=\"mailto:\\1\">\\1</a>", $content);
+		$content = preg_replace("/\\[colorTxt\\](.+?)\\[\\/colorTxt\\]/eis", "color_txt('\\1')", $content);
+		$content = preg_replace("/\\[emot\\](.+?)\\[\\/emot\\]/eis", "emot('\\1')", $content);
+		$content = preg_replace("/\\[i\\](.+?)\\[\\/i\\]/is", "<i>\\1</i>", $content);
+		$content = preg_replace("/\\[u\\](.+?)\\[\\/u\\]/is", "<u>\\1</u>", $content);
+		$content = preg_replace("/\\[b\\](.+?)\\[\\/b\\]/is", "<b>\\1</b>", $content);
+		$content = preg_replace("/\\[quote\\](.+?)\\[\\/quote\\]/is", " <div class=\"quote\"><h5>引用:</h5><blockquote>\\1</blockquote></div>", $content);
+		$content = preg_replace("/\\[code\\](.+?)\\[\\/code\\]/eis", "highlight_code('\\1')", $content);
+		$content = preg_replace("/\\[php\\](.+?)\\[\\/php\\]/eis", "highlight_code('\\1')", $content);
+		$content = preg_replace("/\\[sig\\](.+?)\\[\\/sig\\]/is", "<div class=\"sign\">\\1</div>", $content);
+		$content = preg_replace("/\\n/is", "<br/>", $content);
+
+		return $content;
+	}
 }

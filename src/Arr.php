@@ -541,7 +541,6 @@ final class Arr
 		return $array;
 	}
 
-
 	/**
 	 * 根据字段规则判断给定的数组是否满足条件
 	 *
@@ -629,7 +628,6 @@ final class Arr
 
 		return true;
 	}
-
 
 	/**
 	 * 筛选的项目。
@@ -778,17 +776,6 @@ final class Arr
 
 			return $sort1 == $sort2 ? 0 : ($sort1 > $sort2 ? 1 : -1);
 		});
-	}
-
-	/**
-	 * 将数组转换为查询字符串
-	 *
-	 * @param array $array
-	 * @return string
-	 */
-	public static function query($array)
-	{
-		return http_build_query($array, null, '&', PHP_QUERY_RFC3986);
 	}
 
 	/**
@@ -1042,7 +1029,7 @@ final class Arr
 	}
 
 	/**
-	 * 遍历过滤菜单
+	 * 遍历过滤树形数据
 	 *
 	 * @param array $data
 	 * @param callable $filter
@@ -1076,39 +1063,125 @@ final class Arr
 	/**
 	 * 转换指定数组里面的 key
 	 *
-	 * @param array $arr
-	 * @param array|callable $keyMaps
+	 * @param array $array
+	 * @param array|callable $keyMappings
 	 * @return array
 	 */
-	public static function transformKeys(array $arr, $keyMaps)
+	public static function transformKeys(array $array, $keyMappings)
 	{
-		if (is_callable($keyMaps)) {
-			$newArr = [];
-			foreach ($arr as $oldKey => &$value) {
-				$newKey = call_user_func($keyMaps, $oldKey, $value, $arr);
-				$newArr[$newKey] = $value;
-
-				unset($arr[$oldKey]);
-			}
-			return $newArr;
+		if (is_callable($keyMappings)) {
+			return self::transformKey($array, $keyMappings);
 		} else {
-			foreach ($keyMaps as $oldKey => $newKey) {
-				if (!array_key_exists($oldKey, $arr)) {
+			foreach ($keyMappings as $oldKey => $newKey) {
+				if (!array_key_exists($oldKey, $array)) {
 					continue;
 				}
 
 				if (is_callable($newKey)) {
-					[$newKey, $value] = call_user_func($newKey, $arr[$oldKey], $oldKey, $arr);
-					$arr[$newKey] = $value;
+					[$newKey, $value] = call_user_func($newKey, $array[$oldKey], $oldKey, $array);
+					$array[$newKey] = $value;
 				} else {
-					$arr[$newKey] = $arr[$oldKey];
+					$array[$newKey] = $array[$oldKey];
 				}
 
-				unset($arr[$oldKey]);
+				unset($array[$oldKey]);
 			}
 
-			return $arr;
+			return $array;
 		}
+	}
+
+	/**
+	 * 转换数组键名
+	 *
+	 * @param array $array 原始数组
+	 * @param callable $callback 键名转换回调函数
+	 * @param bool $recursive 是否递归处理多维数组
+	 * @return array 键名转换后的数组
+	 */
+	public static function transformKey(array $array, callable $callback, bool $recursive = false)
+	{
+		$result = [];
+		foreach ($array as $key => $value) {
+			$newKey = call_user_func($callback, $key);
+
+			if ($recursive && is_array($value)) {
+				$result[$newKey] = self::transformKey($value, $callback, $recursive);
+			} else {
+				$result[$newKey] = $value;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * 将键名下划线转驼峰命名
+	 *
+	 * @param array $array
+	 * @param bool $recursive
+	 * @return array
+	 */
+	public static function camelCaseKeys(array $array, bool $recursive = false)
+	{
+		return self::transformKey($array, function ($key) {
+			return Str::camel($key);
+		}, $recursive);
+	}
+
+	/**
+	 * 将键名下划线转大驼峰命名
+	 *
+	 * @param array $array
+	 * @param bool $recursive
+	 * @return array
+	 */
+	public static function studlyCaseKeys(array $array, bool $recursive = false)
+	{
+		return self::transformKey($array, function ($key) {
+			return Str::studly($key);
+		}, $recursive);
+	}
+
+	/**
+	 * 将键名驼峰转下划线命名
+	 *
+	 * @param array $array
+	 * @param bool $recursive
+	 * @return array
+	 */
+	public static function snakeCaseKeys(array $array, bool $recursive = false)
+	{
+		return self::transformKey($array, function ($key) {
+			return Str::snake($key);
+		}, $recursive);
+	}
+
+	/**
+	 * 将键名转小写
+	 *
+	 * @param array $array
+	 * @param bool $recursive
+	 * @return array
+	 */
+	public static function lowerCaseKeys(array $array, bool $recursive = false)
+	{
+		return self::transformKey($array, function ($key) {
+			return strtolower($key);
+		}, $recursive);
+	}
+
+	/**
+	 * 将键名转大写
+	 *
+	 * @param array $array
+	 * @param bool $recursive
+	 * @return array
+	 */
+	public static function upperCaseKeys(array $array, bool $recursive = false)
+	{
+		return self::transformKey($array, function ($key) {
+			return strtoupper($key);
+		});
 	}
 
 	/**

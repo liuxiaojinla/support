@@ -1,6 +1,6 @@
 <?php
 
-namespace Xin\Support;
+namespace Xin\Support\Proxy;
 
 use Xin\Support\Traits\Macroable;
 
@@ -13,14 +13,14 @@ class MacroProxy
 	use Macroable;
 
 	/**
-	 * The target being tapped.
+	 * 正在点击的目标。
 	 *
 	 * @var mixed
 	 */
 	protected $target;
 
 	/**
-	 * Create a new tap proxy instance.
+	 * 创建新的分流代理实例。
 	 *
 	 * @param mixed $target
 	 * @return void
@@ -31,7 +31,7 @@ class MacroProxy
 	}
 
 	/**
-	 * Dynamically handle calls to the class.
+	 * 动态处理对类的调用。
 	 *
 	 * @param string $method
 	 * @param array $parameters

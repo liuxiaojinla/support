@@ -1,7 +1,7 @@
 <?php
 
-use Xin\Support\HigherOrderTapProxy;
 use Xin\Support\Path;
+use Xin\Support\Proxy\HigherOrderTapProxy;
 use Xin\Support\SQL;
 
 if (!function_exists('tap')) {

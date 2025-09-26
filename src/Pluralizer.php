@@ -2,6 +2,7 @@
 
 namespace Xin\Support;
 
+use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 
 /**
@@ -11,7 +12,7 @@ final class Pluralizer
 {
 
 	/**
-	 * Uncountable word forms.
+	 * 无数的词形。
 	 *
 	 * @var array
 	 */
@@ -62,12 +63,12 @@ final class Pluralizer
 	];
 
 	/**
-	 * @var \Doctrine\Inflector\Inflector
+	 * @var Inflector
 	 */
 	protected static $inflector = null;
 
 	/**
-	 * Get the plural form of an English word.
+	 * 获取英语单词的复数形式。
 	 *
 	 * @param string $value
 	 * @param int $count
@@ -75,17 +76,17 @@ final class Pluralizer
 	 */
 	public static function plural($value, $count = 2)
 	{
-		if ((int)abs($count) === 1 || static::uncountable($value)) {
+		if ((int)abs($count) === 1 || self::uncountable($value)) {
 			return $value;
 		}
 
-		$plural = static::inflector()->pluralize($value);
+		$plural = self::inflector()->pluralize($value);
 
-		return static::matchCase($plural, $value);
+		return self::matchCase($plural, $value);
 	}
 
 	/**
-	 * Determine if the given value is uncountable.
+	 * 确定给定值是否不可数。
 	 *
 	 * @param string $value
 	 * @return bool
@@ -96,19 +97,19 @@ final class Pluralizer
 	}
 
 	/**
-	 * @return \Doctrine\Inflector\Inflector
+	 * @return Inflector
 	 */
 	public static function inflector()
 	{
-		if (static::$inflector === null) {
-			static::$inflector = InflectorFactory::create()->build();
+		if (self::$inflector === null) {
+			self::$inflector = InflectorFactory::create()->build();
 		}
 
-		return static::$inflector;
+		return self::$inflector;
 	}
 
 	/**
-	 * Attempt to match the case on two strings.
+	 * 尝试匹配两个字符串上的大小写。
 	 *
 	 * @param string $value
 	 * @param string $comparison
@@ -128,16 +129,16 @@ final class Pluralizer
 	}
 
 	/**
-	 * Get the singular form of an English word.
+	 * 获取英语单词的单数形式。
 	 *
 	 * @param string $value
 	 * @return string
 	 */
 	public static function singular($value)
 	{
-		$singular = static::inflector()->singularize($value);
+		$singular = self::inflector()->singularize($value);
 
-		return static::matchCase($singular, $value);
+		return self::matchCase($singular, $value);
 	}
 
 }

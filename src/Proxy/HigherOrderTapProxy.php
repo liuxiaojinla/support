@@ -1,6 +1,6 @@
 <?php
 
-namespace Xin\Support;
+namespace Xin\Support\Proxy;
 
 class HigherOrderTapProxy
 {
