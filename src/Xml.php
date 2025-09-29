@@ -4,7 +4,7 @@ namespace Xin\Support;
 
 use SimpleXMLElement;
 
-final class XML
+final class Xml
 {
 
 	/**

@@ -11,6 +11,7 @@ use Psr\Http\Message\StreamInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
+use Xin\Support\Security\Etag;
 
 /**
  * 目录操作类
@@ -279,7 +280,7 @@ final class File
 		if ($data instanceof StreamInterface) {
 			$data = $data->getContents();
 		} elseif (is_object($data) || is_array($data)) {
-			$data = JSON::encode($data);
+			$data = Json::encode($data);
 		}
 
 		return file_put_contents($path, $data, $flags, $context);

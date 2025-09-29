@@ -4,30 +4,42 @@
 
 日常开发必备基础库【字符串、集合、数值、加密、时间、文件、反射、重试、服务器、XML】
 
+**基础**
 - 数组相关（Arr.php）
 - 字符串相关（Str.php）
-- 简单集合（Collection.php）
-- 文件相关（File.php）【待升级】
-- Fluent（Fluent.php）
-- 高阶对象代理（HigherOrderTapProxy.php）
-- Javascript（Javascript.php）
-- 简约限流器（LimitThrottle.php）
-- 对象微代理器（MacroProxy.php）【待废弃】
+- 文件相关（File.php）
 - 数值相关（Number.php）
-- 单词复数器（Pluralizer.php）
-- 距离转换（Position.php）
-- 进制转换器（Radix.php）
-- 跳转（Redirect.php）
-- 反射（Reflect.php）
-- 常用正则（Regex.php）
-- 重试器（Retry.php）
-- 证书安全（Secure.php）
-- 服务器相关（Server.php）【待整合】
-- 简约加密器（SimpleEncrypt.php）
 - 时间相关（Time.php）
-- UBB（UBB.php）
-- 版本判断（Version.php）
+- 正则相关（Regex.php）
+- 进程相关（Process.php）
+- 反射相关（Reflect.php）
 - XML（XML.php）
+- Json（Json.php）
+- 距离转换（Position.php）
+- Path（Path.php）
+- Fluent（Fluent.php）
+- OS 信息（OS.php）
+- 重试器（Retry.php）
+- 单词复数器（Pluralizer.php）
+- 进制转换器（Radix.php）
+- 版本判断（Version.php）
+- 对象微代理器（MacroProxy.php）
+- 高阶对象代理（HigherOrderTapProxy.php）
+
+**安全**
+- 证书安全（Security/Secure.php）
+- 加解密（Security/Encryption.php）
+- 加解密（Security/Hash.php）
+- 简约加密器（SimpleEncrypt.php）
+
+**限流器**
+- 简约限流器（LimitThrottle.php）
+
+**Web**
+- Javascript（Web/Javascript.php）
+- 跳转（Web/Redirect.php）
+- 服务器相关（Web/ServerInfo.php）
+- 客户端相关（Web/ClientInfo.php）
 
 #### 安装教程
 
