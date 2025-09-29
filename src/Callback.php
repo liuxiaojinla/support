@@ -2,6 +2,8 @@
 
 namespace Xin\Support;
 
+use Throwable;
+
 final class Callback
 {
 	/**
@@ -26,7 +28,7 @@ final class Callback
 	{
 		try {
 			return call_user_func_array($callback, $args);
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 			$failedCallback && call_user_func($failedCallback, $e);
 		}
 

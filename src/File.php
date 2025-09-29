@@ -10,6 +10,8 @@ use League\Flysystem\PathNormalizer as FlysystemPathNormalizer;
 use Psr\Http\Message\StreamInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionException;
+use RuntimeException;
 use SplFileInfo;
 use Xin\Support\Security\Etag;
 
@@ -60,7 +62,7 @@ final class File
 			return hash_file($hashType, $realPath, true);
 		}
 
-		throw new \RuntimeException("hash_type[{$hashType}] is not support.");
+		throw new RuntimeException("hash_type[{$hashType}] is not support.");
 	}
 
 	/**
@@ -88,8 +90,8 @@ final class File
 		$files = [];
 
 		$each = function ($dir) use (&$each, &$files, $recursive) {
-			$it = new \FilesystemIterator($dir);
-			/**@var $file \SplFileInfo */
+			$it = new FilesystemIterator($dir);
+			/**@var $file SplFileInfo */
 			foreach ($it as $file) {
 				if ($file->isDir()) {
 					if ($recursive) {
@@ -125,9 +127,9 @@ final class File
 	public static function each(string $directory, callable $callback)
 	{
 		$each = function ($dir) use (&$each, $callback) {
-			$it = new \FilesystemIterator($dir);
+			$it = new FilesystemIterator($dir);
 
-			/**@var $file \SplFileInfo */
+			/**@var $file SplFileInfo */
 			foreach ($it as $file) {
 				if ($callback($file) === false) {
 					return false;
@@ -250,7 +252,7 @@ final class File
 	 * @param string $path
 	 * @param FlysystemFilesystem $filesystem
 	 * @return string
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	public static function filesystemRealpath(string $path, FlysystemFilesystem $filesystem)
 	{

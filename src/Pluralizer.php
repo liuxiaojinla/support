@@ -93,7 +93,7 @@ final class Pluralizer
 	 */
 	protected static function uncountable($value)
 	{
-		return in_array(strtolower($value), static::$uncountable);
+		return in_array(strtolower($value), self::$uncountable);
 	}
 
 	/**

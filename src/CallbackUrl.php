@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 
 class CallbackUrl
 {
@@ -55,7 +56,7 @@ class CallbackUrl
 			return $async ? self::postSync($url, $params) : self::post($url, $params);
 		}
 
-		throw new \InvalidArgumentException('Invalid callback url');
+		throw new InvalidArgumentException('Invalid callback url');
 	}
 
 	/**

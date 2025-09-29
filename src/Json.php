@@ -75,7 +75,7 @@ final class Json
 	 * @param bool|null $associative
 	 * @param int $depth
 	 * @param int $flags
-	 * @return mixed
+	 * @return mixed|null
 	 */
 	public static function decode(string $json, ?bool $associative = null, int $depth = 512, int $flags = 0)
 	{

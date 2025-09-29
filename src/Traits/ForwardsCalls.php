@@ -2,6 +2,9 @@
 
 namespace Xin\Support\Traits;
 
+use BadMethodCallException;
+use Error;
+
 trait ForwardsCalls
 {
 
@@ -12,13 +15,13 @@ trait ForwardsCalls
 	 * @param string $method
 	 * @param array $parameters
 	 * @return mixed|void
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	protected function forwardCallTo($object, string $method, array $parameters = [])
 	{
 		try {
 			return $object->{$method}(...$parameters);
-		} catch (\Error|\BadMethodCallException $e) {
+		} catch (Error|BadMethodCallException $e) {
 			$pattern = '~^Call to undefined method (?P<class>[^:]+)::(?P<method>[^\(]+)\(\)$~';
 
 			if (!preg_match($pattern, $e->getMessage(), $matches)) {
@@ -39,11 +42,11 @@ trait ForwardsCalls
 	 *
 	 * @param string $method
 	 * @return void
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	protected static function throwBadMethodCallException(string $method)
 	{
-		throw new \BadMethodCallException(sprintf(
+		throw new BadMethodCallException(sprintf(
 			'Call to undefined method %s::%s()', static::class, $method
 		));
 	}

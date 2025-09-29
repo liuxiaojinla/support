@@ -2,6 +2,9 @@
 
 namespace Xin\Support;
 
+use InvalidArgumentException;
+use RuntimeException;
+
 /**
  * Snowflake ID 生成器
  */
@@ -10,22 +13,46 @@ class SnowflakeId
 	private const EPOCH_OFFSET = 1478476800000;
 
 	// 默认数据中心ID和节点ID
-	private static int $defaultDataCenterId = 0;
-	private static int $defaultNodeId = 0;
+	/**
+	 * @var int
+	 */
+	private static $defaultDataCenterId = 0;
 
-	private int $dataCenterId;
-	private int $nodeId;
-	private int $lastTimestamp = -1;
-	private int $sequence = 0;
+
+	/**
+	 * @var int
+	 */
+	private static $defaultNodeId = 0;
+
+
+	/**
+	 * @var int
+	 */
+	private $dataCenterId;
+
+	/**
+	 * @var int
+	 */
+	private $nodeId;
+
+	/**
+	 * @var int
+	 */
+	private $lastTimestamp = -1;
+
+	/**
+	 * @var int
+	 */
+	private $sequence = 0;
 
 	public function __construct(int $dataCenterId, int $nodeId)
 	{
 		if (!$this->isValidCenterId($dataCenterId)) {
-			throw new \InvalidArgumentException("Invalid data center ID: $dataCenterId");
+			throw new InvalidArgumentException("Invalid data center ID: $dataCenterId");
 		}
 
 		if (!$this->isValidNodeId($nodeId)) {
-			throw new \InvalidArgumentException("Invalid node ID: $nodeId");
+			throw new InvalidArgumentException("Invalid node ID: $nodeId");
 		}
 
 		$this->dataCenterId = $dataCenterId;
@@ -45,7 +72,7 @@ class SnowflakeId
 		// 等待下一毫秒
 		if ($timestamp < $this->lastTimestamp) {
 			$backwardMilliseconds = $this->lastTimestamp - $timestamp;
-			throw new \RuntimeException("Clock moved backwards. Refusing to generate id for {$backwardMilliseconds} milliseconds");
+			throw new RuntimeException("Clock moved backwards. Refusing to generate id for {$backwardMilliseconds} milliseconds");
 		}
 
 		// 同一毫秒内序列号自增
@@ -83,7 +110,7 @@ class SnowflakeId
 	public function parse(int $id): array
 	{
 		if ($id <= 0) {
-			throw new \InvalidArgumentException("Invalid ID: $id");
+			throw new InvalidArgumentException("Invalid ID: $id");
 		}
 
 		return [
@@ -108,7 +135,7 @@ class SnowflakeId
 				&& $parsed['node'] >= 0 && $parsed['node'] <= 31
 				&& $parsed['sequence'] >= 0 && $parsed['sequence'] <= 0xFFF
 				&& $parsed['timestamp'] >= self::EPOCH_OFFSET;
-		} catch (\InvalidArgumentException $e) {
+		} catch (InvalidArgumentException $e) {
 			return false;
 		}
 	}
@@ -152,7 +179,7 @@ class SnowflakeId
 	public static function setDefaultDataCenterId(int $dataCenterId): void
 	{
 		if ($dataCenterId < 0 || $dataCenterId > 31) {
-			throw new \InvalidArgumentException("Data center ID must be between 0 and 31");
+			throw new InvalidArgumentException("Data center ID must be between 0 and 31");
 		}
 		self::$defaultDataCenterId = $dataCenterId;
 	}
@@ -165,7 +192,7 @@ class SnowflakeId
 	public static function setDefaultNodeId(int $nodeId): void
 	{
 		if ($nodeId < 0 || $nodeId > 31) {
-			throw new \InvalidArgumentException("Node ID must be between 0 and 31");
+			throw new InvalidArgumentException("Node ID must be between 0 and 31");
 		}
 		self::$defaultNodeId = $nodeId;
 	}

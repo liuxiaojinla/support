@@ -2,9 +2,11 @@
 
 namespace Xin\Support;
 
+use ArrayAccess;
+use JsonSerializable;
 use Xin\Support\Contracts\Arrayable;
 
-class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
+class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 {
 
 	/**
@@ -193,7 +195,7 @@ class Fluent implements \ArrayAccess, \JsonSerializable, Arrayable
 	 * Specify data which should be serialized to JSON.
 	 *
 	 * @see http://php.net/manual/en/jsonserializable.jsonserialize.php
-	 * @return mixed data which can be serialized by <b>json_encode</b>,
+	 * @return array data which can be serialized by <b>json_encode</b>,
 	 *               which is a value of any type other than a resource
 	 */
 	#[\ReturnTypeWillChange]

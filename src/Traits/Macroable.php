@@ -2,6 +2,12 @@
 
 namespace Xin\Support\Traits;
 
+use BadMethodCallException;
+use Closure;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
+
 trait Macroable
 {
 
@@ -18,12 +24,12 @@ trait Macroable
 	 * @param object $mixin
 	 * @param bool $replace
 	 * @return void
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	public static function mixin($mixin, bool $replace = true)
 	{
-		$methods = (new \ReflectionClass($mixin))->getMethods(
-			\ReflectionMethod::IS_PUBLIC | \ReflectionMethod::IS_PROTECTED
+		$methods = (new ReflectionClass($mixin))->getMethods(
+			ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED
 		);
 
 		foreach ($methods as $method) {
@@ -63,20 +69,20 @@ trait Macroable
 	 * @param string $method
 	 * @param array $parameters
 	 * @return mixed
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public static function __callStatic(string $method, array $parameters)
 	{
 		if (!static::hasMacro($method)) {
-			throw new \BadMethodCallException(sprintf(
+			throw new BadMethodCallException(sprintf(
 				'Method %s::%s does not exist.', static::class, $method
 			));
 		}
 
 		$macro = static::$macros[$method];
 
-		if ($macro instanceof \Closure) {
-			return call_user_func_array(\Closure::bind($macro, null, static::class), $parameters);
+		if ($macro instanceof Closure) {
+			return call_user_func_array(Closure::bind($macro, null, static::class), $parameters);
 		}
 
 		return $macro(...$parameters);
@@ -88,19 +94,19 @@ trait Macroable
 	 * @param string $method
 	 * @param array $parameters
 	 * @return mixed
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public function __call(string $method, array $parameters)
 	{
 		if (!static::hasMacro($method)) {
-			throw new \BadMethodCallException(sprintf(
+			throw new BadMethodCallException(sprintf(
 				'Method %s::%s does not exist.', static::class, $method
 			));
 		}
 
 		$macro = static::$macros[$method];
 
-		if ($macro instanceof \Closure) {
+		if ($macro instanceof Closure) {
 			return call_user_func_array($macro->bindTo($this, static::class), $parameters);
 		}
 

@@ -2,6 +2,8 @@
 
 namespace Xin\Support\Proxy;
 
+use BadMethodCallException;
+use Closure;
 use Xin\Support\Traits\Macroable;
 
 /**
@@ -36,19 +38,19 @@ class MacroProxy
 	 * @param string $method
 	 * @param array $parameters
 	 * @return mixed
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public function __call(string $method, array $parameters)
 	{
 		if (!static::hasMacro($method)) {
-			throw new \BadMethodCallException(sprintf(
+			throw new BadMethodCallException(sprintf(
 				'Method %s::%s does not exist.', static::class, $method
 			));
 		}
 
 		$macro = static::$macros[$method];
 
-		if ($macro instanceof \Closure) {
+		if ($macro instanceof Closure) {
 			return call_user_func_array($macro->bindTo($this->target, get_class($this->target)), $parameters);
 		}
 

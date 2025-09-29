@@ -3,6 +3,9 @@
 
 namespace Xin\Support;
 
+use ArrayAccess;
+use InvalidArgumentException;
+
 /**
  * 数组工具类
  */
@@ -29,7 +32,7 @@ final class Arr
 	/**
 	 * 支持使用“点”表示法从数组中获取项
 	 *
-	 * @param \ArrayAccess|array $array
+	 * @param ArrayAccess|array $array
 	 * @param string|int $key
 	 * @param mixed $default
 	 * @return mixed
@@ -71,19 +74,19 @@ final class Arr
 	 */
 	public static function accessible($value)
 	{
-		return is_array($value) || $value instanceof \ArrayAccess;
+		return is_array($value) || $value instanceof ArrayAccess;
 	}
 
 	/**
 	 * 确定给定的键是否存在于提供的数组中
 	 *
-	 * @param \ArrayAccess|array $array
+	 * @param ArrayAccess|array $array
 	 * @param string|int $key
 	 * @return bool
 	 */
 	public static function exists($array, $key)
 	{
-		if ($array instanceof \ArrayAccess) {
+		if ($array instanceof ArrayAccess) {
 			return $array->offsetExists($key);
 		}
 
@@ -94,7 +97,7 @@ final class Arr
 	 * 支持使用“点”表示法将数组项设置为给定值
 	 * 如果没有给方法指定键，整个数组将被替换
 	 *
-	 * @param array $array
+	 * @param iterable|array $array
 	 * @param string $key
 	 * @param mixed $value
 	 * @return array
@@ -133,7 +136,7 @@ final class Arr
 	/**
 	 * 支持使用“点”表示法检查数组中是否存在一个或多个项
 	 *
-	 * @param \ArrayAccess|array $array
+	 * @param iterable|array $array
 	 * @param string|array $keys
 	 * @return bool
 	 */
@@ -167,13 +170,13 @@ final class Arr
 	/**
 	 * 获取除指定的键数组以外的所有给定数组
 	 *
-	 * @param array $array
+	 * @param iterable|array $array
 	 * @param array|string $keys
-	 * @return array
+	 * @return iterable|array
 	 */
 	public static function except($array, $keys)
 	{
-		static::forget($array, $keys);
+		self::forget($array, $keys);
 
 		return $array;
 	}
@@ -181,7 +184,7 @@ final class Arr
 	/**
 	 * 使用“点”表示法从给定数组中删除一个或多个数组项
 	 *
-	 * @param array $array
+	 * @param iterable|array &$array
 	 * @param array|string $keys
 	 * @return void
 	 */
@@ -197,7 +200,7 @@ final class Arr
 
 		foreach ($keys as $key) {
 			// if the exact key exists in the top-level, remove it
-			if (static::exists($array, $key)) {
+			if (self::exists($array, $key)) {
 				unset($array[$key]);
 
 				continue;
@@ -328,7 +331,7 @@ final class Arr
 	 */
 	public static function only($data, array $keys)
 	{
-		return array_intersect_key($data, array_flip((array)$keys));
+		return array_intersect_key($data, array_flip($keys));
 	}
 
 	/**
@@ -475,9 +478,9 @@ final class Arr
 	 */
 	public static function pull(&$array, $key, $default = null)
 	{
-		$value = static::get($array, $key, $default);
+		$value = self::get($array, $key, $default);
 
-		static::forget($array, $key);
+		self::forget($array, $key);
 
 		return $value;
 	}
@@ -488,7 +491,7 @@ final class Arr
 	 * @param array $array
 	 * @param int|null $number
 	 * @return mixed
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public static function random($array, $number = null)
 	{
@@ -497,7 +500,7 @@ final class Arr
 		$count = count($array);
 
 		if ($requested > $count) {
-			throw new \InvalidArgumentException(
+			throw new InvalidArgumentException(
 				"You requested {$requested} items, but there are only {$count} items available."
 			);
 		}

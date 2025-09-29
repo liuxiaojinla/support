@@ -2,6 +2,7 @@
 
 namespace Xin\Support\Debug;
 
+use Closure;
 use Xin\Support\Callback;
 use Xin\Support\Counter;
 
@@ -79,7 +80,14 @@ class DebugTime
 		];
 
 		return new class($this, $this->name) {
-			private DebugTime $debugTime;
+			/**
+			 * @var DebugTime
+			 */
+			private $debugTime;
+
+			/**
+			 * @var string
+			 */
 			private $label;
 
 			public function __construct(DebugTime $debugTime, $label)
@@ -107,7 +115,7 @@ class DebugTime
 
 		$timeConsuming = $this->time($label, $label, $asMillisecond);
 		if ($print) {
-			$this->dump($label, "time consuming: $timeConsuming".($asMillisecond?'ms':'us'));
+			$this->dump($label, "time consuming: $timeConsuming" . ($asMillisecond ? 'ms' : 'us'));
 		}
 
 		return $timeConsuming;
@@ -146,7 +154,7 @@ class DebugTime
 
 	/**
 	 * 获取打印器
-	 * @return callable|\Closure|null
+	 * @return callable|Closure|null
 	 */
 	public function getDumperResolver()
 	{
@@ -169,7 +177,7 @@ class DebugTime
 
 	/**
 	 * 获取默认的打印器
-	 * @return callable|\Closure|null
+	 * @return callable|Closure|null
 	 */
 	public static function getDefaultDumperResolver()
 	{
@@ -209,19 +217,21 @@ class DebugTime
 	}
 
 	/**
+	 * 开始标记
 	 * @param string $label
-	 * @return void
+	 * @return mixed
 	 */
 	public static function beginTime(string $label = 'default')
 	{
-		self::instance()->begin($label);
+		return self::instance()->begin($label);
 	}
 
 	/**
+	 * 结束标记
 	 * @param string $label
 	 * @param bool $asMillisecond
 	 * @param bool $print
-	 * @return void
+	 * @return float|int
 	 */
 	public static function endTime(string $label = 'default', bool $asMillisecond = true, bool $print = true)
 	{

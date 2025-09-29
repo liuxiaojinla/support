@@ -2,6 +2,8 @@
 
 namespace Xin\Support;
 
+use Throwable;
+
 class Retry
 {
 
@@ -16,7 +18,7 @@ class Retry
 	protected $when = null;
 
 	/**
-	 * @var \Throwable
+	 * @var Throwable
 	 */
 	protected $exceptions = [];
 
@@ -66,7 +68,7 @@ class Retry
 
 			try {
 				return call_user_func($this->callback, $attempts);
-			} catch (\Throwable $e) {
+			} catch (Throwable $e) {
 				$this->exceptions[$attempts - 1] = $exception = $e;
 
 				if ($this->when && $result = call_user_func($this->when, $e, $attempts)) {

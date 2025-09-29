@@ -2,6 +2,8 @@
 
 namespace Xin\Support\Throttle;
 
+use Throwable;
+
 /**
  * 节滤器
  */
@@ -83,7 +85,7 @@ class LimitThrottle
 	{
 		try {
 			return call_user_func($this->valueCallback);
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 		}
 
 		return 0;
@@ -99,7 +101,7 @@ class LimitThrottle
 	{
 		try {
 			return call_user_func($this->thenCallback, $this->limits, $value);
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 		}
 
 		return null;

@@ -2,10 +2,12 @@
 
 namespace Xin\Support;
 
+use ArrayAccess;
+use LogicException;
 use ReturnTypeWillChange;
 use Xin\Support\Traits\Macroable;
 
-class ClassMapManager implements \ArrayAccess
+class ClassMapManager implements ArrayAccess
 {
 
 	use Macroable;
@@ -80,7 +82,7 @@ class ClassMapManager implements \ArrayAccess
 	public function get(string $type)
 	{
 		if (!$this->has($type)) {
-			throw new \LogicException("class map {$type} not defined.");
+			throw new LogicException("class map {$type} not defined.");
 		}
 
 		return $this->mapping[$type];
@@ -133,7 +135,7 @@ class ClassMapManager implements \ArrayAccess
 	public function bind(string $type, string $class)
 	{
 		if ($this->has($type)) {
-			throw new \LogicException("class map {$type} duplicate defined.");
+			throw new LogicException("class map {$type} duplicate defined.");
 		}
 
 		$this->mapping[$type] = $class;

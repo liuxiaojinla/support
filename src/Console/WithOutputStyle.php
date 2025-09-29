@@ -2,6 +2,7 @@
 
 namespace Xin\Support\Console;
 
+use RuntimeException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,7 +24,7 @@ trait WithOutputStyle
 	{
 		if ($this->outputStyle === null) {
 			if (!class_exists(SymfonyStyle::class)) {
-				throw new \RuntimeException('You need to run "composer require symfony/console".');
+				throw new RuntimeException('You need to run "composer require symfony/console".');
 			}
 
 			$this->outputStyle = new SymfonyStyle(new ArgvInput(), new ConsoleOutput());

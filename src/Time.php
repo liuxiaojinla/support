@@ -9,6 +9,7 @@ use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
+use RuntimeException;
 
 final class Time
 {
@@ -24,7 +25,7 @@ final class Time
 	 * @return DateTimeZone
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public static function timezone($tz = null)
+	public static function timezone(DateTimeZone $tz = null)
 	{
 		$tz = $tz ?: self::$timezone;
 
@@ -124,6 +125,7 @@ final class Time
 	 * @param string $type
 	 * @param DateInterval|DateTimeInterface|int $value
 	 * @return DateTimeInterface
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	protected static function sub($target, $type, $value)
 	{
@@ -136,7 +138,7 @@ final class Time
 		} elseif (is_int($value)) {
 			$target->modify('-' . $value . $type);
 		} else {
-			throw new \InvalidArgumentException('Invalid ' . $type);
+			throw new InvalidArgumentException('Invalid ' . $type);
 		}
 
 		return $target;
@@ -615,13 +617,12 @@ final class Time
 	 * 返回指定日期昨天的开始时间
 	 *
 	 * @param DateTimeInterface|int|null $timestamp 时间戳，用于计算昨天的日期，默认为null
-	 * @param int $hour 小时，默认为0，表示午夜
-	 * @param int $minute 分钟，默认为0
-	 * @param int $second 秒，默认为0
-	 *
+	 * @param int $hours 小时，默认为0，表示午夜
+	 * @param int $minutes 分钟，默认为0
+	 * @param int $seconds 秒，默认为0
 	 * @return int
 	 */
-	public static function yesterday($timestamp = null, $hours = 0, $minutes = 0, $seconds = 0)
+	public static function yesterday($timestamp = null, int $hours = 0, int $minutes = 0, int $seconds = 0)
 	{
 		return self::yesterdayDate($timestamp, $hours, $minutes, $seconds)->getTimestamp();
 	}
@@ -1294,9 +1295,10 @@ final class Time
 
 	/**
 	 * 获取指定时间范围内的日期数组
-	 * @param int $startTime
-	 * @param int $endTime
+	 * @param DateTimeInterface|int|null $startTime
+	 * @param DateTimeInterface|int|null $endTime
 	 * @return DatePeriod
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function daysUntilOfTimestamp($startTime, $endTime)
 	{
@@ -1308,13 +1310,11 @@ final class Time
 		// return $startTime->daysUntil($endTime);
 
 		$interval = new DateInterval('P1D');
-		$period = new DatePeriod(
+		return new DatePeriod(
 			self::date($startTime),
 			$interval,
-			self::date($endTime),
+			self::date($endTime)
 		);
-
-		return $period;
 	}
 
 	/**
@@ -1323,7 +1323,7 @@ final class Time
 	 * @param array $times
 	 * @return array
 	 */
-	public static function sort($times)
+	public static function sort(array $times)
 	{
 		usort($times, function ($com1, $com2) {
 			$com1 = strtotime($com1);
@@ -1342,14 +1342,14 @@ final class Time
 	protected static function checkCarbonInstalled()
 	{
 		if (!class_exists('Carbon\Carbon')) {
-			throw new \RuntimeException('Carbon is not installed. Please run `composer require nesbot/carbon`.');
+			throw new RuntimeException('Carbon is not installed. Please run `composer require nesbot/carbon`.');
 		}
 	}
 
 	/**
 	 * 获取当前的秒
-	 * @param int $timestamp
-	 * @return string
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
 	 */
 	public static function currentSecond($timestamp = null)
 	{
@@ -1358,27 +1358,27 @@ final class Time
 
 	/**
 	 * 获取当前的分钟
-	 * @param int $timestamp
-	 * @return string
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
 	 */
 	public static function currentMinute($timestamp = null)
 	{
-		return self::date($timestamp)->format('i');
+		return (int)self::date($timestamp)->format('i');
 	}
 
 	/**
 	 * 返回当前的小时
-	 * @param int $timestamp
-	 * @return string
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
 	 */
 	public static function currentHour($timestamp = null)
 	{
-		return self::date($timestamp)->format('H');
+		return (int)self::date($timestamp)->format('H');
 	}
 
 	/**
 	 * 返回当前的星期几
-	 * @param int $timestamp
+	 * @param DateTimeInterface|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayOfWeek($timestamp = null)
@@ -1388,7 +1388,7 @@ final class Time
 
 	/**
 	 * 返回当前的星期几的中文
-	 * @param int $timestamp
+	 * @param DateTimeInterface|int|null $timestamp
 	 * @return string
 	 */
 	public static function dayOfWeekName($timestamp = null)
@@ -1399,17 +1399,17 @@ final class Time
 
 	/**
 	 * 返回当月的第几天
-	 * @param int $timestamp
-	 * @return string
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
 	 */
 	public static function dayOfMonth($timestamp = null)
 	{
-		return self::date($timestamp)->format('d');
+		return (int)self::date($timestamp)->format('d');
 	}
 
 	/**
 	 * 返回本年的第几天
-	 * @param int $timestamp
+	 * @param DateTimeInterface|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayOfYear($timestamp = null)
@@ -1420,29 +1420,39 @@ final class Time
 
 	/**
 	 * 返回当前的月
-	 * @param int $timestamp
+	 * @param DateTimeInterface|int|null $timestamp
 	 * @return string
 	 */
 	public static function currentMonth($timestamp = null)
 	{
-		return self::date($timestamp)->format('m');
+		return (int)self::date($timestamp)->format('m');
 	}
 
 	/**
 	 * 返回当前的年
-	 * @param int $timestamp
-	 * @return string
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
 	 */
 	public static function currentYear($timestamp = null)
 	{
-		return self::date($timestamp)->format('Y');
+		return (int)self::date($timestamp)->format('Y');
 	}
 
+	/**
+	 * 获取当前月份的天数
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
+	 */
 	public static function dayCountInMonth($timestamp = null)
 	{
 		return intval(self::date($timestamp)->format('t'));
 	}
 
+	/**
+	 * 获取当前年份的天数
+	 * @param DateTimeInterface|int|null $timestamp
+	 * @return int
+	 */
 	public static function dayCountInYear($timestamp = null)
 	{
 		return intval(self::date($timestamp)->format('L')) ? 366 : 365;
@@ -1450,7 +1460,7 @@ final class Time
 
 	/**
 	 * 是否是闰年
-	 * @param $timestamp
+	 * @param DateTimeInterface|int|null $timestamp
 	 * @return bool
 	 */
 	public static function isLeapYear($timestamp = null)
@@ -1464,7 +1474,7 @@ final class Time
 	 * @param int $day
 	 * @return int
 	 */
-	public static function daysToSeconds($day = 1)
+	public static function daysToSeconds(int $day = 1)
 	{
 		return $day * 86400;
 	}
@@ -1475,7 +1485,7 @@ final class Time
 	 * @param int $week
 	 * @return int
 	 */
-	public static function weekToSeconds($week = 1)
+	public static function weekToSeconds(int $week = 1)
 	{
 		return self::daysToSeconds(7) * $week;
 	}

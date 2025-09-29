@@ -2,6 +2,10 @@
 
 namespace Xin\Support\Security;
 
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
+
 class Encryption
 {
 
@@ -46,7 +50,7 @@ class Encryption
 	{
 		$encryptKey = $this->key;
 		if (empty($encryptKey)) {
-			throw new \InvalidArgumentException('Encryption [app.key] not found');
+			throw new InvalidArgumentException('Encryption [app.key] not found');
 		}
 
 		return $encryptKey;
@@ -59,12 +63,12 @@ class Encryption
 	public function getCipherType()
 	{
 		if (!$this->cipher) {
-			throw new \InvalidArgumentException('Encryption [app.cipher] not found');
+			throw new InvalidArgumentException('Encryption [app.cipher] not found');
 		}
 
 		// 判断算法是否被支持
 		if (!in_array($this->cipher, openssl_get_cipher_methods())) {
-			throw new \InvalidArgumentException('Encryption [app.cipher] not supported');
+			throw new InvalidArgumentException('Encryption [app.cipher] not supported');
 		}
 
 		return $this->cipher;
@@ -126,7 +130,7 @@ class Encryption
 				OPENSSL_RAW_DATA,
 				$iv
 			);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			return false;
 		}
 	}
@@ -149,7 +153,7 @@ class Encryption
 	public static function getInstance()
 	{
 		if (!self::$instance) {
-			throw new \RuntimeException('Encryption not set');
+			throw new RuntimeException('Encryption not set');
 		}
 
 		return self::$instance;

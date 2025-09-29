@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Xin\Support\Path;
 use Xin\Support\Proxy\HigherOrderTapProxy;
 use Xin\Support\SQL;
@@ -209,7 +210,7 @@ if (!function_exists('now')) {
 	 * 获取当前时间实例
 	 *
 	 * @param DateTimeZone|string|null $tz $tz
-	 * @return \Carbon\Carbon|DateTime
+	 * @return Carbon|DateTime
 	 */
 	function now($tz = null)
 	{

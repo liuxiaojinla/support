@@ -8,6 +8,7 @@
 namespace Xin\Support;
 
 use MyCLabs\Enum\Enum as BaseEnum;
+use ReflectionClass;
 
 class Enum extends BaseEnum
 {
@@ -44,7 +45,7 @@ class Enum extends BaseEnum
 	 */
 	public static function data()
 	{
-		$objClass = new \ReflectionClass(static::class);
+		$objClass = new ReflectionClass(static::class);
 		$constants = $objClass->getConstants();
 
 		$result = [];

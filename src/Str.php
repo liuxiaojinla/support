@@ -3,8 +3,11 @@
 
 namespace Xin\Support;
 
+use Closure;
+use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 
 /**
  * 字符串工具类
@@ -79,7 +82,7 @@ final class Str
 	public static function endsWith($haystack, $needles)
 	{
 		foreach ((array)$needles as $needle) {
-			if ((string)$needle === static::substr($haystack, -static::length($needle))) {
+			if ((string)$needle === self::substr($haystack, -self::length($needle))) {
 				return true;
 			}
 		}
@@ -323,7 +326,7 @@ final class Str
 		} elseif (function_exists("iconv")) {
 			$output = iconv($inputCharset, $outputCharset, $input);
 		} else {
-			throw new \RuntimeException("不支持 $inputCharset 到 $outputCharset 编码！");
+			throw new RuntimeException("不支持 $inputCharset 到 $outputCharset 编码！");
 		}
 
 		return $output;
@@ -371,7 +374,7 @@ final class Str
 	{
 		try {
 			return Uuid::uuid4();
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 		}
 
 		return null;
@@ -555,7 +558,7 @@ final class Str
 	 * @param mixed $value
 	 * @param string $format
 	 * @param string $delimiter
-	 * @param bool|\Closure $filter
+	 * @param bool|Closure $filter
 	 * @return array
 	 */
 	public static function explode($value, $format = 'intval', $delimiter = ',', $filter = true)
@@ -648,7 +651,7 @@ final class Str
 			return $subject;
 		}
 
-		return static::substr($subject, $position + mb_strlen($search));
+		return self::substr($subject, $position + mb_strlen($search));
 	}
 
 	/**
@@ -682,7 +685,7 @@ final class Str
 			return $subject;
 		}
 
-		return static::substr($subject, 0, $pos);
+		return self::substr($subject, 0, $pos);
 	}
 
 	/**
