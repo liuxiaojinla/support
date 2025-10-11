@@ -6,7 +6,7 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 
-class Encryption
+class Encrypter
 {
 
 	/**

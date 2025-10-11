@@ -48,7 +48,7 @@ composer require xin/support
 | 模块 | 描述 |
 |------|------|
 | `Security\Secure.php` | 证书安全处理 |
-| `Security\Encryption.php` | 数据加密和解密工具 |
+| `Security\Encrypter.php` | 数据加密和解密工具 |
 | `Security\Hash.php` | 哈希生成和验证 |
 | `SimpleEncrypt.php` | 简化版加密器，满足基础加密需求 |
 
@@ -205,7 +205,7 @@ echo Time::formatDuration(3661); // 1小时1分1秒
 
 ```php
 use Xin\Support\SimpleEncrypt;
-use Xin\Support\Security\Encryption;
+use Xin\Support\Security\Encrypter;
 use Xin\Support\Security\Hash;
 
 // 简单加密
@@ -213,7 +213,7 @@ $encrypted = SimpleEncrypt::encrypt('secret message', 'mykey');
 $decrypted = SimpleEncrypt::decrypt($encrypted, 'mykey');
 
 // 高级加密
-$encryption = new Encryption('my-encryption-key');
+$encryption = new Encrypter('my-encryption-key');
 $encrypted = $encryption->encrypt('secret data');
 $decrypted = $encryption->decrypt($encrypted);
 

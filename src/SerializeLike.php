@@ -2,6 +2,9 @@
 
 namespace Xin\Support;
 
+/**
+ * 存储数据到文件中
+ */
 class SerializeLike extends Fluent
 {
 	/**
@@ -14,6 +17,9 @@ class SerializeLike extends Fluent
 	 */
 	protected $likeFilepath;
 
+	/**
+	 * @var bool $automaticStorage
+	 */
 	protected $automaticStorage = false;
 
 	/**
@@ -31,6 +37,7 @@ class SerializeLike extends Fluent
 	}
 
 	/**
+	 * 加载数据
 	 * @return false|void
 	 */
 	protected function load()
@@ -42,11 +49,13 @@ class SerializeLike extends Fluent
 		$data = (array)Json::arrayFromFile($this->likeFilepath);
 
 		$originalChanged = $this->isChanged;
+
 		$this->setAutomaticStorage(false);
 		foreach ($data as $key => $value) {
 			$this->set($key, $value);
 		}
 		$this->setAutomaticStorage(true);
+
 		$this->isChanged = $originalChanged;
 	}
 
@@ -56,6 +65,7 @@ class SerializeLike extends Fluent
 	public function add($key, $value)
 	{
 		parent::add($key, $value);
+
 		$this->shouldStorage();
 	}
 
@@ -75,6 +85,7 @@ class SerializeLike extends Fluent
 	public function forget($key)
 	{
 		parent::forget($key);
+
 		$this->shouldStorage();
 	}
 
@@ -107,7 +118,7 @@ class SerializeLike extends Fluent
 	 * 是否自动的进行存储
 	 * @return bool
 	 */
-	public function isAutomaticStorage(): bool
+	public function isAutomaticStorage()
 	{
 		return $this->automaticStorage;
 	}
@@ -127,7 +138,7 @@ class SerializeLike extends Fluent
 	 * @param bool $shouldStorage
 	 * @return mixed
 	 */
-	protected function dontAutomaticStorage(callable $callback, $shouldStorage = true)
+	public function dontAutomaticStorage(callable $callback, $shouldStorage = true)
 	{
 		try {
 			$this->setAutomaticStorage(false);

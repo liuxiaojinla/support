@@ -5,7 +5,7 @@ namespace Xin\Support\Security;
 /**
  * 简易加解密器
  */
-final class SimpleEncrypt
+final class SimpleEncrypter
 {
 	/**
 	 * 系统加密方法

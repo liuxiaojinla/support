@@ -5,6 +5,7 @@ namespace Xin\Support;
 
 use Closure;
 use Exception;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
@@ -98,9 +99,9 @@ final class Str
 	 * @param int|null $length
 	 * @return string
 	 */
-	public static function substr($string, $start, $length = null)
+	public static function substr($string, $start, $length = null, $encoding = 'UTF-8')
 	{
-		return mb_substr($string, $start, $length, 'UTF-8');
+		return mb_substr($string, $start, $length, $encoding);
 	}
 
 	/**
@@ -114,38 +115,38 @@ final class Str
 		return mb_strlen($value);
 	}
 
-	/**
-	 * 字符串截取，支持中文和其他编码
-	 *
-	 * @param string $value 验证的值
-	 * @param int $start 开始位置
-	 * @param int $length 截取长度
-	 * @param string $charset 字符编码
-	 * @return string
-	 * @deprecated 废弃，请使用 substr()，mb_substr()
-	 */
-	public static function subString($value, $start = 0, $length = null, $charset = null)
-	{
-		if (function_exists("mb_substr")) {
-			$slice = mb_substr($value, $start, $length, $charset);
-		} elseif (function_exists('iconv_substr')) {
-			$length = is_null($length) ? iconv_strlen($value, $charset) : $length;
-			$charset = is_null($charset) ? ini_get("iconv.internal_encoding") : $charset;
-			$slice = iconv_substr($value, $start, $length, $charset);
-			if (false === $slice) {
-				$slice = '';
-			}
-		} else {
-			$re ['utf-8'] = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
-			$re ['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
-			$re ['gbk'] = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
-			$re ['big5'] = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
-			preg_match_all($re [$charset], $value, $match);
-			$slice = join("", array_slice($match [0], $start, $length));
-		}
-
-		return $slice;
-	}
+	// /**
+	//  * 字符串截取，支持中文和其他编码
+	//  *
+	//  * @param string $value 验证的值
+	//  * @param int $start 开始位置
+	//  * @param int $length 截取长度
+	//  * @param string $charset 字符编码
+	//  * @return string
+	//  * @deprecated 废弃，请使用 substr()，mb_substr()
+	//  */
+	// public static function subString($value, $start = 0, $length = null, $charset = null)
+	// {
+	// 	if (function_exists("mb_substr")) {
+	// 		$slice = mb_substr($value, $start, $length, $charset);
+	// 	} elseif (function_exists('iconv_substr')) {
+	// 		$length = is_null($length) ? iconv_strlen($value, $charset) : $length;
+	// 		$charset = is_null($charset) ? ini_get("iconv.internal_encoding") : $charset;
+	// 		$slice = iconv_substr($value, $start, $length, $charset);
+	// 		if (false === $slice) {
+	// 			$slice = '';
+	// 		}
+	// 	} else {
+	// 		$re ['utf-8'] = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
+	// 		$re ['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
+	// 		$re ['gbk'] = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
+	// 		$re ['big5'] = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
+	// 		preg_match_all($re [$charset], $value, $match);
+	// 		$slice = join("", array_slice($match [0], $start, $length));
+	// 	}
+	//
+	// 	return $slice;
+	// }
 
 	/**
 	 * 字符串转大写
@@ -725,6 +726,28 @@ final class Str
 	}
 
 	/**
+	 * 从渲染模板中获取变量
+	 * @param string $tpl
+	 * @param array $options
+	 * @return array
+	 */
+	public static function extractStubVariables($tpl, $options = [])
+	{
+		$options = array_replace_recursive([
+			'tag_start' => '{',
+			'tag_end' => '}',
+		], $options);
+
+		$matches = [];
+		$pattern = '/' . preg_quote($options['tag_start'], '/') . '([a-zA-Z0-9_-]+)' . preg_quote($options['tag_end'], '/') . '/';
+		if (preg_match_all($pattern, $tpl, $matches) === false) {
+			return [];
+		}
+
+		return $matches[1];
+	}
+
+	/**
 	 * 查找分割符在字符串中第一个出现的索引
 	 * @param string $str 要检查的字符串
 	 * @param array $delimiters 分隔符数组(单字符)
@@ -792,6 +815,59 @@ final class Str
 	{
 		$index = self::findLastDelimiterIndex($str, $delimiters);
 		return $index !== -1 ? $delimiters[$index] : null;
+	}
+
+	/**
+	 * 使用自定义分隔符，取任意区间段（从 0 开始）
+	 *
+	 * @param string $text 原始字符串
+	 * @param int $start 起始行号（含）
+	 * @param int $end 结束行号（含）
+	 * @param string $delimiter 任意分隔字符串
+	 * @return string 指定区间内容
+	 * @throws InvalidArgumentException
+	 */
+	public static function sliceWithDelimiter($text, $start, $end = 0, $delimiter = "\n")
+	{
+		if ($start < 0 || $end < 0) {
+			throw new InvalidArgumentException('start or end out of range');
+		}
+
+		if ($end > 0 && $start > $end) {
+			throw new InvalidArgumentException('start must less than end');
+		}
+
+		if ($text === '' || $delimiter === '') {
+			return '';
+		}
+
+		$dLen = strlen($delimiter);
+		$len = strlen($text);
+
+		// 截取范围
+		$cutStart = 0;
+		$cutEnd = $len;
+
+		// 查找分隔符位置
+		$pos = 0;
+		$count = 0;
+		while (($pos = strpos($text, $delimiter, $pos)) !== false) {
+			$pos += $dLen;
+			$count++;
+
+			// 找到起始分隔符
+			if ($count === $start) {
+				$cutStart = $pos;
+			}
+
+			// 找到结束分隔符
+			if ($count === $end) {
+				$cutEnd = $pos - $dLen;
+				break;
+			}
+		}
+
+		return substr($text, $cutStart, $cutEnd - $cutStart);
 	}
 
 	/**
