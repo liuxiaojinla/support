@@ -901,25 +901,79 @@ final class Str
 		return $result;
 	}
 
-	/**
-	 * 提取JSON数据
-	 * @param string $jsonCode
-	 * @return string
-	 */
-	public static function extractJson(string $jsonCode)
+	public static function extractCode($code, &$language = null, $failOrNull = true)
 	{
-		$start = strpos($jsonCode, "```json");
-
-		if ($start !== false) {
-			$end = strpos($jsonCode, "```", $start + 1);
-			if ($end === false) {
-				$jsonCode = substr($jsonCode, $start + 7);
-			} else {
-				$jsonCode = substr($jsonCode, $start + 7, $end - $start - 7);
+		if ($language) {
+			$start = strpos($code, "```{$language}");
+		} else {
+			$start = strpos($code, "```");
+			// 自动识别目标语言
+			if ($start !== false) {
+				$language = substr($code, $start + 3, strpos($code, "\n", $start + 3) - $start - 3);
 			}
 		}
 
-		return trim($jsonCode);
+		if ($start !== false) {
+			$fLength = strlen("```{$language}");
+			$end = strpos($code, "```", $start + $fLength);
+			if ($end === false) {
+				$code = substr($code, $start + $fLength);
+			} else {
+				$code = substr($code, $start + $fLength, $end - $start - $fLength);
+			}
+		} elseif ($failOrNull) {
+			return null;
+		}
+
+		return trim($code);
+	}
+
+	/**
+	 * 提取JSON数据
+	 * @param string $code
+	 * @param bool $failOrNull
+	 * @return string
+	 */
+	public static function extractJson(string $code, $failOrNull = true)
+	{
+		$language = 'json';
+		return self::extractCode($code, $language, $failOrNull);
+	}
+
+	/**
+	 * 提取YAML数据
+	 * @param string $code
+	 * @param bool $failOrNull
+	 * @return string
+	 */
+	public static function extractYaml(string $code, $failOrNull = true)
+	{
+		$language = 'yaml';
+		return self::extractCode($code, $language, $failOrNull);
+	}
+
+	/**
+	 * 提取Markdown数据
+	 * @param string $code
+	 * @param bool $failOrNull
+	 * @return string
+	 */
+	public static function extractMarkdown(string $code, $failOrNull = true)
+	{
+		$language = 'markdown';
+		return self::extractCode($code, $language, $failOrNull);
+	}
+
+	/**
+	 * 提取HTML数据
+	 * @param string $code
+	 * @param bool $failOrNull
+	 * @return string
+	 */
+	public static function extractHtml(string $code, $failOrNull = true)
+	{
+		$language = 'html';
+		return self::extractCode($code, $language, $failOrNull);
 	}
 
 	/**
