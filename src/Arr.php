@@ -1013,10 +1013,9 @@ final class Arr
 		$options = array_merge([
 			'child' => 'child', // 要存放的子结果集
 		], $options);
-
 		$childKey = $options['child'];
 
-		$handler = function (&$data, &$parent) use (&$handler, &$callback, &$childKey) {
+		$handler = function (&$data, &$parent) use (&$handler, $callback, $childKey) {
 			foreach ($data as &$item) {
 				call_user_func_array($callback, [&$item, &$parent]);
 				if (isset($item[$childKey])) {
@@ -1044,7 +1043,6 @@ final class Arr
 		$options = array_merge([
 			'child' => 'child', // 要存放的子结果集
 		], $options);
-
 		$childKey = $options['child'];
 
 		$handler = function (&$data) use (&$handler, &$filter, &$childKey) {
