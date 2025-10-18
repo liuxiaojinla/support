@@ -901,7 +901,14 @@ final class Str
 		return $result;
 	}
 
-	public static function extractCode($code, &$language = null, $failOrNull = true)
+	/**
+	 * 提取代码块
+	 * @param string $code
+	 * @param string|null $language
+	 * @param bool $failOrNull
+	 * @return string|null
+	 */
+	public static function extractCode($code, &$language = null, $failOrNull = false)
 	{
 		if ($language) {
 			$start = strpos($code, "```{$language}");
@@ -946,7 +953,7 @@ final class Str
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractYaml(string $code, $failOrNull = true)
+	public static function extractYaml(string $code, $failOrNull = false)
 	{
 		$language = 'yaml';
 		return self::extractCode($code, $language, $failOrNull);
@@ -958,7 +965,7 @@ final class Str
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractMarkdown(string $code, $failOrNull = true)
+	public static function extractMarkdown(string $code, $failOrNull = false)
 	{
 		$language = 'markdown';
 		return self::extractCode($code, $language, $failOrNull);
@@ -970,7 +977,7 @@ final class Str
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractHtml(string $code, $failOrNull = true)
+	public static function extractHtml(string $code, $failOrNull = false)
 	{
 		$language = 'html';
 		return self::extractCode($code, $language, $failOrNull);
