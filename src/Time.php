@@ -11,6 +11,9 @@ use DateTimeZone;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * 时间处理类
+ */
 final class Time
 {
 	/**
@@ -25,7 +28,7 @@ final class Time
 	 * @return DateTimeZone
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public static function timezone(DateTimeZone $tz = null)
+	public static function timezone($tz = null)
 	{
 		$tz = $tz ?: self::$timezone;
 
@@ -59,31 +62,29 @@ final class Time
 
 	/**
 	 * 返回指定时间戳的DateTime实例
-	 * @param DateTimeInterface|int|null $timestampOrDatetime
+	 * @param DateTimeInterface|string|int|null $datetime
 	 * @param DateTimeZone|string|null $tz
 	 * @return DateTime
 	 * @noinspection PhpDocMissingThrowsInspection
+	 * @noinspection PhpUnhandledExceptionInspection
 	 */
-	public static function date($timestampOrDatetime = null, $tz = null)
+	public static function date($datetime = null, $tz = null)
 	{
-		$tz = self::timezone($tz);
-
-		/** @noinspection PhpUnhandledExceptionInspection */
-		$date = new DateTime('now', $tz);
-
-		if ($timestampOrDatetime) {
-			if ($timestampOrDatetime instanceof DateTimeInterface) {
-				if (!$tz) {
-					$date->setTimezone($timestampOrDatetime->getTimezone());
-				}
-
-				$date->setTimestamp($timestampOrDatetime->getTimestamp());
-			} else {
-				$date->setTimestamp($timestampOrDatetime);
+		// 兼容 DateTimeInterface
+		if ($datetime instanceof DateTime) {
+			return $datetime;
+		} elseif ($datetime instanceof DateTimeInterface) {
+			if (!$tz) {
+				$tz = $datetime->getTimezone();
 			}
-		}
 
-		return $date;
+			return new DateTime('@' . $datetime->getTimestamp(), $tz);
+		} elseif (is_numeric($datetime)) {
+			return new DateTime('@' . $datetime, self::timezone($tz));
+		} else {
+			$datetime = $datetime ?: 'now';
+			return new DateTime($datetime, self::timezone($tz));
+		}
 	}
 
 	/**
@@ -97,12 +98,13 @@ final class Time
 
 	/**
 	 * 添加时间
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param string $type
 	 * @param DateInterval|DateTimeInterface|int $value
+	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
-	protected static function add($target, $type, $value)
+	protected static function add($target, $type, $value, $floorTime = false)
 	{
 		$target = self::date($target);
 
@@ -116,18 +118,23 @@ final class Time
 			throw new InvalidArgumentException('Invalid ' . $type);
 		}
 
+		if ($floorTime) {
+			$target->setTime((int)$target->format('H'), 0, 0);
+		}
+
 		return $target;
 	}
 
 	/**
 	 * 减少时间
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param string $type
 	 * @param DateInterval|DateTimeInterface|int $value
+	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	protected static function sub($target, $type, $value)
+	protected static function sub($target, $type, $value, $floorTime = false)
 	{
 		$target = self::date($target);
 
@@ -141,12 +148,16 @@ final class Time
 			throw new InvalidArgumentException('Invalid ' . $type);
 		}
 
+		if ($floorTime) {
+			$target->setTime((int)$target->format('H'), 0, 0);
+		}
+
 		return $target;
 	}
 
 	/**
 	 * 添加秒数
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $seconds
 	 * @return DateTimeInterface
 	 */
@@ -157,7 +168,7 @@ final class Time
 
 	/**
 	 * 减少秒数
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $seconds
 	 * @return DateTimeInterface
 	 */
@@ -168,7 +179,7 @@ final class Time
 
 	/**
 	 * 添加分钟
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $minutes
 	 * @return DateTimeInterface
 	 */
@@ -179,7 +190,7 @@ final class Time
 
 	/**
 	 * 减少分钟
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $minutes
 	 * @return DateTimeInterface
 	 */
@@ -190,178 +201,127 @@ final class Time
 
 	/**
 	 * 添加小时
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $hours
 	 * @return DateTimeInterface
 	 */
 	public static function addHours($target, $hours = 1, $floorTime = false)
 	{
-		$date = self::add($target, 'hours', $hours);
-		if ($floorTime) {
-			$date->setTime((int)$date->format('H'), 0, 0);
-		}
-
-		return $date;
+		return self::add($target, 'hours', $hours, $floorTime);
 	}
 
 	/**
 	 * 减少小时
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $hours
 	 * @return DateTimeInterface
 	 */
 	public static function subHours($target, $hours = 1, $floorTime = false)
 	{
-		$date = self::sub($target, 'hours', $hours);
-		if ($floorTime) {
-			$date->setTime((int)$date->format('H'), 0, 0);
-		}
-
-		return $date;
+		return self::sub($target, 'hours', $hours, $floorTime);
 	}
 
 	/**
 	 * 添加天
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $days
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function addDays($target, $days = 1, $floorTime = false)
 	{
-		$date = self::add($target, 'days', $days);
-
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::add($target, 'days', $days, $floorTime);
 	}
 
 	/**
 	 * 减少天
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $days
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function subDays($target, $days = 1, $floorTime = false)
 	{
-		$date = self::sub($target, 'days', $days);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::sub($target, 'days', $days, $floorTime);
 	}
 
 	/**
 	 * 添加周
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $weeks
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function addWeeks($target, $weeks = 1, $floorTime = false)
 	{
-		$date = self::add($target, 'weeks', $weeks);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::add($target, 'weeks', $weeks, $floorTime);
 	}
 
 	/**
 	 * 减少周
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $weeks
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function subWeeks($target, $weeks = 1, $floorTime = false)
 	{
-		$date = self::sub($target, 'weeks', $weeks);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::sub($target, 'weeks', $weeks, $floorTime);
 	}
 
 
 	/**
 	 * 添加月
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $months
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function addMonths($target, $months = 1, $floorTime = false)
 	{
-		$date = self::add($target, 'months', $months);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::add($target, 'months', $months, $floorTime);
 	}
 
 	/**
 	 * 减少月
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $months
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function subMonths($target, $months = 1, $floorTime = false)
 	{
-		$date = self::sub($target, 'months', $months);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::sub($target, 'months', $months, $floorTime);
 	}
 
 	/**
 	 * 添加月
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $years
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function addYears($target, $years = 1, $floorTime = false)
 	{
-		$date = self::add($target, 'years', $years);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::add($target, 'years', $years, $floorTime);
 	}
 
 	/**
 	 * 减少月
-	 * @param DateTimeInterface|int|null $target
+	 * @param DateTimeInterface|string|int|null $target
 	 * @param DateInterval|DateTimeInterface|int $years
 	 * @param bool $floorTime
 	 * @return DateTimeInterface
 	 */
 	public static function subYears($target, $years = 1, $floorTime = false)
 	{
-		$date = self::sub($target, 'years', $years);
-		if ($floorTime) {
-			$date->setTime(0, 0, 0);
-		}
-
-		return $date;
+		return self::sub($target, 'years', $years, $floorTime);
 	}
 
 	/**
 	 * 返回指定日期的分钟起始DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $seconds
 	 * @return DateTime
 	 */
@@ -379,7 +339,7 @@ final class Time
 	/**
 	 * 返回指定日期的分钟结束DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return DateTime
 	 */
 	public static function endOfMinuteDate($timestamp = null)
@@ -390,7 +350,7 @@ final class Time
 	/**
 	 * 返回指定日期的分钟起始时间戳
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $second
 	 * @return int
 	 */
@@ -401,7 +361,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的分钟起始时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function startOfMinute($timestamp = null)
@@ -411,7 +371,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的分钟结束时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function endOfMinute($timestamp = null)
@@ -421,7 +381,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的分钟开始和结束时间区间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return array
 	 */
 	public static function minuteRange($timestamp = null, $asDate = false)
@@ -435,7 +395,7 @@ final class Time
 	/**
 	 * 返回指定日期的小时起始的DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $minute
 	 * @param int $second
 	 * @return DateTimeInterface
@@ -451,7 +411,7 @@ final class Time
 	/**
 	 * 返回指定日期的小时结束的DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return DateTimeInterface
 	 */
 	public static function endOfHourDate($timestamp = null)
@@ -462,7 +422,7 @@ final class Time
 	/**
 	 * 返回指定日期的小时起始时间戳
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $minute
 	 * @param int $second
 	 * @return int
@@ -475,7 +435,7 @@ final class Time
 	/**
 	 * 返回指定日期的小时起始时间戳
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $minute
 	 * @param int $second
 	 * @return int
@@ -487,7 +447,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的小时结束时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function endOfHour($timestamp = null)
@@ -497,7 +457,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的小时开始和结束时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param bool $asDate
 	 * @return array
 	 */
@@ -512,7 +472,7 @@ final class Time
 	/**
 	 * 返回指定日期天的起始DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours
 	 * @param int $minutes
 	 * @param int $seconds
@@ -526,7 +486,7 @@ final class Time
 	/**
 	 * 返回指定日期的天结束DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return DateTimeInterface
 	 */
 	public static function endOfTodayDate($timestamp = null)
@@ -538,7 +498,7 @@ final class Time
 	 * 获取今天日期的特定时间点
 	 * 如果没有提供时间戳，默认使用当前时间
 	 *
-	 * @param DateTimeInterface|int|null $timestamp 时间戳，用于计算今天的日期，默认为null
+	 * @param DateTimeInterface|string|int|null $timestamp 时间戳，用于计算今天的日期，默认为null
 	 * @param int $hours 小时，默认为0，表示午夜
 	 * @param int $minutes 分钟，默认为0
 	 * @param int $seconds 秒，默认为0
@@ -556,7 +516,7 @@ final class Time
 	 * 该方法用于获取给定日期所在天的开始时间（即00:00:00）的时间戳如果未提供时间戳，则默认为当前时间
 	 * 这在需要计算或比较时间时非常有用，例如，确定某个事件是否发生在今天
 	 *
-	 * @param DateTimeInterface|int|null $timestamp 可选的时间戳，默认为null如果提供时间戳，则函数返回该时间戳所在天的开始时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp 可选的时间戳，默认为null如果提供时间戳，则函数返回该时间戳所在天的开始时间戳
 	 * @return int
 	 */
 	public static function startOfToday($timestamp = null)
@@ -566,7 +526,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的天结束时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function endOfToday($timestamp = null)
@@ -576,7 +536,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的天开始和结束时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param bool $asDate
 	 * @return int[]|DateTimeInterface[]
 	 */
@@ -591,7 +551,7 @@ final class Time
 	/**
 	 * 返回指定日期昨天的开始DataTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours
 	 * @param int $minutes
 	 * @param int $seconds
@@ -605,7 +565,7 @@ final class Time
 	/**
 	 * 返回指定日期昨天的结束DateTime实例
 	 *
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return DateTimeInterface
 	 */
 	public static function endOfYesterdayDate($timestamp = null)
@@ -616,7 +576,7 @@ final class Time
 	/**
 	 * 返回指定日期昨天的开始时间
 	 *
-	 * @param DateTimeInterface|int|null $timestamp 时间戳，用于计算昨天的日期，默认为null
+	 * @param DateTimeInterface|string|int|null $timestamp 时间戳，用于计算昨天的日期，默认为null
 	 * @param int $hours 小时，默认为0，表示午夜
 	 * @param int $minutes 分钟，默认为0
 	 * @param int $seconds 秒，默认为0
@@ -629,7 +589,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的天开始时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function startOfYesterday($timestamp = null)
@@ -639,7 +599,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的天结束时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function endOfYesterday($timestamp = null)
@@ -649,7 +609,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的昨天开始和结束时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param bool $asDate
 	 * @return int[]|DateTimeInterface[]
 	 */
@@ -723,7 +683,7 @@ final class Time
 
 	/**
 	 * 返回本周开始的DateTime实例
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours 小时，默认为0，表示午夜
 	 * @param int $minutes 分钟，默认为0
 	 * @param int $seconds 秒，默认为0
@@ -740,7 +700,7 @@ final class Time
 
 	/**
 	 * 返回本周结束的DateTime实例
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours 小时，默认为23
 	 * @param int $minutes 分钟，默认为59
 	 * @param int $seconds 秒，默认为59
@@ -757,7 +717,7 @@ final class Time
 
 	/**
 	 * 返回本周开始的时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours 小时，默认为0，表示午夜
 	 * @param int $minutes 分钟，默认为0
 	 * @param int $seconds 秒，默认为0
@@ -770,7 +730,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的周开始时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function startOfWeek($timestamp = null)
@@ -780,7 +740,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的周结束时间戳
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function endOfWeek($timestamp = null)
@@ -790,7 +750,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的周开始和结束时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param bool $asDate
 	 * @return array
 	 */
@@ -804,7 +764,7 @@ final class Time
 
 	/**
 	 * 返回上周开始的DateTime实例
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours 小时，默认为0，表示午夜
 	 * @param int $minutes 分钟，默认为0
 	 * @param int $seconds 秒，默认为0
@@ -821,7 +781,7 @@ final class Time
 
 	/**
 	 * 返回上周结束的DateTime实例
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param int $hours 小时，默认为0，表示午夜
 	 * @param int $minutes 分钟，默认为0
 	 * @param int $seconds 秒，默认为0
@@ -854,7 +814,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的上周开始时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function startOfLastWeek($timestamp = null)
@@ -864,7 +824,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的上周结束时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function endOfLastWeek($timestamp = null)
@@ -874,7 +834,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的上周开始和结束的时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return array
 	 */
 	public static function lastWeekRange($timestamp = null, $asDate = false)
@@ -922,11 +882,21 @@ final class Time
 		return self::monthDate($timestamp, $days)->getTimestamp();
 	}
 
+	/**
+	 * 返回本月开始时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function startOfMonth($timestamp = null)
 	{
 		return self::monthDate($timestamp)->getTimestamp();
 	}
 
+	/**
+	 * 返回本月结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function endOfMonth($timestamp = null)
 	{
 		return self::endOfMonthDate($timestamp)->getTimestamp();
@@ -934,7 +904,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的本月开始和结束的时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return array
 	 */
 	public static function monthRange($timestamp = null, $asDate = false)
@@ -956,21 +926,42 @@ final class Time
 		return self::date()->modify('first day of last month')->setTime(0, 0, 0);
 	}
 
+	/**
+	 * 返回上个月结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return DateTime
+	 */
 	public static function endOfLastMonthDate($timestamp = null)
 	{
 		return self::date($timestamp)->modify('last day of last month')->setTime(23, 59, 59);
 	}
 
+	/**
+	 * 返回上个月开始和结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @param int $days
+	 * @return int
+	 */
 	public static function lastMonth($timestamp = null, $days = 1)
 	{
 		return self::lastMonthDate($timestamp, $days)->getTimestamp();
 	}
 
+	/**
+	 * 返回上个月开始时间
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function startOfLastMonth($timestamp = null)
 	{
 		return self::lastMonthDate($timestamp)->getTimestamp();
 	}
 
+	/**
+	 * 返回上个月结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function endOfLastMonth($timestamp = null)
 	{
 		return self::endOfLastMonthDate($timestamp)->getTimestamp();
@@ -978,7 +969,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的上月开始和结束的时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return array
 	 */
 	public static function lastMonthRange($timestamp = null, $asDate = false)
@@ -1003,21 +994,42 @@ final class Time
 		return $date;
 	}
 
+	/**
+	 * 获取指定时间戳的结束的时间
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return DateTime
+	 */
 	public static function endOfYearDate($timestamp = null)
 	{
 		return self::date($timestamp)->modify('last day of this year')->setTime(23, 59, 59);
 	}
 
+	/**
+	 * 返回今年开始和结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @param int $days
+	 * @return int
+	 */
 	public static function year($timestamp = null, $days = 1)
 	{
 		return self::yearDate($timestamp, $days)->getTimestamp();
 	}
 
+	/**
+	 * 获取指定时间戳的年开始时间
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function startOfYear($timestamp = null)
 	{
 		return self::yearDate($timestamp)->getTimestamp();
 	}
 
+	/**
+	 * 返回今年结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function endOfYear($timestamp = null)
 	{
 		return self::endOfYearDate($timestamp)->getTimestamp();
@@ -1025,7 +1037,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的年开始和结束的时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param bool $asDate
 	 * @return array
 	 */
@@ -1047,21 +1059,42 @@ final class Time
 		return self::date($timestamp)->modify('first day of last year')->setTime(0, 0, 0);
 	}
 
+	/**
+	 * 获取指定日期的上年结束时间
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return DateTime
+	 */
 	public static function endOfLastYearDate($timestamp = null)
 	{
 		return self::date($timestamp)->modify('last day of last year')->setTime(23, 59, 59);
 	}
 
+	/**
+	 * 获取指定日期的上年时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @param int $days
+	 * @return int
+	 */
 	public static function lastYear($timestamp = null, $days = 1)
 	{
 		return self::lastYearDate($timestamp, $days)->getTimestamp();
 	}
 
+	/**
+	 * 返回去年开始时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function startOfLastYear($timestamp = null)
 	{
 		return self::lastYearDate($timestamp)->getTimestamp();
 	}
 
+	/**
+	 * 返回去年结束的时间戳
+	 * @param DateTimeInterface|string|int|null $timestamp
+	 * @return int
+	 */
 	public static function endOfLastYear($timestamp = null)
 	{
 		return self::endOfLastYearDate($timestamp)->getTimestamp();
@@ -1069,7 +1102,7 @@ final class Time
 
 	/**
 	 * 返回指定日期的上年开始和结束的时间
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @param bool $asDate
 	 * @return array
 	 */
@@ -1295,8 +1328,8 @@ final class Time
 
 	/**
 	 * 获取指定时间范围内的日期数组
-	 * @param DateTimeInterface|int|null $startTime
-	 * @param DateTimeInterface|int|null $endTime
+	 * @param DateTimeInterface|string|int|null $startTime
+	 * @param DateTimeInterface|string|int|null $endTime
 	 * @return DatePeriod
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
@@ -1348,7 +1381,7 @@ final class Time
 
 	/**
 	 * 获取当前的秒
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function currentSecond($timestamp = null)
@@ -1358,7 +1391,7 @@ final class Time
 
 	/**
 	 * 获取当前的分钟
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function currentMinute($timestamp = null)
@@ -1368,7 +1401,7 @@ final class Time
 
 	/**
 	 * 返回当前的小时
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function currentHour($timestamp = null)
@@ -1378,7 +1411,7 @@ final class Time
 
 	/**
 	 * 返回当前的星期几
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayOfWeek($timestamp = null)
@@ -1388,7 +1421,7 @@ final class Time
 
 	/**
 	 * 返回当前的星期几的中文
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return string
 	 */
 	public static function dayOfWeekName($timestamp = null)
@@ -1399,7 +1432,7 @@ final class Time
 
 	/**
 	 * 返回当月的第几天
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayOfMonth($timestamp = null)
@@ -1409,7 +1442,7 @@ final class Time
 
 	/**
 	 * 返回本年的第几天
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayOfYear($timestamp = null)
@@ -1420,7 +1453,7 @@ final class Time
 
 	/**
 	 * 返回当前的月
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return string
 	 */
 	public static function currentMonth($timestamp = null)
@@ -1430,7 +1463,7 @@ final class Time
 
 	/**
 	 * 返回当前的年
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function currentYear($timestamp = null)
@@ -1440,7 +1473,7 @@ final class Time
 
 	/**
 	 * 获取当前月份的天数
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayCountInMonth($timestamp = null)
@@ -1450,7 +1483,7 @@ final class Time
 
 	/**
 	 * 获取当前年份的天数
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return int
 	 */
 	public static function dayCountInYear($timestamp = null)
@@ -1460,7 +1493,7 @@ final class Time
 
 	/**
 	 * 是否是闰年
-	 * @param DateTimeInterface|int|null $timestamp
+	 * @param DateTimeInterface|string|int|null $timestamp
 	 * @return bool
 	 */
 	public static function isLeapYear($timestamp = null)
