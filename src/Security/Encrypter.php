@@ -50,7 +50,7 @@ class Encrypter
 	{
 		$encryptKey = $this->key;
 		if (empty($encryptKey)) {
-			throw new InvalidArgumentException('Encryption [app.key] not found');
+			throw new InvalidArgumentException('Encryption [key] not found');
 		}
 
 		return $encryptKey;
@@ -63,12 +63,12 @@ class Encrypter
 	public function getCipherType()
 	{
 		if (!$this->cipher) {
-			throw new InvalidArgumentException('Encryption [app.cipher] not found');
+			throw new InvalidArgumentException('Encryption [cipher] not found');
 		}
 
 		// 判断算法是否被支持
-		if (!in_array($this->cipher, openssl_get_cipher_methods())) {
-			throw new InvalidArgumentException('Encryption [app.cipher] not supported');
+		if (!in_array(strtolower($this->cipher), array_change_key_case(openssl_get_cipher_methods()))) {
+			throw new InvalidArgumentException("Encryption [{$this->cipher}] not supported");
 		}
 
 		return $this->cipher;
