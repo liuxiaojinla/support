@@ -440,6 +440,7 @@ final class Str
 	 *
 	 * @param string $url url地址或URL query参数
 	 * @return array
+	 * @deprecated
 	 */
 	public static function parseUrlQuery($url)
 	{
@@ -454,7 +455,7 @@ final class Str
 	}
 
 	/**
-	 * 匹配URL
+	 * 匹配 URL
 	 *
 	 * @param string $checkUrl
 	 * @param string $currentPath
@@ -530,7 +531,19 @@ final class Str
 	 */
 	public static function queryString($array)
 	{
-		return http_build_query($array, null, '&', PHP_QUERY_RFC3986);
+		return http_build_query($array, '', '&', PHP_QUERY_RFC3986);
+	}
+
+	/**
+	 * 将路径连接到一个URL。
+	 *
+	 * @param string $basePath
+	 * @param string $subPath
+	 * @return string
+	 */
+	public static function concatUrl($basePath, $subPath)
+	{
+		return rtrim($basePath, '/') . '/' . ltrim($subPath, '/');
 	}
 
 	/**

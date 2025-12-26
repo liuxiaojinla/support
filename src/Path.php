@@ -54,4 +54,15 @@ final class Path
 		}, $paths);
 		return implode(DIRECTORY_SEPARATOR, $paths);
 	}
+
+	/**
+	 * 拼接路径
+	 * @param string $basePath
+	 * @param string $subPath
+	 * @return string
+	 */
+	public static function concat($basePath, $subPath)
+	{
+		return self::joins(rtrim($basePath, '/'), ltrim($subPath, '/'));
+	}
 }
