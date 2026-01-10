@@ -1249,4 +1249,45 @@ final class Arr
 		return $result;
 	}
 
+	/**
+	 * 第二个索引数组向第一个索引数组覆盖
+	 * @param array $base
+	 * @param array $overlay
+	 * @param null $length
+	 * @return array
+	 */
+	public static function overlay(array $base, array $overlay, $length = null)
+	{
+		$length = $length === null ? count($base) : $length;
+		$out = [];
+		for ($i = 0; $i < $length; $i++) {
+			$out[$i] = isset($overlay[$i]) ? $overlay[$i] : (isset($base[$i]) ? $base[$i] : null);
+		}
+		return $out;
+	}
+
+	/**
+	 * 混合两个数组，取最长的数组长度
+	 * @param array $base
+	 * @param array $overlay
+	 * @return array
+	 */
+	public static function blend(array $base, array $overlay)
+	{
+		$len = max(count($base), count($overlay));
+		return self::overlay($base, $overlay, $len);
+	}
+
+	/**
+	 * 裁剪两个数组，取最短的数组长度
+	 * @param array $base
+	 * @param array $overlay
+	 * @return array
+	 */
+	public static function crop(array $base, array $overlay)
+	{
+		$len = min(count($base), count($overlay));
+		return self::overlay($base, $overlay, $len);
+	}
+
 }

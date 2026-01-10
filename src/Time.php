@@ -1144,6 +1144,17 @@ final class Time
 	}
 
 	/**
+	 * 时间格式化
+	 * @param DateTimeInterface|string|int|null $target
+	 * @param string $format
+	 * @return string
+	 */
+	public static function format($target = null, $format = 'Y-m-d H:i:s')
+	{
+		return self::date($target)->format($format);
+	}
+
+	/**
 	 * 获取相对时间
 	 *
 	 * @param int $timestamp
