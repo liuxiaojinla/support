@@ -811,6 +811,35 @@ final class Arr
 	}
 
 	/**
+	 * 映射数组。
+	 *
+	 * 回调应返回一个值。
+	 *
+	 * @template TKey
+	 * @template TValue
+	 * @template TMapKey of array-key
+	 * @template TMapValue
+	 *
+	 * @param array<TKey, TValue> $array
+	 * @param callable(TValue, TKey): TMapValue $callback
+	 * @return array<TMapKey, TMapValue>
+	 */
+	public static function map(array $array, callable $callback, bool $isIndexKey = false)
+	{
+		$result = [];
+
+		foreach ($array as $key => $value) {
+			if ($isIndexKey) {
+				$result[] = $callback($value, $key);
+			} else {
+				$result[$key] = $callback($value, $key);
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * 从数组中提取指定的值数组
 	 *
 	 * @param array $array
@@ -1209,7 +1238,12 @@ final class Arr
 	 */
 	public static function parse($string)
 	{
-		$array = preg_split('/[,;\r\n]+/', trim($string, ",;\r\n"));
+		$string = trim(trim($string), ",;\r\n");
+		if (empty($string)) {
+			return [];
+		}
+
+		$array = preg_split('/[,;\r\n]+/', $string);
 
 		if (strpos($string, ':')) {
 			$value = [];
