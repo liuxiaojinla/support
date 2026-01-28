@@ -719,9 +719,10 @@ final class Str
 	 * 渲染Stub
 	 * @param string $tpl
 	 * @param array $data
+	 * @param array $options
 	 * @return array|string|string[]
 	 */
-	public static function stub($tpl, $data, $options = [])
+	public static function stub(string $tpl, array $data, array $options = [])
 	{
 		$options = array_replace_recursive([
 			'tag_start' => '{',
@@ -744,7 +745,7 @@ final class Str
 	 * @param array $options
 	 * @return array
 	 */
-	public static function extractStubVariables($tpl, $options = [])
+	public static function extractStubVariables(string $tpl, array $options = [])
 	{
 		$options = array_replace_recursive([
 			'tag_start' => '{',
@@ -766,7 +767,7 @@ final class Str
 	 * @param array $delimiters 分隔符数组(单字符)
 	 * @return int 分隔符索引，未找到返回-1
 	 */
-	public static function findDelimiterIndex($str, array $delimiters)
+	public static function findDelimiterIndex(string $str, array $delimiters)
 	{
 		// 构建快速查找的映射表 [分隔符 => 索引]
 		$map = array_flip($delimiters);
@@ -789,7 +790,7 @@ final class Str
 	 * @param array $delimiters 分隔符数组(单字符)
 	 * @return int 分隔符索引，未找到返回-1
 	 */
-	public static function findLastDelimiterIndex($str, array $delimiters)
+	public static function findLastDelimiterIndex(string $str, array $delimiters)
 	{
 		// 构建快速查找的映射表 [分隔符 => 索引]
 		$map = array_flip($delimiters);
@@ -812,7 +813,7 @@ final class Str
 	 * @param array $delimiters 分隔符数组(单字符)
 	 * @return string|null 分隔符，未找到返回null
 	 */
-	public static function findDelimiter($str, array $delimiters)
+	public static function findDelimiter(string $str, array $delimiters)
 	{
 		$index = self::findDelimiterIndex($str, $delimiters);
 		return $index !== -1 ? $delimiters[$index] : null;
@@ -824,7 +825,7 @@ final class Str
 	 * @param array $delimiters 分隔符数组(单字符)
 	 * @return string|null 分隔符，未找到返回null
 	 */
-	public static function findLastDelimiter($str, array $delimiters)
+	public static function findLastDelimiter(string $str, array $delimiters)
 	{
 		$index = self::findLastDelimiterIndex($str, $delimiters);
 		return $index !== -1 ? $delimiters[$index] : null;
@@ -840,7 +841,7 @@ final class Str
 	 * @return string 指定区间内容
 	 * @throws InvalidArgumentException
 	 */
-	public static function sliceWithDelimiter($text, $start, $end = 0, $delimiter = "\n")
+	public static function sliceWithDelimiter(string $text, int $start, int $end = 0, string $delimiter = "\n")
 	{
 		if ($start < 0 || $end < 0) {
 			throw new InvalidArgumentException('start or end out of range');
@@ -916,13 +917,17 @@ final class Str
 
 	/**
 	 * 提取代码块
-	 * @param string $code
+	 * @param string|null $code
 	 * @param string|null $language
 	 * @param bool $failOrNull
 	 * @return string|null
 	 */
-	public static function extractCode($code, &$language = null, $failOrNull = false)
+	public static function extractCode(?string $code, string $language = null, bool $failOrNull = false)
 	{
+		if (empty($code)) {
+			return null;
+		}
+
 		if ($language) {
 			$start = strpos($code, "```{$language}");
 		} else {
@@ -950,50 +955,48 @@ final class Str
 
 	/**
 	 * 提取JSON数据
-	 * @param string $code
+	 * @param string|null $code
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractJson(string $code, $failOrNull = true)
+	public static function extractJson(?string $code, bool $failOrNull = true)
 	{
-		$language = 'json';
-		return self::extractCode($code, $language, $failOrNull);
+		$code = self::extractCode($code, 'json', $failOrNull);
+		// 删除控制字符，防止JSON解析失败
+		return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u', '', $code);
 	}
 
 	/**
 	 * 提取YAML数据
-	 * @param string $code
+	 * @param string|null $code
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractYaml(string $code, $failOrNull = false)
+	public static function extractYaml(?string $code, bool $failOrNull = false)
 	{
-		$language = 'yaml';
-		return self::extractCode($code, $language, $failOrNull);
+		return self::extractCode($code, 'yaml', $failOrNull);
 	}
 
 	/**
 	 * 提取Markdown数据
-	 * @param string $code
+	 * @param string|null $code
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractMarkdown(string $code, $failOrNull = false)
+	public static function extractMarkdown(?string $code, bool $failOrNull = false)
 	{
-		$language = 'markdown';
-		return self::extractCode($code, $language, $failOrNull);
+		return self::extractCode($code, 'markdown', $failOrNull);
 	}
 
 	/**
 	 * 提取HTML数据
-	 * @param string $code
+	 * @param string|null $code
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractHtml(string $code, $failOrNull = false)
+	public static function extractHtml(?string $code, bool $failOrNull = false)
 	{
-		$language = 'html';
-		return self::extractCode($code, $language, $failOrNull);
+		return self::extractCode($code, 'html', $failOrNull);
 	}
 
 	/**

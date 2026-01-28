@@ -14,6 +14,23 @@ use Webman\App as WebmanApp;
 final class FrameworkHelper
 {
 	/**
+	 * @var array
+	 */
+	protected $things = [];
+
+	/**
+	 * @var callable
+	 */
+	protected $otherwise;
+
+	/**
+	 * 私有构造函数.
+	 */
+	private function __construct()
+	{
+	}
+
+	/**
 	 * 获取框架的容器.
 	 * @return \Psr\Container\ContainerInterface
 	 */
@@ -77,37 +94,29 @@ final class FrameworkHelper
 	}
 
 	/**
-	 * @return FrameworkHelperWhen
+	 * @return self
 	 */
 	public static function when()
 	{
-		return new FrameworkHelperWhen();
+		return new self();
 	}
-}
-
-class FrameworkHelperWhen
-{
-	/**
-	 * @var array
-	 */
-	protected $things = [];
 
 	/**
-	 * @var callable
+	 * 判断是否满足条件
+	 * @param bool $condition
+	 * @param callable $callback
+	 * @param callable|null $otherwise
+	 * @return $this
 	 */
-	protected $otherwise;
-
-	/**
-	 * FrameworkInvoke constructor.
-	 */
-	public function __construct()
+	protected function thing($condition, callable $callback, callable $otherwise = null)
 	{
-		$this->otherwise(function () {
-			return null;
-		});
+		$this->things[] = [(bool)$condition, $callback, $otherwise];
+
+		return $this;
 	}
 
 	/**
+	 * 否则
 	 * @param callable $callback
 	 * @return $this
 	 */
@@ -119,59 +128,51 @@ class FrameworkHelperWhen
 	}
 
 	/**
+	 * 如果是Laravel框架
 	 * @param callable $callback
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
 	public function laravel(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(FrameworkHelper::isLaravel(), $callback, $otherwise);
+		return $this->thing(FrameworkHelper::isLaravel(), $callback, $otherwise);
 	}
 
 	/**
-	 * @param bool $condition
-	 * @param callable $callback
-	 * @param callable|null $otherwise
-	 * @return $this
-	 */
-	public function when($condition, callable $callback, callable $otherwise = null)
-	{
-		$this->things[] = [(bool)$condition, $callback, $otherwise];
-
-		return $this;
-	}
-
-	/**
+	 * 如果是ThinkPHP框架
 	 * @param callable $callback
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
 	public function thinkphp(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(FrameworkHelper::isThinkPHP(), $callback, $otherwise);
+		return $this->thing(FrameworkHelper::isThinkPHP(), $callback, $otherwise);
 	}
 
 	/**
+	 * 如果是Webman框架
 	 * @param callable $callback
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
 	public function webman(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(FrameworkHelper::isWebman(), $callback, $otherwise);
+		return $this->thing(FrameworkHelper::isWebman(), $callback, $otherwise);
 	}
 
 	/**
+	 * 如果是Hyperf框架
 	 * @param callable $callback
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
 	public function hyperf(callable $callback, callable $otherwise = null)
 	{
-		return $this->when(FrameworkHelper::isHyperf(), $callback, $otherwise);
+		return $this->thing(FrameworkHelper::isHyperf(), $callback, $otherwise);
 	}
 
 	/**
+	 * 执行
 	 * @return mixed
 	 */
 	public function invoke()

@@ -54,12 +54,8 @@ class Html
 
 		// 强制闭合一些 HTML 标签
 		$html = preg_replace('/<source\b([^>]*)>/i', '<source $1/>', $html);
-
-		// 3. 把真正的 \u00A0 换成普通空格
-		// $html = str_replace("\u{00A0}", ' ', $html);
-
-		// 4. 如果想把多个连续空格再压成一个
-		// $html = preg_replace('/\s{2,}/u', ' ', $html);
+		// 移除 Content-Type
+		$html = preg_replace('#<meta\b[^>]*\bhttp-equiv\s*=\s*["\']?Content-Type["\']?[^>]*>#i', '', $html);
 
 		// 创建实例并统一配置
 		$document = new DOMDocument();
@@ -111,13 +107,13 @@ class Html
 	 * 快速清理HTML
 	 * 支持自定义清理规则，适用于大多数场景
 	 *
-	 * @param string|DOMNode $htmlStr 原始HTML内容
+	 * @param string|DOMNode $html 原始HTML内容
 	 * @param array $options 清理选项
 	 * @return string|DOMNode 清理后的HTML
 	 */
-	public static function clean($htmlStr, array $options = [], $toString = true)
+	public static function clean($html, array $options = [], $toString = true)
 	{
-		$node = $htmlStr instanceof DOMNode ? $htmlStr : self::document($htmlStr);
+		$node = self::document($html);
 
 		// 合并选项
 		$options = array_merge([
@@ -363,17 +359,16 @@ class Html
 		return $root;
 	}
 
-
 	/**
 	 * 获取节点属性
-	 * @param DOMElement $element
+	 * @param DOMElement $node
 	 * @return array
 	 */
-	public static function attributes(DOMElement $element)
+	public static function attributes(DOMNode $node)
 	{
 		$attributes = [];
 
-		foreach ($element->attributes as $attr) {
+		foreach ($node->attributes as $attr) {
 			$attributes[$attr->nodeName] = $attr->nodeValue;
 		}
 
@@ -734,6 +729,37 @@ class Html
 		return implode(' | ', $xpaths);
 	}
 
+	/**
+	 * 获取 body 节点
+	 * @param DOMNode $dom
+	 * @return DOMElement
+	 */
+	public static function body(DOMNode $root)
+	{
+		if ($root instanceof DOMDocument) {
+			$body = self::xpath($root)->query('//body');
+			if ($body && $body->length) {
+				$root = $body->item(0);
+			}
+		}
+
+		return $root;
+	}
+
+	/**
+	 * 获取第一个可迭代的子节点
+	 * @param DOMNode $node
+	 * @return DOMNode
+	 */
+	public static function canIteratorFirstChild(DOMNode $node)
+	{
+		$node = $node instanceof DOMDocument ? $node->documentElement : $node;
+		if ($node->nodeName === 'html' && $node->firstElementChild) {
+			$node = $node->firstElementChild;
+		}
+
+		return $node;
+	}
 
 	/**
 	 * 遍历节点树
@@ -741,17 +767,147 @@ class Html
 	 * @param callable $callback 回调函数
 	 * @return DOMNode
 	 */
-	public function each(DOMNode $root, callable $callback)
+	public static function each(DOMNode $root, callable $callback)
 	{
-		$callback($root);
+		$traverse = function (DOMNode $currentNode, int $currentDepth, int $currentIndex, int $currentSiblingIndex, array $parentInfo) use (&$traverse, $callback) {
+			$tempNode = $callback($currentNode, $currentDepth, $currentIndex, $currentSiblingIndex, $parentInfo);
+			if ($tempNode) {
+				$currentNode = $tempNode;
+			}
 
-		// 递归处理所有子节点
-		for ($i = $root->childNodes->length - 1; $i >= 0; $i--) {
-			$childNode = $root->childNodes->item($i);
-			static::each($childNode, $callback);
-		}
+			// 节点没有子节点
+			if (!$currentNode->hasChildNodes()) {
+				return;
+			}
+
+
+			// 递归遍历子节点
+			$index = 0;
+			$siblingIndexes = [];
+
+			/** @var DOMNode $childNode */
+			for ($i = 0; $i < $currentNode->childNodes->count(); $i++) {
+				$childNode = $currentNode->childNodes->item($i);
+				if (!($childNode instanceof DOMElement)) {
+					continue;
+				}
+
+				// 记录当前层级的兄弟节点索引
+				$tagName = $childNode->tagName;
+				if (!isset($siblingIndexes[$tagName])) {
+					$siblingIndexes[$tagName] = 0;
+				}
+				$siblingIndex = $siblingIndexes[$tagName];
+
+				// 递归遍历子节点
+				$traverse($childNode, $currentDepth + 1, $index, $siblingIndex, [
+					'depth' => $currentDepth,
+					'index' => $currentIndex,
+					'sibling_index' => $currentSiblingIndex,
+				]);
+
+				// 索引加1
+				$index++;
+				$siblingIndexes[$tagName]++;
+			}
+		};
+
+		$traverse(self::canIteratorFirstChild($root), 0, 1, 1, [
+			'depth' => 0,
+			'index' => 0,
+			'sibling_index' => 0,
+		]);
 
 		return $root;
+	}
+
+	/**
+	 * 映射节点树
+	 *
+	 * @param callable $callback 回调函数
+	 * @return array
+	 */
+	public static function map(DOMNode $root, callable $callback)
+	{
+		$traverse = function (DOMNode $currentNode, int $currentDepth, int $currentIndex, int $currentSiblingIndex, array $parentInfo) use (&$traverse, $callback) {
+			$resultItem = $callback($currentNode, $currentDepth, $currentIndex, $currentSiblingIndex, $parentInfo);
+			if (!$currentNode->hasChildNodes()) {
+				return $resultItem;
+			}
+
+			// 递归遍历子节点
+			$index = 0;
+			$siblingIndexes = [];
+
+			/** @var DOMNode $childNode */
+			for ($i = 0; $i < $currentNode->childNodes->count(); $i++) {
+				$childNode = $currentNode->childNodes->item($i);
+
+				if ($childNode->nodeType === XML_ELEMENT_NODE) {
+					// 记录当前层级的兄弟节点索引
+					$tagName = $childNode->tagName;
+					if (!isset($siblingIndexes[$tagName])) {
+						$siblingIndexes[$tagName] = 0;
+					}
+					$siblingIndex = $siblingIndexes[$tagName];
+
+					// 递归遍历子节点
+					$child = $traverse($childNode, $currentDepth + 1, $index, $siblingIndex, [
+						'depth' => $currentDepth,
+						'index' => $currentIndex,
+						'sibling_index' => $currentSiblingIndex,
+					]);
+
+					// 索引加1
+					$index++;
+					$siblingIndexes[$tagName]++;
+				} else {
+					// 递归遍历子节点
+					$child = $traverse($childNode, $currentDepth + 1, -1, -1, [
+						'depth' => $currentDepth,
+						'index' => $currentIndex,
+						'sibling_index' => $currentSiblingIndex,
+					]);
+				}
+
+				if (!empty($child)) {
+					$resultItem['child'][] = $child;
+				}
+			}
+
+			return $resultItem;
+		};
+
+		return $traverse(self::canIteratorFirstChild($root), 0, 1, 1, [
+			'depth' => 0,
+			'index' => 0,
+			'sibling_index' => 0,
+		]);
+	}
+
+	/**
+	 * 获取 DOM 节点的数组结构
+	 * @param DOMNode $node
+	 * @return array
+	 */
+	public static function toArray(DOMNode $node)
+	{
+		return self::map($node, function (DOMNode $node, $level) {
+			$item = [
+				'tag' => $node->nodeName,
+				'level' => $level,
+			];
+
+			if ($node->hasAttributes()) {
+				$item['attrs'] = $node->attributes ? self::attributes($node) : [];
+			}
+
+			if ($node->nodeType == XML_TEXT_NODE) {
+				$item['text'] = trim($node->nodeValue);
+			}
+
+			return $item;
+		});
 	}
 
 	/**
@@ -795,35 +951,121 @@ class Html
 	 * @param DOMNode|null $root
 	 * @return string
 	 */
-	public static function toHtmlString(DOMNode $root = null, bool $compressWhitespace = true)
+	public static function toHtmlString(DOMNode $root = null, bool $compress = true)
 	{
 		if ($root === null) {
 			return '';
 		}
 
 		// 获取节点内容
-		$html = $root->ownerDocument->saveHTML($root);
+		$document = $root instanceof DOMDocument ? $root : $root->ownerDocument;
 
+		$html = $document->saveHTML($root);
 		// 把 saveHTML 产生的 HTML 实体还原成真实 Unicode
 		$html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-		// 压缩空白
-		return $compressWhitespace ? static::compressWhitespace($html) : $html;
+		// 移除 <?xml encoding="UTF-8" ...
+		if (Str::startsWith($html, '<?xml encoding="UTF-8">')) {
+			$html = substr($html, 23);
+		}
+
+		// 压缩空白 / 格式化
+		return $compress ? self::compressWhitespace($html) : self::beautify($html);
+	}
+
+	/**
+	 * 美化 HTML
+	 * @param string $html
+	 * @return string
+	 */
+	public static function beautify(string $html): string
+	{
+		// 拆成 token 流：标签开/闭、文本、注释（保留原正则）
+		$tokens = preg_split('#(<!--.*?-->|<[^>]+>)#s', $html, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+		$indentSize = 1;
+		$indentChar = "\t";
+		$depth = 0;
+		$output = '';
+		// 原内联标签列表不变 + 正则加i忽略大小写
+		$inlineTags = implode('|', [
+			'a', 'abbr', 'acronym', 'b', 'bdo', 'big', 'br', 'button', 'cite', 'code', 'dfn', 'em', 'i', 'img',
+			'kbd', 'label', 'map', 'object', 'q', 'samp', 'script', 'select', 'small', 'strong',
+			'sub', 'sup', 'textarea', 'input', 'time', 'tt', 'var',
+		]);
+
+		// 修复1：加i忽略大小写 + 匹配闭合标签（原逻辑不变，仅补全匹配规则）
+		$isInlineTag = function ($token) use ($inlineTags) {
+			return preg_match('/^<\/?(' . $inlineTags . ')\b/i', $token);
+		};
+
+		// 修复2：新增自闭合标签判断（兼容HTML5无/和有/写法，原逻辑补充）
+		$isSelfClosing = function ($token) {
+			$selfTags = [
+				'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta',
+				'param', 'source', 'track', 'wbr',
+			];
+			$tagName = preg_replace('/^<([a-z0-9]+)\b.*$/i', '$1', $token);
+			return in_array(strtolower($tagName), $selfTags) || preg_match('/\/>$/', $token);
+		};
+
+		foreach ($tokens as $token) {
+			// 修复3：仅判断空token，不全局trim（保留标签/文本内的原始空白）
+			$trimToken = trim($token);
+			if ($trimToken === '') {
+				continue;
+			}
+
+			// 注释：修复4：保留原始注释（不trim），单独缩进
+			if (str_starts_with($trimToken, '<!--')) {
+				$output .= str_repeat($indentChar, $depth * $indentSize) . rtrim($token) . "\n";
+				continue;
+			}
+
+			// 闭合标签 </...> （原逻辑不变 + 防止depth为负）
+			if (str_starts_with($trimToken, '</')) {
+				if (!$isInlineTag($trimToken)) {
+					$depth = max($depth - 1, 0); // 修复：防止层级为负
+				}
+				$output .= str_repeat($indentChar, $depth * $indentSize) . $trimToken . "\n";
+				continue;
+			}
+
+			// 开标签 <...> （原逻辑 + 自闭合标签不增加depth）
+			if (str_starts_with($trimToken, '<')) {
+				$output .= str_repeat($indentChar, $depth * $indentSize) . $trimToken . "\n";
+				// 修复：自闭合标签/内联标签 都不增加层级
+				if (!$isSelfClosing($trimToken) && !$isInlineTag($trimToken)) {
+					$depth++;
+				}
+				continue;
+			}
+
+			// 文本节点：修复5：彻底删掉htmlspecialchars（原核心错误）+ 仅合并多余空白
+			$text = preg_replace('/\s+/', ' ', $token);
+			if ($text !== '') {
+				$output .= str_repeat($indentChar, $depth * $indentSize) . $text . "\n";
+			}
+		}
+
+		// 去掉最后一行多余换行（原逻辑不变）
+		return rtrim($output, "\n");
 	}
 
 	/**
 	 * 空格缩进替换成指定宽度
 	 * @param string $html
 	 * @param int $indentSize
+	 * @param string $indentChar
 	 * @return string
 	 */
-	public static function reindent(string $html, int $indentSize)
+	public static function reindent(string $html, int $indentSize, string $indentChar = ' ')
 	{
 		if ($indentSize < 1) {
 			return preg_replace('/>\s+</', '><', $html);
 		}
 
-		$spaces = str_repeat(' ', $indentSize);
+		$spaces = str_repeat($indentChar, $indentSize);
 		return preg_replace_callback('/^(\s+)/m', function ($m) use ($spaces) {
 			$level = (int)(strlen($m[1]) / 2);
 			return str_repeat($spaces, $level);
