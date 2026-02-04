@@ -309,7 +309,7 @@ final class File
 	 * @param int|null $length
 	 * @return false|string
 	 */
-	public static function get(string $path, bool $useIncludePath = false, $context = null, int $offset = 0, int $length = null)
+	public static function get(string $path, bool $useIncludePath = false, $context = null, int $offset = 0, ?int $length = null)
 	{
 		return file_get_contents($path, $useIncludePath, $context, $offset, $length);
 	}

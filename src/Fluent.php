@@ -34,7 +34,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	 * @param Fluent|null $instance
 	 * @return static
 	 */
-	public static function make(array $items = [], Fluent $instance = null)
+	public static function make(array $items = [], ?Fluent $instance = null)
 	{
 		return new static($items);
 	}

@@ -108,7 +108,7 @@ final class FrameworkHelper
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
-	protected function thing($condition, callable $callback, callable $otherwise = null)
+	protected function thing($condition, callable $callback, ?callable $otherwise = null)
 	{
 		$this->things[] = [(bool)$condition, $callback, $otherwise];
 
@@ -133,7 +133,7 @@ final class FrameworkHelper
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
-	public function laravel(callable $callback, callable $otherwise = null)
+	public function laravel(callable $callback, ?callable $otherwise = null)
 	{
 		return $this->thing(FrameworkHelper::isLaravel(), $callback, $otherwise);
 	}
@@ -144,7 +144,7 @@ final class FrameworkHelper
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
-	public function thinkphp(callable $callback, callable $otherwise = null)
+	public function thinkphp(callable $callback, ?callable $otherwise = null)
 	{
 		return $this->thing(FrameworkHelper::isThinkPHP(), $callback, $otherwise);
 	}
@@ -155,7 +155,7 @@ final class FrameworkHelper
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
-	public function webman(callable $callback, callable $otherwise = null)
+	public function webman(callable $callback, ?callable $otherwise = null)
 	{
 		return $this->thing(FrameworkHelper::isWebman(), $callback, $otherwise);
 	}
@@ -166,7 +166,7 @@ final class FrameworkHelper
 	 * @param callable|null $otherwise
 	 * @return $this
 	 */
-	public function hyperf(callable $callback, callable $otherwise = null)
+	public function hyperf(callable $callback, ?callable $otherwise = null)
 	{
 		return $this->thing(FrameworkHelper::isHyperf(), $callback, $otherwise);
 	}

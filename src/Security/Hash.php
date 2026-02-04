@@ -69,7 +69,7 @@ class Hash
 	 * @param array $options
 	 * @return bool 匹配返回true，否则返回false
 	 */
-	public function verify(string $password, string $hashedValue = null, array $options = [])
+	public function verify(string $password, ?string $hashedValue = null, array $options = [])
 	{
 		if (is_null($hashedValue) || strlen($hashedValue) === 0) {
 			return false;

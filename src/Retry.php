@@ -34,7 +34,7 @@ class Retry
 	 * @param callable|null $when
 	 * @param int|array $times
 	 */
-	public function __construct(callable $callback, callable $when = null, $times = 3)
+	public function __construct(callable $callback, ?callable $when = null, $times = 3)
 	{
 		$this->callback = $callback;
 		$this->when = $when;

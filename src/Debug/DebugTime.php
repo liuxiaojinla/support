@@ -53,7 +53,7 @@ class DebugTime
 	 * @param bool $asMillisecond
 	 * @return float|int
 	 */
-	public function time(string $beginFlag = 'default', string $endFlag = null, bool $asMillisecond = false)
+	public function time(string $beginFlag = 'default', ?string $endFlag = null, bool $asMillisecond = false)
 	{
 		$endFlag = $endFlag ?: $beginFlag;
 

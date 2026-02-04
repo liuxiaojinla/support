@@ -295,7 +295,7 @@ class Html
 	 * @param array|null $excepts 强制移除的属性列表
 	 * @return DOMNode 清理后的节点
 	 */
-	public static function removeAttributes(DOMNode $root, array $allows = null, array $excepts = null)
+	public static function removeAttributes(DOMNode $root, ?array $allows = null, ?array $excepts = null)
 	{
 		if (!$root instanceof DOMElement) {
 			return $root;
@@ -558,7 +558,7 @@ class Html
 	 * @param callable|null $transform
 	 * @return array
 	 */
-	public static function readValues(DOMNode $root, $xpathRules, callable $transform = null)
+	public static function readValues(DOMNode $root, $xpathRules, ?callable $transform = null)
 	{
 		$nodes = self::findAll($root, $xpathRules);
 		if (!$nodes) {
@@ -949,9 +949,10 @@ class Html
 	/**
 	 * 获取节点内容
 	 * @param DOMNode|null $root
+	 * @param bool $compress
 	 * @return string
 	 */
-	public static function toHtmlString(DOMNode $root = null, bool $compress = true)
+	public static function toHtmlString(?DOMNode $root = null, bool $compress = true)
 	{
 		if ($root === null) {
 			return '';

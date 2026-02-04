@@ -922,7 +922,7 @@ final class Str
 	 * @param bool $failOrNull
 	 * @return string|null
 	 */
-	public static function extractCode(?string $code, string $language = null, bool $failOrNull = false)
+	public static function extractCode(?string $code, ?string $language = null, bool $failOrNull = false)
 	{
 		if (empty($code)) {
 			return null;

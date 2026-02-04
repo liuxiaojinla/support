@@ -35,7 +35,7 @@ class Encrypter
 	 * @param string|null $cipher 加密算法
 	 * @param array $config 配置项
 	 */
-	public function __construct(string $key, string $cipher = null, array $config = [])
+	public function __construct(string $key, ?string $cipher = null, array $config = [])
 	{
 		$this->key = $key;
 		$this->cipher = $cipher ?: $this->cipher;
@@ -141,7 +141,7 @@ class Encrypter
 	 * @param string|null $cipher 加密算法
 	 * @param array $config 配置项
 	 */
-	public static function setDefaultInstance(string $key, string $cipher = null, array $config = [])
+	public static function setDefaultInstance(string $key, ?string $cipher = null, array $config = [])
 	{
 		self::$instance = new static($key, $cipher, $config);
 	}

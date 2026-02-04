@@ -14,7 +14,7 @@ final class Process
 	 * @param array $options
 	 * @return SymfonyProcess
 	 */
-	public static function run(array $commands, callable $processHandlerCallback, callable $makeProcessCallback = null, array $options = []): SymfonyProcess
+	public static function run(array $commands, callable $processHandlerCallback, ?callable $makeProcessCallback = null, array $options = []): SymfonyProcess
 	{
 		$process = self::make($commands, $options);
 
@@ -55,7 +55,7 @@ final class Process
 	 * @param callable|null $makeProcessCallback
 	 * @return SymfonyProcess
 	 */
-	protected static function runProcess(SymfonyProcess $process, callable $processHandlerCallback, callable $makeProcessCallback = null)
+	protected static function runProcess(SymfonyProcess $process, callable $processHandlerCallback, ?callable $makeProcessCallback = null)
 	{
 		if ($makeProcessCallback) {
 			call_user_func($makeProcessCallback, $process);
@@ -74,7 +74,7 @@ final class Process
 	 * @param array $options
 	 * @return SymfonyProcess
 	 */
-	public static function runShellCommandline(string $command, callable $processHandlerCallback, callable $makeProcessCallback = null, array $options = [])
+	public static function runShellCommandline(string $command, callable $processHandlerCallback, ?callable $makeProcessCallback = null, array $options = [])
 	{
 		$process = self::fromShellCommandline($command, $options);
 

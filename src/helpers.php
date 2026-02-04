@@ -13,7 +13,7 @@ if (!function_exists('tap')) {
 	 * @param callable|null $callback
 	 * @return mixed
 	 */
-	function tap($value, callable $callback = null)
+	function tap($value, ?callable $callback = null)
 	{
 		if (is_null($callback)) {
 			return new HigherOrderTapProxy($value);
@@ -299,7 +299,7 @@ if (!function_exists('with')) {
 	 * @param (callable(TValue): (TReturn))|null $callback
 	 * @return ($callback is null ? TValue : TReturn)
 	 */
-	function with($value, callable $callback = null)
+	function with($value, ?callable $callback = null)
 	{
 		return is_null($callback) ? $value : $callback($value);
 	}
