@@ -1,6 +1,6 @@
 <?php
 
-namespace Xin\Encryption\Exceptions;
+namespace Xin\Support\Security;
 
 use Exception;
 

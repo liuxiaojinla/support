@@ -1533,4 +1533,39 @@ final class Time
 	{
 		return self::daysToSeconds(7) * $week;
 	}
+
+
+    /**
+     * 获取时间间隔的秒数
+     *
+     * @param DateInterval $delay
+     * @return int
+     */
+    protected static function intervalToSeconds(DateInterval $delay)
+    {
+        $seconds = $delay->s;
+        $seconds += $delay->i * 60;
+        $seconds += $delay->h * 3600;
+        $seconds += $delay->d * 86400;
+        $seconds += $delay->m * 2592000;
+        $seconds += $delay->y * 31104000;
+        return $seconds;
+    }
+
+    /**
+     * 精确获取时间间隔的秒数
+     *
+     * 通过实际日期时间差计算，避免月份和年份天数不固定的问题
+     *
+     * @param DateInterval $interval
+     * @param DateTimeInterface|string|int|null $baseTime 基准时间，用于计算实际间隔秒数，默认为当前时间
+     * @return int 返回精确的秒数
+     */
+    protected static function preciseIntervalToSeconds(DateInterval $interval, $baseTime = null)
+    {
+        $baseTime = self::date($baseTime);
+        $targetTime = (clone $baseTime)->add($interval);
+
+        return $targetTime->getTimestamp() - $baseTime->getTimestamp();
+    }
 }
