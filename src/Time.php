@@ -71,9 +71,7 @@ final class Time
 	public static function date($datetime = null, $tz = null)
 	{
 		// 兼容 DateTimeInterface
-		if ($datetime instanceof DateTime) {
-			return $datetime;
-		} elseif ($datetime instanceof DateTimeInterface) {
+		if ($datetime instanceof DateTimeInterface) {
 			if (!$tz) {
 				$tz = $datetime->getTimezone();
 			}
@@ -85,6 +83,107 @@ final class Time
 			$datetime = $datetime ?: 'now';
 			return new DateTime($datetime, self::timezone($tz));
 		}
+	}
+
+	/**
+	 * 解析时间字符串
+	 * @param string|null $datetimeString
+	 * @param string|null $format
+	 * @param DateTimeZone|string|null $tz
+	 * @return DateTime|null
+	 * @noinspection PhpDocMissingThrowsInspection
+	 */
+	public static function parse($datetimeString = null,  $format = null, $tz = null)
+	{
+		// 处理 null
+		if ($datetimeString === null) {
+			return null;
+		}
+
+		// 空字符串
+		$datetimeString = trim($datetimeString);
+		if (empty($datetimeString)) {
+			return null;
+		}
+
+		// 尝试的格式列表（按常见程度排序）
+		$formats = [
+			// 常见分隔符变体
+			'Y-m-d H:i:s',        // 2026-03-20 18:26:00
+			'Y-m-d H:i',          // 2026-03-20 18:26
+			'Y-m-d',              // 2026-03-20
+			'Y-m-d H:i:s.u',      // 2026-03-20 18:26:00.123456
+
+			// 斜杠格式
+			'Y/m/d H:i:s',        // 2026/03/20 18:26:00
+			'Y/m/d',              // 2026/03/20
+
+			// ISO 8601 标准
+			'Y-m-d\TH:i:sP',      // 2026-03-20T18:26:00+08:00
+			'Y-m-d\TH:i:s.uP',    // 2026-03-20T18:26:00.123456+08:00
+			'Y-m-d\TH:i:s.u\Z',   // 2026-03-20T18:26:00.123456Z
+			'Y-m-d\TH:i:s\Z',     // 2026-03-20T18:26:00Z
+			'Y-m-d\TH:i:s',       // 2026-03-20T18:26:00
+
+			// 欧洲/中文常见格式
+			'd/m/Y H:i:s',        // 20/03/2026 18:26:00
+			'd/m/Y',              // 20/03/2026
+			'd.m.Y H:i:s',        // 20.03.2026 18:26:00
+			'd.m.Y',              // 20.03.2026
+
+			// 美式格式
+			'm/d/Y H:i:s',        // 03/20/2026 18:26:00
+			'm/d/Y',              // 03/20/2026
+
+			// 紧凑格式
+			'YmdHis',             // 20260320182600
+			'Ymd',                // 20260320
+
+			// 带星期/月份名称
+			'D, d M Y H:i:s O',   // Fri, 20 Mar 2026 18:26:00 +0800 (RFC2822)
+			'l, d F Y H:i:s',     // Friday, 20 March 2026 18:26:00
+			'd F Y',              // 20 March 2026
+			'M d, Y',             // Mar 20, 2026
+
+			// 中文格式
+			'Y年m月d日 H:i:s',    // 2026年03月20日 18:26:00
+			'Y年m月d日',          // 2026年03月20日
+		];
+
+		// 如果设置了时间格式，则优先使用它
+		if ($format) {
+			array_unshift($formats, $format);
+		}
+
+		// 自动检测时间格式
+		$date = null;
+		foreach ($formats as $fmt) {
+			$date = DateTime::createFromFormat($fmt, $datetimeString);
+			if ($date !== false && $date->format($fmt) === $datetimeString) {
+				break;
+			}
+		}
+
+		// 最后尝试 strtotime（处理相对时间如 "+1 day", "next Monday"）
+		if (empty($date)) {
+			$timestamp = strtotime($datetimeString);
+			if ($timestamp === false) {
+				return null;
+			}
+
+			$date = new DateTime();
+			$date->setTimestamp($timestamp);
+		}
+
+		// 是否需要重新设置时区
+		if ($tz) {
+			$tz = self::timezone($tz);
+			if ($tz) {
+				$date->setTimezone($tz);
+			}
+		}
+
+		return $date;
 	}
 
 	/**
@@ -268,7 +367,6 @@ final class Time
 	{
 		return self::sub($target, 'weeks', $weeks, $floorTime);
 	}
-
 
 	/**
 	 * 添加月
@@ -915,7 +1013,6 @@ final class Time
 		];
 	}
 
-
 	/**
 	 * 返回上个月开始和结束的时间戳
 	 *
@@ -1113,7 +1210,6 @@ final class Time
 			$asDate ? self::endOfLastYearDate($timestamp) : self::endOfLastYear($timestamp),
 		];
 	}
-
 
 	/**
 	 * 获取毫秒级别的时间戳
@@ -1328,7 +1424,6 @@ final class Time
 			max($rangeDatetime[0], $rangeDatetime[1]),
 		];
 
-
 		// 如果大于最大时间间隔 则用结束时间减去最大时间间隔获得开始时间
 		if ($maxRange > 0 && $rangeDatetime[1] - $rangeDatetime[0] > $maxRange) {
 			$rangeDatetime[0] = $rangeDatetime[1] - $maxRange;
@@ -1440,7 +1535,6 @@ final class Time
 		return self::date($timestamp)->format('l');
 	}
 
-
 	/**
 	 * 返回当月的第几天
 	 * @param DateTimeInterface|string|int|null $timestamp
@@ -1460,7 +1554,6 @@ final class Time
 	{
 		return intval(self::date($timestamp)->format('z')) + 1;
 	}
-
 
 	/**
 	 * 返回当前的月
@@ -1534,38 +1627,37 @@ final class Time
 		return self::daysToSeconds(7) * $week;
 	}
 
+	/**
+	 * 获取时间间隔的秒数
+	 *
+	 * @param DateInterval $delay
+	 * @return int
+	 */
+	protected static function intervalToSeconds(DateInterval $delay)
+	{
+		$seconds = $delay->s;
+		$seconds += $delay->i * 60;
+		$seconds += $delay->h * 3600;
+		$seconds += $delay->d * 86400;
+		$seconds += $delay->m * 2592000;
+		$seconds += $delay->y * 31104000;
+		return $seconds;
+	}
 
-    /**
-     * 获取时间间隔的秒数
-     *
-     * @param DateInterval $delay
-     * @return int
-     */
-    protected static function intervalToSeconds(DateInterval $delay)
-    {
-        $seconds = $delay->s;
-        $seconds += $delay->i * 60;
-        $seconds += $delay->h * 3600;
-        $seconds += $delay->d * 86400;
-        $seconds += $delay->m * 2592000;
-        $seconds += $delay->y * 31104000;
-        return $seconds;
-    }
+	/**
+	 * 精确获取时间间隔的秒数
+	 *
+	 * 通过实际日期时间差计算，避免月份和年份天数不固定的问题
+	 *
+	 * @param DateInterval $interval
+	 * @param DateTimeInterface|string|int|null $baseTime 基准时间，用于计算实际间隔秒数，默认为当前时间
+	 * @return int 返回精确的秒数
+	 */
+	protected static function preciseIntervalToSeconds(DateInterval $interval, $baseTime = null)
+	{
+		$baseTime = self::date($baseTime);
+		$targetTime = (clone $baseTime)->add($interval);
 
-    /**
-     * 精确获取时间间隔的秒数
-     *
-     * 通过实际日期时间差计算，避免月份和年份天数不固定的问题
-     *
-     * @param DateInterval $interval
-     * @param DateTimeInterface|string|int|null $baseTime 基准时间，用于计算实际间隔秒数，默认为当前时间
-     * @return int 返回精确的秒数
-     */
-    protected static function preciseIntervalToSeconds(DateInterval $interval, $baseTime = null)
-    {
-        $baseTime = self::date($baseTime);
-        $targetTime = (clone $baseTime)->add($interval);
-
-        return $targetTime->getTimestamp() - $baseTime->getTimestamp();
-    }
+		return $targetTime->getTimestamp() - $baseTime->getTimestamp();
+	}
 }
