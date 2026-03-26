@@ -26,7 +26,7 @@ abstract class Enum extends BaseEnum
 	 */
 	public static function label($value, ?string $default = '--')
 	{
-		return static::$labels[$value] ?? $default;
+		return static::labels()[$value] ?? $default;
 	}
 
 	/**
