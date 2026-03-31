@@ -959,7 +959,7 @@ final class Str
 	 * @param bool $failOrNull
 	 * @return string
 	 */
-	public static function extractJson(?string $code, bool $failOrNull = true)
+	public static function extractJson(?string $code, bool $failOrNull = false)
 	{
 		$code = self::extractCode($code, 'json', $failOrNull);
 		// 删除控制字符，防止JSON解析失败
