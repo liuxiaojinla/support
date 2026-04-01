@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Xin\Support;
 
 use ArrayAccess;
@@ -15,7 +14,7 @@ final class Arr
 	/**
 	 * 如果元素不存在，则使用“点”表示法将其添加到数组中
 	 *
-	 * @param array $array
+	 * @param ArrayAccess|array $array
 	 * @param string $key
 	 * @param mixed $value
 	 * @return array
@@ -80,7 +79,7 @@ final class Arr
 	/**
 	 * 确定给定的键是否存在于提供的数组中
 	 *
-	 * @param ArrayAccess|array $array
+	 * @param array|ArrayAccess $array
 	 * @param string|int $key
 	 * @return bool
 	 */
@@ -97,7 +96,7 @@ final class Arr
 	 * 支持使用“点”表示法将数组项设置为给定值
 	 * 如果没有给方法指定键，整个数组将被替换
 	 *
-	 * @param iterable|array $array
+	 * @param array|ArrayAccess $array
 	 * @param string $key
 	 * @param mixed $value
 	 * @return array
@@ -136,11 +135,11 @@ final class Arr
 	/**
 	 * 支持使用“点”表示法检查数组中是否存在一个或多个项
 	 *
-	 * @param iterable|array $array
+	 * @param array $array
 	 * @param string|array $keys
 	 * @return bool
 	 */
-	public static function has($array, $keys)
+	public static function has(array $array, $keys)
 	{
 		$keys = (array)$keys;
 
@@ -170,11 +169,11 @@ final class Arr
 	/**
 	 * 获取除指定的键数组以外的所有给定数组
 	 *
-	 * @param iterable|array $array
+	 * @param array $array
 	 * @param array|string $keys
-	 * @return iterable|array
+	 * @return array
 	 */
-	public static function except($array, $keys)
+	public static function except(array $array, $keys)
 	{
 		self::forget($array, $keys);
 
@@ -184,11 +183,11 @@ final class Arr
 	/**
 	 * 使用“点”表示法从给定数组中删除一个或多个数组项
 	 *
-	 * @param iterable|array &$array
+	 * @param array &$array
 	 * @param array|string $keys
 	 * @return void
 	 */
-	public static function forget(&$array, $keys)
+	public static function forget(array &$array, $keys)
 	{
 		$original = &$array;
 
@@ -242,12 +241,30 @@ final class Arr
 
 	/**
 	 * 将数组使用点展平多维关联数组
-	 *
+	 * $user = [
+	 * 'name' => '张三',
+	 * 'profile' => [
+	 * 'age' => 25,
+	 * 'city' => '北京'
+	 * ],
+	 * 'contact' => [
+	 * 'email' => 'zhangsan@example.com',
+	 * 'phone' => '13800138000'
+	 * ]
+	 * ];
+	 * $result = Arr::dot($user);
+	 * $result = [
+	 * 'name' => '张三',
+	 * 'profile.age' => 25,
+	 * 'profile.city' => '北京',
+	 * 'contact.email' => 'zhangsan@example.com',
+	 * 'contact.phone' => '13800138000',
+	 * ];
 	 * @param array $array
 	 * @param string $prepend
 	 * @return array
 	 */
-	public static function dot($array, $prepend = '')
+	public static function dot(array $array, string $prepend = '')
 	{
 		$results = [];
 
@@ -264,8 +281,12 @@ final class Arr
 
 	/**
 	 * 交叉连接给定的数组，返回所有可能的排列
-	 * 使用用例：产品规格
-	 *
+	 * 使用用例：产品规格组合
+	 * $colors = ['red', 'green', 'blue'];
+	 * $sizes = ['small', 'medium', 'large'];
+	 * $weights = ['light', 'medium', 'heavy'];
+	 * $result = Arr::crossJoin($colors, $sizes, $weights);
+	 * $result = [['red','small','light'], ['red','medium','light'], ['red','large','light'], ['green','small','light'], ['green','medium','light'], ['green','large','light'], ['blue','small','light'], ['blue','medium','light'], ['blue','large','light']];
 	 * @param array ...$arrays
 	 * @return array
 	 */
@@ -292,7 +313,10 @@ final class Arr
 
 	/**
 	 * 把一个数组分成两个数组。一个带有键，另一个带有值
-	 *
+	 * $array = ['name' => 'John', 'age' => 25, 'city' => 'New York'];
+	 * $keys, $values = Arr::divide($array);
+	 * $keys = ['name', 'age', 'city'];
+	 * $values = ['John', 25, 'New York'];
 	 * @param array $array
 	 * @return array
 	 */
@@ -304,8 +328,11 @@ final class Arr
 	/**
 	 * 创建一个由键和值组成的数组，类似 Python 中 zip() 的内置函数，
 	 * 用于将多个可迭代对象（如列表、元组等）“打包”成一个个元组
-	 *
-	 * @param mixed ...$arrays
+	 * $keys = ['name', 'age', 'city'];
+	 * $values = ['John', 25, 'New York'];
+	 * $result = Arr::zip($keys, $values);
+	 * $result = [['name','John', 'age',25, 'city','New York']];
+	 * @param array ...$arrays
 	 * @return array
 	 */
 	public static function zip(...$arrays)
@@ -325,32 +352,32 @@ final class Arr
 	/**
 	 * 从数组里面获取指定的数据
 	 *
-	 * @param array $data
+	 * @param array $array
 	 * @param array $keys
 	 * @return array
 	 */
-	public static function only($data, array $keys)
+	public static function only(array $array, array $keys)
 	{
-		return array_intersect_key($data, array_flip($keys));
+		return array_intersect_key($array, array_flip($keys));
 	}
 
 	/**
 	 * 从数组里面获取指定的数据，如果指定的key不存在，则赋值为默认值
 	 *
-	 * @param array $data
+	 * @param array $array
 	 * @param array $keys
 	 * @param mixed $default
 	 * @return array
 	 */
-	public static function onlyWithDefault($data, array $keys, $default = null)
+	public static function onlyWithDefault(array $array, array $keys, $default = null)
 	{
 		$result = [];
 
 		foreach ($keys as $key) {
-			if (isset($data[$key])) {
-				$result[$key] = $data[$key];
+			if (isset($array[$key])) {
+				$result[$key] = $array[$key];
 			} elseif (strpos($key, '.')) {
-				$result = self::get($data, $key);
+				$result = self::get($array, $key);
 			} else {
 				$result[$key] = $default;
 			}
@@ -367,7 +394,7 @@ final class Arr
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public static function last($array, ?callable $callback = null, $default = null)
+	public static function last(array $array, ?callable $callback = null, $default = null)
 	{
 		if (is_null($callback)) {
 			return empty($array) ? value($default) : end($array);
@@ -379,12 +406,12 @@ final class Arr
 	/**
 	 * 返回数组中通过给定真值测试的第一个元素
 	 *
-	 * @param array|iterable $array
+	 * @param array $array
 	 * @param callable|null $callback
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public static function first($array, ?callable $callback = null, $default = null)
+	public static function first(array $array, ?callable $callback = null, $default = null)
 	{
 		if (is_null($callback)) {
 			if (empty($array)) {
@@ -412,7 +439,7 @@ final class Arr
 	 * @param int $depth
 	 * @return array
 	 */
-	public static function flatten($array, $depth = INF)
+	public static function flatten(array $array, int $depth = INF)
 	{
 		$result = [];
 
@@ -434,11 +461,11 @@ final class Arr
 	/**
 	 * 检测数组所有元素是否都符合指定条件
 	 *
-	 * @param array|iterable $array
-	 * @param string|callable $callback
+	 * @param iterable $array
+	 * @param callable $callback
 	 * @return bool
 	 */
-	public static function every($array, $callback)
+	public static function every(iterable $array, callable $callback)
 	{
 		foreach ($array as $k => $v) {
 			if (!$callback($v, $k)) {
@@ -454,10 +481,10 @@ final class Arr
 	 *
 	 * @param array $array
 	 * @param mixed $value
-	 * @param mixed $key
+	 * @param array-key $key
 	 * @return array
 	 */
-	public static function prepend($array, $value, $key = null)
+	public static function prepend(array $array, $value, $key = null)
 	{
 		if (is_null($key)) {
 			array_unshift($array, $value);
@@ -472,11 +499,11 @@ final class Arr
 	 * 从数组中获取一个值，并将其移除
 	 *
 	 * @param array $array
-	 * @param string $key
+	 * @param array-key $key
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public static function pull(&$array, $key, $default = null)
+	public static function pull(array &$array, $key, $default = null)
 	{
 		$value = self::get($array, $key, $default);
 
@@ -489,34 +516,20 @@ final class Arr
 	 * 从数组中获取一个或指定数量的随机值
 	 *
 	 * @param array $array
-	 * @param int|null $number
+	 * @param int|null $num
 	 * @return mixed
 	 * @throws InvalidArgumentException
 	 */
-	public static function random($array, $number = null)
+	public static function random(array $array, ?int $num = null)
 	{
-		$requested = is_null($number) ? 1 : $number;
+		$requested = is_null($num) ? 1 : $num;
 
-		$count = count($array);
-
-		if ($requested > $count) {
-			throw new InvalidArgumentException(
-				"You requested {$requested} items, but there are only {$count} items available."
-			);
-		}
-
-		if (is_null($number)) {
+		if (is_null($num)) {
 			return $array[array_rand($array)];
 		}
 
-		if ((int)$number === 0) {
-			return [];
-		}
-
-		$keys = array_rand($array, $number);
-
 		$results = [];
-
+		$keys = array_rand($array, $requested);
 		foreach ((array)$keys as $key) {
 			$results[] = $array[$key];
 		}
@@ -531,7 +544,7 @@ final class Arr
 	 * @param int|null $seed
 	 * @return array
 	 */
-	public static function shuffle($array, $seed = null)
+	public static function shuffle(array $array, ?int $seed = null)
 	{
 		if (is_null($seed)) {
 			shuffle($array);
@@ -547,12 +560,12 @@ final class Arr
 	/**
 	 * 根据字段规则判断给定的数组是否满足条件
 	 *
-	 * @param mixed $array
+	 * @param iterable $array
 	 * @param array $condition
 	 * @param bool $any
 	 * @return bool
 	 */
-	public static function is($array, $condition, $any = false)
+	public static function is(iterable $array, $condition, bool $any = false)
 	{
 		if (self::isAssoc($condition)) {
 			$temp = [];
@@ -639,7 +652,7 @@ final class Arr
 	 * @param bool $any
 	 * @return array
 	 */
-	public static function where($arrays, $condition, $any = false)
+	public static function where(array $arrays, $condition, bool $any = false)
 	{
 		$isAssoc = self::isAssoc($condition);
 
@@ -667,7 +680,7 @@ final class Arr
 	 * @param array $arrays
 	 * @return array
 	 */
-	public static function whereNotNull($arrays)
+	public static function whereNotNull(array $arrays)
 	{
 		return self::where($arrays, function ($value) {
 			return !is_null($value);
@@ -676,13 +689,18 @@ final class Arr
 
 	/**
 	 * 给定值是否为关联数组
-	 *
-	 * @param array $arr 数组
+	 * @param array|ArrayAccess $array 数组
 	 * @return bool
 	 */
-	public static function isAssoc($arr)
+	public static function isAssoc($array)
 	{
-		return array_keys($arr) !== range(0, count($arr) - 1);
+		if (is_array($array)) {
+			return array_keys($array) !== range(0, count($array) - 1);
+		} elseif ($array instanceof ArrayAccess) {
+			return !$array->offsetExists(0);
+		}
+
+		return false;
 	}
 
 	/**
@@ -692,7 +710,7 @@ final class Arr
 	 * @param array $filter 要额外过滤的数据
 	 * @return array
 	 */
-	public static function filter(&$params, $filter = ["sign", "sign_type"])
+	public static function filter(array &$params, array $filter = ["sign", "sign_type"])
 	{
 		foreach ($params as $key => $val) {
 			if ($val == "" || (is_array($val) && count($val) == 0)) {
@@ -715,11 +733,11 @@ final class Arr
 	/**
 	 * 不区分大小写的in_array实现
 	 *
-	 * @param $value
-	 * @param $array
+	 * @param mixed $value
+	 * @param array $array
 	 * @return bool
 	 */
-	public static function in($value, $array)
+	public static function in($value, array $array)
 	{
 		return in_array(strtolower($value), array_map('strtolower', $array));
 	}
@@ -730,7 +748,7 @@ final class Arr
 	 * @param array $array
 	 * @return array
 	 */
-	public static function sort(&$array)
+	public static function sort(array &$array)
 	{
 		if (self::isAssoc($array)) {
 			ksort($array);
@@ -748,7 +766,7 @@ final class Arr
 	 * @param array $array
 	 * @return array
 	 */
-	public static function sortRecursive($array)
+	public static function sortRecursive(array $array)
 	{
 		foreach ($array as &$value) {
 			if (is_array($value)) {
@@ -791,11 +809,11 @@ final class Arr
 	 * @template TMapWithKeysKey of array-key
 	 * @template TMapWithKeysValue
 	 *
-	 * @param array<TKey, TValue> $array
+	 * @param iterable<TKey, TValue> $array
 	 * @param callable(TValue, TKey): array<TMapWithKeysKey, TMapWithKeysValue> $callback
 	 * @return array
 	 */
-	public static function mapWithKeys(array $array, callable $callback)
+	public static function mapWithKeys(iterable $array, callable $callback)
 	{
 		$result = [];
 
@@ -820,20 +838,16 @@ final class Arr
 	 * @template TMapKey of array-key
 	 * @template TMapValue
 	 *
-	 * @param array<TKey, TValue> $array
+	 * @param iterable<TKey, TValue> $array
 	 * @param callable(TValue, TKey): TMapValue $callback
 	 * @return array<TMapKey, TMapValue>
 	 */
-	public static function map(array $array, callable $callback, bool $isIndexKey = false)
+	public static function map(iterable $array, callable $callback)
 	{
 		$result = [];
 
 		foreach ($array as $key => $value) {
-			if ($isIndexKey) {
-				$result[] = $callback($value, $key);
-			} else {
-				$result[$key] = $callback($value, $key);
-			}
+			$result[$key] = $callback($value, $key);
 		}
 
 		return $result;
@@ -843,11 +857,11 @@ final class Arr
 	 * 从数组中提取指定的值数组
 	 *
 	 * @param array $array
-	 * @param string $column
-	 * @param string $indexKey
+	 * @param string|null $column
+	 * @param string|null $indexKey
 	 * @return array
 	 */
-	public static function column(array $array, $column, $indexKey = null)
+	public static function column(array $array, ?string $column = null, ?string $indexKey = null)
 	{
 		$result = [];
 
@@ -915,7 +929,7 @@ final class Arr
 	 * @return array
 	 * @link https://www.php.net/manual/zh/function.array-unique.php#116302
 	 */
-	public static function uniqueMulti($array, $key)
+	public static function uniqueMulti(array $array, string $key)
 	{
 		$i = 0;
 		$temp_array = [];
@@ -941,7 +955,7 @@ final class Arr
 	 * @param array $options
 	 * @return array
 	 */
-	public static function tree(array $list, callable $itemHandler = null, $pid = 0, array $options = [])
+	public static function tree(array $list, callable $itemHandler = null, int $pid = 0, array $options = [])
 	{
 		$options = array_merge([
 			'id' => 'id', // 要检索的ID键名
@@ -1008,7 +1022,7 @@ final class Arr
 	 * @param string $child
 	 * @return array
 	 */
-	public static function treeToList($list, $child = 'child')
+	public static function treeToList(array $list, string $child = 'child')
 	{
 		$handler = function ($list, $child) use (&$handler) {
 			$result = [];
@@ -1031,21 +1045,21 @@ final class Arr
 	/**
 	 * 遍历树形数据
 	 *
-	 * @param array $data
+	 * @param array $list
 	 * @param callable $callback
 	 * @param mixed $parent
 	 * @param array $options
 	 * @return array
 	 */
-	public static function treeEach(array $data, callable $callback, &$parent = null, array $options = [])
+	public static function treeEach(array $list, callable $callback, &$parent = null, array $options = [])
 	{
 		$options = array_merge([
 			'child' => 'child', // 要存放的子结果集
 		], $options);
 		$childKey = $options['child'];
 
-		$handler = function (&$data, &$parent) use (&$handler, $callback, $childKey) {
-			foreach ($data as &$item) {
+		$handler = function (&$list, &$parent) use (&$handler, $callback, $childKey) {
+			foreach ($list as &$item) {
 				call_user_func_array($callback, [&$item, &$parent]);
 				if (isset($item[$childKey])) {
 					$handler($item[$childKey], $item);
@@ -1053,41 +1067,41 @@ final class Arr
 			}
 			unset($item);
 
-			return $data;
+			return $list;
 		};
 
-		return $handler($data, $parent);
+		return $handler($list, $parent);
 	}
 
 	/**
 	 * 遍历过滤树形数据
 	 *
-	 * @param array $data
+	 * @param array $list
 	 * @param callable $filter
 	 * @param array $options
 	 * @return array
 	 */
-	public static function treeFilter(array $data, callable $filter, array $options = [])
+	public static function treeFilter(array $list, callable $filter, array $options = [])
 	{
 		$options = array_merge([
 			'child' => 'child', // 要存放的子结果集
 		], $options);
 		$childKey = $options['child'];
 
-		$handler = function (&$data) use (&$handler, &$filter, &$childKey) {
-			foreach ($data as $key => &$item) {
+		$handler = function (&$list) use (&$handler, &$filter, &$childKey) {
+			foreach ($list as $key => &$item) {
 				if (call_user_func_array($filter, [$item]) === false) {
-					unset($data[$key]);
+					unset($list[$key]);
 				} elseif (isset($item[$childKey])) {
 					$item[$childKey] = $handler($item[$childKey]);
 				}
 			}
 			unset($item);
 
-			return $data;
+			return $list;
 		};
 
-		return $handler($data);
+		return $handler($list);
 	}
 
 	/**
@@ -1095,9 +1109,10 @@ final class Arr
 	 *
 	 * @param array $array
 	 * @param array|callable $keyMappings
+	 * @param bool $overwrite
 	 * @return array
 	 */
-	public static function transformKeys(array $array, $keyMappings)
+	public static function transformKeys(array $array, $keyMappings, bool $overwrite = false)
 	{
 		if (is_callable($keyMappings)) {
 			return self::transformKey($array, $keyMappings);
@@ -1111,7 +1126,12 @@ final class Arr
 					[$newKey, $value] = call_user_func($newKey, $array[$oldKey], $oldKey, $array);
 					$array[$newKey] = $value;
 				} else {
-					$array[$newKey] = $array[$oldKey];
+					$value = $array[$oldKey];
+				}
+
+				// 如果覆盖则赋值
+				if ($overwrite || !array_key_exists($newKey, $array)) {
+					$array[$newKey] = $value;
 				}
 
 				unset($array[$oldKey]);
@@ -1222,7 +1242,7 @@ final class Arr
 	 * @return array
 	 * @link https://www.php.net/manual/zh/function.array-intersect-key.php#80227
 	 */
-	public static function mergeDefault($default, $data)
+	public static function mergeDefault(array $default, array $data)
 	{
 		$intersect = array_intersect_key($data, $default); //Get data for which a default exists
 		$diff = array_diff_key($default, $data); //Get defaults which are not present in data
@@ -1236,8 +1256,12 @@ final class Arr
 	 * @param string $string
 	 * @return array
 	 */
-	public static function parse($string)
+	public static function parse(?string $string = null)
 	{
+		if ($string === null || $string === '') {
+			return [];
+		}
+
 		$string = trim(trim($string), ",;\r\n");
 		if (empty($string)) {
 			return [];
@@ -1265,7 +1289,7 @@ final class Arr
 	/**
 	 * 数组解析为字符串
 	 *
-	 * @param array $array
+	 * @param array|ArrayAccess $array
 	 * @return string
 	 */
 	public static function toString($array)
