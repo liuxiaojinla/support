@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Xin\Support;
 
 use Closure;
@@ -605,11 +604,11 @@ final class Str
 	 */
 	public static function is($pattern, $value)
 	{
-		$patterns = Arr::wrap($pattern);
-
 		if (empty($patterns)) {
 			return false;
 		}
+
+		$patterns = is_array($pattern) ? $pattern : [$pattern];
 
 		foreach ($patterns as $pattern) {
 			// If the given value is an exact match we can of course return true right
@@ -716,7 +715,7 @@ final class Str
 	}
 
 	/**
-	 * 渲染Stub
+	 * 渲染 Stub
 	 * @param string $tpl
 	 * @param array $data
 	 * @param array $options
@@ -737,6 +736,47 @@ final class Str
 		}
 
 		return str_replace($variables, $values, $tpl);
+	}
+
+	/**
+	 * 渲染 Stub 升级版
+	 * @param string $tpl
+	 * @param array|callable $data
+	 * @param array $options
+	 * @return array|string|string[]|null
+	 */
+	public static function stub2(string $tpl, $data, array $options = [])
+	{
+		$options = array_replace_recursive([
+			'tag_start' => '{',
+			'tag_end' => '}',
+			'strict' => false, // 严格模式：变量不存在时保留原标记
+			'throw' => false, // 抛出异常
+		], $options);
+
+		$pattern = '/' . preg_quote($options['tag_start'], '/') . '([a-zA-Z0-9_.-]+)' . preg_quote($options['tag_end'], '/') . '/';
+		return preg_replace_callback($pattern, function ($matches) use ($data, $options) {
+			$key = $matches[1];
+
+			if (is_callable($data)) {
+				$value = $data($key);
+			} else {
+				$value = $data[$key] ?? null;
+			}
+
+			if ($value === null) {
+				// 严格模式：保留原标记或抛出异常
+				if ($options['strict']) {
+					return $matches[0];
+				} elseif ($options['throw']) {
+					throw new InvalidArgumentException("Missing variable: {$key}");
+				}
+
+				return '';
+			}
+
+			return $value;
+		}, $tpl);
 	}
 
 	/**
