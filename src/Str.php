@@ -604,7 +604,7 @@ final class Str
 	 */
 	public static function is($pattern, $value)
 	{
-		if (empty($patterns)) {
+		if (empty($pattern)) {
 			return false;
 		}
 
