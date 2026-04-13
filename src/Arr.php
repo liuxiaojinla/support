@@ -1251,9 +1251,24 @@ final class Arr
 	}
 
 	/**
+	 * 扩展数组
+	 *
+	 * @param array $target
+	 * @param array ...$items
+	 */
+	public static function extend(array &$target, array ...$items)
+	{
+		foreach ($items as $item) {
+			foreach ($item as $key => $value) {
+				$target[$key] = $value;
+			}
+		}
+	}
+
+	/**
 	 * 解析字符串为数组
 	 *
-	 * @param string $string
+	 * @param string|null $string
 	 * @return array
 	 */
 	public static function parse(?string $string = null)

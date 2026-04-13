@@ -76,7 +76,8 @@ final class Time
 				$tz = $datetime->getTimezone();
 			}
 
-			return new DateTime('@' . $datetime->getTimestamp(), $tz);
+			return DateTime::createFromInterface($datetime)->setTimezone($tz);
+			// return new DateTime($new->format('Y-m-d H:i:s'));
 		} elseif (is_numeric($datetime)) {
 			return new DateTime('@' . $datetime, self::timezone($tz));
 		} else {
