@@ -439,7 +439,7 @@ final class Arr
 	 * @param int $depth
 	 * @return array
 	 */
-	public static function flatten(array $array, int $depth = INF)
+	public static function flatten(array $array, int $depth = 999999)
 	{
 		$result = [];
 
@@ -819,7 +819,6 @@ final class Arr
 
 		foreach ($array as $key => $value) {
 			$assoc = $callback($value, $key);
-
 			foreach ($assoc as $mapKey => $mapValue) {
 				$result[$mapKey] = $mapValue;
 			}
@@ -892,11 +891,37 @@ final class Arr
 	}
 
 	/**
-	 * 解包数组
+	 * 解包数组，将二维数组按指定键拆分为多个一维数组
 	 *
-	 * @param array $array
-	 * @param string|array $keys
-	 * @return array
+	 * @param array $array 二维数组
+	 * @param string|array|null $keys 指定的键名，可以是字符串（逗号分隔）或数组。如果为 null，则自动获取第一个元素的键名
+	 * @return array 返回一个数组，其中每个元素是一个一维数组，对应原数组中指定键的所有值
+	 *
+	 * @example
+	 * $data = [
+	 *     ['name' => 'Alice', 'age' => 25],
+	 *     ['name' => 'Bob', 'age' => 30]
+	 * ];
+	 *
+	 * // 示例 1: 不指定 keys，自动提取所有键
+	 * Arr::uncombine($data);
+	 * // 返回: [
+	 * //     ['Alice', 'Bob'],       // 对应 'name' 键的值
+	 * //     [25, 30]                // 对应 'age' 键的值
+	 * // ]
+	 *
+	 * // 示例 2: 指定单个键
+	 * Arr::uncombine($data, 'name');
+	 * // 返回: [
+	 * //     ['Alice', 'Bob']
+	 * // ]
+	 *
+	 * // 示例 3: 指定多个键
+	 * Arr::uncombine($data, ['name', 'age']);
+	 * // 返回: [
+	 * //     ['Alice', 'Bob'],
+	 * //     [25, 30]
+	 * // ]
 	 */
 	public static function uncombine(array $array, $keys = null)
 	{
@@ -905,7 +930,7 @@ final class Arr
 		if ($keys) {
 			$keys = is_array($keys) ? $keys : explode(',', $keys);
 		} else {
-			$keys = array_keys(current($array));
+			$keys = array_keys($array);
 		}
 
 		foreach ($keys as $index => $key) {
@@ -1251,21 +1276,6 @@ final class Arr
 	}
 
 	/**
-	 * 扩展数组
-	 *
-	 * @param array $target
-	 * @param array ...$items
-	 */
-	public static function extend(array &$target, array ...$items)
-	{
-		foreach ($items as $item) {
-			foreach ($item as $key => $value) {
-				$target[$key] = $value;
-			}
-		}
-	}
-
-	/**
 	 * 解析字符串为数组
 	 *
 	 * @param string|null $string
@@ -1305,18 +1315,19 @@ final class Arr
 	 * 数组解析为字符串
 	 *
 	 * @param array|ArrayAccess $array
+	 * @param string $separator 分隔符
 	 * @return string
 	 */
-	public static function toString($array)
+	public static function toString($array, string $separator = "\n")
 	{
 		$result = '';
 
 		if (self::isAssoc($array)) {
 			foreach ($array as $key => $val) {
-				$result .= "{$key}:$val\n";
+				$result .= "{$key}:{$val}{$separator}";
 			}
 		} else {
-			$result = implode("\n", $array);
+			$result = implode($separator, $array);
 		}
 
 		return $result;
@@ -1324,12 +1335,22 @@ final class Arr
 
 	/**
 	 * 第二个索引数组向第一个索引数组覆盖
-	 * @param array $base
-	 * @param array $overlay
-	 * @param null $length
+	 *
+	 * @param array $base 基础数组
+	 * @param array $overlay 覆盖数组
+	 * @param int|null $length 处理的长度，默认为基础数组的长度
 	 * @return array
+	 *
+	 * @example
+	 * $base = ['a', 'b', 'c', 'd'];
+	 * $overlay = ['x', 'y'];
+	 * $result = Arr::overlay($base, $overlay);
+	 * // $result = ['x', 'y', 'c', 'd']
+	 *
+	 * $result = Arr::overlay($base, $overlay, 3);
+	 * // $result = ['x', 'y', 'c']
 	 */
-	public static function overlay(array $base, array $overlay, $length = null)
+	public static function overlay(array $base, array $overlay, ?int $length = null)
 	{
 		$length = $length === null ? count($base) : $length;
 		$out = [];
@@ -1341,9 +1362,21 @@ final class Arr
 
 	/**
 	 * 混合两个数组，取最长的数组长度
-	 * @param array $base
-	 * @param array $overlay
+	 *
+	 * @param array $base 基础数组
+	 * @param array $overlay 覆盖数组
 	 * @return array
+	 *
+	 * @example
+	 * $base = ['a', 'b'];
+	 * $overlay = ['x', 'y', 'z'];
+	 * $result = Arr::blend($base, $overlay);
+	 * // $result = ['x', 'y', 'z']
+	 *
+	 * $base = ['a', 'b', 'c'];
+	 * $overlay = ['x'];
+	 * $result = Arr::blend($base, $overlay);
+	 * // $result = ['x', 'b', 'c']
 	 */
 	public static function blend(array $base, array $overlay)
 	{
@@ -1353,9 +1386,21 @@ final class Arr
 
 	/**
 	 * 裁剪两个数组，取最短的数组长度
-	 * @param array $base
-	 * @param array $overlay
+	 *
+	 * @param array $base 基础数组
+	 * @param array $overlay 覆盖数组
 	 * @return array
+	 *
+	 * @example
+	 * $base = ['a', 'b', 'c'];
+	 * $overlay = ['x', 'y'];
+	 * $result = Arr::crop($base, $overlay);
+	 * // $result = ['x', 'y']
+	 *
+	 * $base = ['a'];
+	 * $overlay = ['x', 'y', 'z'];
+	 * $result = Arr::crop($base, $overlay);
+	 * // $result = ['x']
 	 */
 	public static function crop(array $base, array $overlay)
 	{
