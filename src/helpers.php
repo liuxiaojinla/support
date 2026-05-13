@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use Xin\Support\Path;
 use Xin\Support\Proxy\HigherOrderTapProxy;
 use Xin\Support\SQL;
+use Xin\Support\Time;
 
 if (!function_exists('tap')) {
 	/**
@@ -99,11 +100,11 @@ if (!function_exists('object_get')) {
 	 * Get an item from an object using "dot" notation.
 	 *
 	 * @param object $object
-	 * @param string $key
+	 * @param string|null $key
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	function object_get($object, $key, $default = null)
+	function object_get($object, ?string $key, $default = null)
 	{
 		if (is_null($key) || trim($key) == '') {
 			return $object;
@@ -136,7 +137,8 @@ if (!function_exists('build_mysql_distance_field')) {
 	 */
 	function build_mysql_distance_field(
 		$longitude, $latitude,
-		$lng_name = 'longitude', $lat_name = 'latitude',
+		$lng_name = 'longitude',
+		$lat_name = 'latitude',
 		$as_name = 'distance'
 	)
 	{
@@ -151,7 +153,7 @@ if (!function_exists('get_class_const_list')) {
 	 * @param string $class
 	 * @return array|bool
 	 */
-	function get_class_const_list($class)
+	function get_class_const_list(string $class)
 	{
 		try {
 			return (new ReflectionClass($class))->getConstants();
@@ -170,7 +172,7 @@ if (!function_exists('get_const_value')) {
 	 * @param string $name
 	 * @return mixed
 	 */
-	function get_const_value($class, $name)
+	function get_const_value(string $class, string $name)
 	{
 		try {
 			$ref = new ReflectionClass($class);
@@ -194,7 +196,7 @@ if (!function_exists('const_exist')) {
 	 * @param string $name
 	 * @return bool
 	 */
-	function const_exist($class, $name)
+	function const_exist(string $class, string $name)
 	{
 		try {
 			return (new ReflectionClass($class))->hasConstant($name);
@@ -214,7 +216,7 @@ if (!function_exists('now')) {
 	 */
 	function now($tz = null)
 	{
-		return \Xin\Support\Time::now($tz);
+		return Time::now($tz);
 	}
 }
 
@@ -311,7 +313,7 @@ if (!function_exists('suffix')) {
 	 * @param string $file
 	 * @return string
 	 */
-	function path_suffix($file)
+	function path_suffix(string $file)
 	{
 		return Path::suffix($file);
 	}
@@ -321,9 +323,10 @@ if (!function_exists('replace_suffix')) {
 	/**
 	 * 替换文件后缀
 	 * @param string $file
+	 * @param string $suffix
 	 * @return string
 	 */
-	function path_replace_suffix($file, $suffix)
+	function path_replace_suffix(string $file, string $suffix)
 	{
 		return Path::replaceSuffix($file, $suffix);
 	}

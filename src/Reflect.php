@@ -285,6 +285,7 @@ final class Reflect
 	 * @param array $default
 	 * @param bool $throw
 	 * @return ReflectionMethod[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function publicMethods($objectOrClass, array $default = [], bool $throw = false)
 	{
@@ -324,6 +325,7 @@ final class Reflect
 	 * @param array $default
 	 * @param bool $throw
 	 * @return ReflectionMethod[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function finalMethods($objectOrClass, array $default = [], bool $throw = false)
 	{
@@ -336,6 +338,7 @@ final class Reflect
 	 * @param array $default
 	 * @param bool $throw
 	 * @return ReflectionMethod[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function abstractMethods($objectOrClass, array $default = [], bool $throw = false)
 	{
@@ -348,6 +351,7 @@ final class Reflect
 	 * @param array $default
 	 * @param bool $throw
 	 * @return ReflectionMethod[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function staticMethods($objectOrClass, array $default = [], bool $throw = false)
 	{
@@ -529,6 +533,7 @@ final class Reflect
 	 * @param array $default
 	 * @param bool $throw
 	 * @return ReflectionProperty[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function dynamicProperties($objectOrClass, array $default = [], bool $throw = false)
 	{
@@ -544,6 +549,7 @@ final class Reflect
 	 * @param array $default
 	 * @param bool $throw
 	 * @return ReflectionProperty[]
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function staticProperties($objectOrClass, array $default = [], bool $throw = false)
 	{
@@ -703,9 +709,9 @@ final class Reflect
 	 * 获取类的常量
 	 * @param class-string|object $objectOrClass
 	 * @param int|null $filter
+	 * @param bool $throw
 	 * @return array
 	 * @noinspection PhpDocMissingThrowsInspection
-	 * @noinspection PhpUnhandledExceptionInspection
 	 */
 	public static function constants($objectOrClass, ?int $filter = null, bool $throw = false)
 	{

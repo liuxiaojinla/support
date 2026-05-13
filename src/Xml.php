@@ -11,10 +11,12 @@ final class Xml
 	 * 将XML转换成数组
 	 *
 	 * @param string $xml
+	 * @param int $options
 	 * @return mixed
 	 */
-	public static function parse($xml, int $options = LIBXML_NOCDATA)
+	public static function parse(string $xml, int $options = LIBXML_NOCDATA)
 	{
+		/** @noinspection PhpComposerExtensionStubsInspection */
 		return json_decode(json_encode(self::parseAsElement($xml, $options)), true);
 	}
 
@@ -22,9 +24,10 @@ final class Xml
 	 * 将XML转换成SimpleXMLElement对象
 	 *
 	 * @param string $xml
+	 * @param int $options
 	 * @return SimpleXMLElement
 	 */
-	public static function parseAsElement($xml, int $options = LIBXML_NOCDATA)
+	public static function parseAsElement(string $xml, int $options = LIBXML_NOCDATA)
 	{
 		// 检查 PHP 版本以决定是否需要调用 libxml_disable_entity_loader()
 		if (version_compare(PHP_VERSION, '8.0.0', '<')) {
@@ -43,9 +46,9 @@ final class Xml
 	 * @param string $tag 指定元素标签名称，主要用于索引数组
 	 * @return string
 	 */
-	public static function encode($param, $root = 'xml', $tag = '')
+	public static function encode(array $param, string $root = 'xml', string $tag = '')
 	{
-		if (!is_array($param) || count($param) <= 0) {
+		if (count($param) <= 0) {
 			return '';
 		}
 

@@ -59,7 +59,7 @@ class Retry
 	 * @return mixed
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public function invoke($throw = true)
+	public function invoke(bool $throw = true)
 	{
 		$exception = null;
 
@@ -92,7 +92,7 @@ class Retry
 	 * @param int $times
 	 * @return static
 	 */
-	public static function make($callback, $times = 3)
+	public static function make(callable $callback, int $times = 3)
 	{
 		return new static($callback, null, $times);
 	}

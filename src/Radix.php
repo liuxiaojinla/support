@@ -30,7 +30,7 @@ class Radix
 	 *
 	 * @param string $sequence
 	 */
-	public function __construct($sequence)
+	public function __construct(string $sequence)
 	{
 		$this->chars = str_split($sequence);
 		$this->chars2 = array_flip($this->chars);
@@ -59,7 +59,7 @@ class Radix
 	 * @param int $num
 	 * @return string
 	 */
-	public function generate($num)
+	public function generate(int $num)
 	{
 		if (is_nan($num)) {
 			return '';
@@ -88,7 +88,7 @@ class Radix
 	 * @param string $str
 	 * @return int
 	 */
-	public function parse($str)
+	public function parse(string $str)
 	{
 		$strLastIndex = strlen($str) - 1;
 

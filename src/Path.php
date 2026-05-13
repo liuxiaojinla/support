@@ -61,7 +61,7 @@ final class Path
 	 * @param string $subPath
 	 * @return string
 	 */
-	public static function concat($basePath, $subPath)
+	public static function concat(string $basePath, string $subPath)
 	{
 		return self::joins(rtrim($basePath, '/'), ltrim($subPath, '/'));
 	}

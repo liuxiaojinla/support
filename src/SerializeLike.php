@@ -24,8 +24,9 @@ class SerializeLike extends Fluent
 
 	/**
 	 * @param string $likeFilepath
+	 * @param array $items
 	 */
-	public function __construct($likeFilepath, array $items = [])
+	public function __construct(string $likeFilepath, array $items = [])
 	{
 		parent::__construct($items);
 
@@ -38,19 +39,18 @@ class SerializeLike extends Fluent
 
 	/**
 	 * 加载数据
-	 * @return false|void
+	 * @return void
 	 */
 	protected function load()
 	{
 		if (!is_readable($this->likeFilepath)) {
-			return false;
+			return;
 		}
-
-		$data = (array)Json::arrayFromFile($this->likeFilepath);
 
 		$originalChanged = $this->isChanged;
 
 		$this->setAutomaticStorage(false);
+		$data = (array)Json::arrayFromFile($this->likeFilepath);
 		foreach ($data as $key => $value) {
 			$this->set($key, $value);
 		}

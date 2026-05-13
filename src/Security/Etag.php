@@ -21,7 +21,7 @@ final class Etag
 	 * @param int $fsize
 	 * @return int
 	 */
-	private static function blockCount($fsize)
+	private static function blockCount(int $fsize)
 	{
 		return (int)(($fsize + (self::BLOCK_SIZE - 1)) / self::BLOCK_SIZE);
 	}
@@ -30,7 +30,7 @@ final class Etag
 	 * @param string $data
 	 * @return array
 	 */
-	private static function calcSha1($data)
+	private static function calcSha1(string $data)
 	{
 		$sha1Str = sha1($data, true);
 		$err = error_get_last();
@@ -42,10 +42,11 @@ final class Etag
 	}
 
 	/**
+	 * 计算文件的ETag值
 	 * @param string $filename
 	 * @return string
 	 */
-	public static function sum($filename)
+	public static function sum(string $filename)
 	{
 		$fhandler = fopen($filename, 'rb');
 		$err = error_get_last();
@@ -96,7 +97,7 @@ final class Etag
 	 * @return string 编码后的字符串
 	 * @link http://developer.qiniu.com/docs/v6/api/overview/appendix.html#urlsafe-base64
 	 */
-	private static function base64_urlSafeEncode($data)
+	private static function base64_urlSafeEncode(string $data)
 	{
 		$find = ['+', '/'];
 		$replace = ['-', '_'];

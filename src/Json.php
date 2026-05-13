@@ -4,6 +4,7 @@ namespace Xin\Support;
 
 final class Json
 {
+	/** @noinspection PhpComposerExtensionStubsInspection */
 	public const ENCODE_DEFAULT = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 
 	/**
@@ -28,6 +29,7 @@ final class Json
 	 */
 	public static function encode($value, int $flags = self::ENCODE_DEFAULT, int $depth = 512)
 	{
+		/** @noinspection PhpComposerExtensionStubsInspection */
 		return json_encode($value, $flags, $depth);
 	}
 
@@ -53,6 +55,7 @@ final class Json
 	 */
 	public static function pretty($value, int $flags = self::ENCODE_DEFAULT, int $depth = 512)
 	{
+		/** @noinspection PhpComposerExtensionStubsInspection */
 		return self::encode($value, $flags | JSON_PRETTY_PRINT, $depth);
 	}
 
@@ -79,6 +82,7 @@ final class Json
 	 */
 	public static function decode(string $json, ?bool $associative = null, int $depth = 512, int $flags = 0)
 	{
+		/** @noinspection PhpComposerExtensionStubsInspection */
 		return json_decode($json, $associative, $depth, $flags);
 	}
 

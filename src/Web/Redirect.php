@@ -40,7 +40,7 @@ class Redirect
 	 * @param string $msg 重定向前的提示信息
 	 * @return void
 	 */
-	public static function redirect(string $url, $time = 0, string $msg = '')
+	public static function redirect(string $url, int $time = 0, string $msg = '')
 	{
 		$redirect = new static($url, $time, $msg);
 		$redirect->send();

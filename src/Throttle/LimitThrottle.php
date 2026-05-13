@@ -97,7 +97,7 @@ class LimitThrottle
 	 * @param int $value
 	 * @return mixed
 	 */
-	protected function call($value)
+	protected function call(int $value)
 	{
 		try {
 			return call_user_func($this->thenCallback, $this->limits, $value);
@@ -113,7 +113,7 @@ class LimitThrottle
 	 * @param int $value
 	 * @return int
 	 */
-	protected function getLimit($value)
+	protected function getLimit(int $value)
 	{
 		foreach ($this->limits as $limit) {
 			if ($value >= $limit) {

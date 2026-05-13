@@ -22,7 +22,7 @@ final class Version
 	 * @param string $new
 	 * @return bool
 	 */
-	public static function gt($current, $new)
+	public static function gt(string $current, string $new)
 	{
 		return self::check($current, $new) === 1;
 	}
@@ -30,11 +30,11 @@ final class Version
 	/**
 	 * 版本检测
 	 *
-	 * @param $current
-	 * @param $new
+	 * @param string $current
+	 * @param string $new
 	 * @return int
 	 */
-	public static function check($current, $new)
+	public static function check(string $current, string $new)
 	{
 		if ($current == $new) {
 			return 0;
@@ -67,7 +67,7 @@ final class Version
 	 * @param string $new
 	 * @return bool
 	 */
-	public static function egt($current, $new)
+	public static function egt(string $current, string $new)
 	{
 		$res = self::check($current, $new);
 
@@ -81,7 +81,7 @@ final class Version
 	 * @param string $new
 	 * @return bool
 	 */
-	public static function eq($current, $new)
+	public static function eq(string $current, string $new)
 	{
 		return self::check($current, $new) === 0;
 	}
@@ -93,7 +93,7 @@ final class Version
 	 * @param string $new
 	 * @return bool
 	 */
-	public static function lt($current, $new)
+	public static function lt(string $current, string $new)
 	{
 		return self::check($current, $new) === -1;
 	}
@@ -105,7 +105,7 @@ final class Version
 	 * @param string $new
 	 * @return bool
 	 */
-	public static function elt($current, $new)
+	public static function elt(string $current, string $new)
 	{
 		$res = self::check($current, $new);
 

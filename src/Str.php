@@ -146,10 +146,10 @@ final class Str
 	 * 返回给定值首次出现后字符串的剩余部分
 	 *
 	 * @param string $subject
-	 * @param string $search
+	 * @param string|null $search
 	 * @return string
 	 */
-	public static function after(string $subject, string $search)
+	public static function after(string $subject, ?string $search)
 	{
 		return $search === '' ? $subject : array_reverse(explode($search, $subject, 2))[0];
 	}
@@ -158,17 +158,16 @@ final class Str
 	 * 返回给定值最后一次出现后字符串的剩余部分
 	 *
 	 * @param string $subject
-	 * @param string $search
+	 * @param string|null $search
 	 * @return string
 	 */
-	public static function afterLast(string $subject, string $search)
+	public static function afterLast(string $subject, ?string $search)
 	{
 		if ($search === '') {
 			return $subject;
 		}
 
 		$position = mb_strrpos($subject, (string)$search);
-
 		if ($position === false) {
 			return $subject;
 		}
@@ -180,10 +179,10 @@ final class Str
 	 * 获取给定值第一次出现之前的字符串部分
 	 *
 	 * @param string $subject
-	 * @param string $search
+	 * @param string|null $search
 	 * @return string
 	 */
-	public static function before(string $subject, string $search)
+	public static function before(string $subject, ?string $search)
 	{
 		return $search === '' ? $subject : explode($search, $subject)[0];
 	}
@@ -192,17 +191,16 @@ final class Str
 	 * 获取给定值最后一次出现之前的字符串部分。
 	 *
 	 * @param string $subject
-	 * @param string $search
+	 * @param string|null $search
 	 * @return string
 	 */
-	public static function beforeLast(string $subject, string $search)
+	public static function beforeLast(string $subject, ?string $search)
 	{
 		if ($search === '') {
 			return $subject;
 		}
 
 		$pos = mb_strrpos($subject, $search);
-
 		if ($pos === false) {
 			return $subject;
 		}
@@ -302,10 +300,10 @@ final class Str
 	 * 转为首字母大写的标题格式
 	 *
 	 * @param string $value
-	 * @param string $encoding
+	 * @param string|null $encoding
 	 * @return string
 	 */
-	public static function title(string $value, string $encoding = 'UTF-8')
+	public static function title(string $value, ?string $encoding = 'UTF-8')
 	{
 		return mb_convert_case($value, MB_CASE_TITLE, $encoding);
 	}

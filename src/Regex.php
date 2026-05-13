@@ -18,7 +18,7 @@ final class Regex
 	 * @param string $type 验证类型，默认‘ALL’,EN.验证英文,CN.验证中文，ALL.验证中文和英文
 	 * @return bool
 	 */
-	public static function isUsername($value, $minLen = 2, $maxLen = 48, $type = 'ALL')
+	public static function isUsername(string $value, int $minLen = 2, int $maxLen = 48, string $type = 'ALL')
 	{
 		if (empty ($value)) {
 			return false;
@@ -46,7 +46,7 @@ final class Regex
 	 * @param int $maxLen 最大长度
 	 * @return bool
 	 */
-	public static function isPassword($value, $minLen = 6, $maxLen = 16)
+	public static function isPassword(string $value, int $minLen = 6, int $maxLen = 16)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -64,7 +64,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function isEmail($value)
+	public static function isEmail(string $value)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -82,7 +82,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function isTelephone($value)
+	public static function isTelephone(string $value)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -100,7 +100,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function isMobile($value)
+	public static function isMobile(string $value)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -118,7 +118,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function isPostCode($value)
+	public static function isPostCode(string $value)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -136,7 +136,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return boolean
 	 */
-	public static function isIp($value)
+	public static function isIp(string $value)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -157,7 +157,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return boolean
 	 */
-	public static function isIDCard($value)
+	public static function isIDCard(string $value)
 	{
 		$value = trim($value);
 		if (empty ($value)) {
@@ -179,14 +179,14 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return boolean
 	 */
-	public static function isUrl($value)
+	public static function isUrl(string $value)
 	{
 		$value = strtolower(trim($value));
 		if (empty ($value)) {
 			return false;
 		}
-		$match = '/^(http:\/\/)?(https:\/\/)?([\w\d-]+\.)+[\w-]+(\/[\d\w-.\/?%&=]*)?$/';
 
+		$match = '/^(http:\/\/)?(https:\/\/)?([\w\d-]+\.)+[\w-]+(\/[\d\w-.\/?%&=]*)?$/';
 		return preg_match($match, $value) !== 0;
 	}
 
@@ -197,7 +197,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function hasNumber($value)
+	public static function hasNumber(string $value)
 	{
 		return preg_match("/[0-9]/", $value) != false;
 	}
@@ -209,7 +209,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function hasEnglish($value)
+	public static function hasEnglish(string $value)
 	{
 		return preg_match("/[a-zA-Z]/", $value) != false;
 	}
@@ -221,7 +221,7 @@ final class Regex
 	 * @param string $value 验证的值
 	 * @return bool
 	 */
-	public static function hasChinese($value)
+	public static function hasChinese(string $value)
 	{
 		return preg_match("/[\x7f-\xff]/", $value) != false;
 	}

@@ -79,7 +79,7 @@ class Encrypter
 	 * @param string $data 要加密的数据
 	 * @return string 加密后的字符串
 	 */
-	public function encrypt($data)
+	public function encrypt(string $data)
 	{
 		$cipher = $this->getCipherType();
 		$encryptKey = $this->getKey();
@@ -106,7 +106,7 @@ class Encrypter
 	 * @param string $encryptedData 加密的数据
 	 * @return string|false 解密后的字符串，失败返回false
 	 */
-	public function decrypt($encryptedData)
+	public function decrypt(string $encryptedData)
 	{
 		$cipher = $this->getCipherType();
 		$encryptKey = $this->getKey();

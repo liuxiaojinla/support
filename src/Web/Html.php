@@ -780,7 +780,6 @@ class Html
 				return;
 			}
 
-
 			// 递归遍历子节点
 			$index = 0;
 			$siblingIndexes = [];
@@ -1018,13 +1017,13 @@ class Html
 			}
 
 			// 注释：修复4：保留原始注释（不trim），单独缩进
-			if (str_starts_with($trimToken, '<!--')) {
+			if (strpos($trimToken, '<!--') === 0) {
 				$output .= str_repeat($indentChar, $depth * $indentSize) . rtrim($token) . "\n";
 				continue;
 			}
 
 			// 闭合标签 </...> （原逻辑不变 + 防止depth为负）
-			if (str_starts_with($trimToken, '</')) {
+			if (strpos($trimToken, '</') === 0) {
 				if (!$isInlineTag($trimToken)) {
 					$depth = max($depth - 1, 0); // 修复：防止层级为负
 				}
@@ -1033,7 +1032,7 @@ class Html
 			}
 
 			// 开标签 <...> （原逻辑 + 自闭合标签不增加depth）
-			if (str_starts_with($trimToken, '<')) {
+			if (strpos($trimToken, '<') === 0) {
 				$output .= str_repeat($indentChar, $depth * $indentSize) . $trimToken . "\n";
 				// 修复：自闭合标签/内联标签 都不增加层级
 				if (!$isSelfClosing($trimToken) && !$isInlineTag($trimToken)) {
