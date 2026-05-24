@@ -7,7 +7,7 @@ interface Htmlable
 {
 
 	/**
-	 * Get content as a string of HTML.
+	 * 将内容作为 HTML 字符串获取。
 	 *
 	 * @return string
 	 */

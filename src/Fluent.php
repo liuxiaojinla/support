@@ -1,23 +1,27 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php
+/** @noinspection PhpLanguageLevelInspection */
+/** @noinspection PhpMissingParamTypeInspection */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace Xin\Support;
 
 use ArrayAccess;
 use JsonSerializable;
 use Xin\Support\Contracts\Arrayable;
+use Xin\Support\Contracts\Jsonable;
 
-class Fluent implements ArrayAccess, JsonSerializable, Arrayable
+class Fluent implements ArrayAccess, JsonSerializable, Arrayable, Jsonable
 {
 
 	/**
-	 * The collection data.
+	 * 集合数据。
 	 *
 	 * @var array
 	 */
 	protected $items = [];
 
 	/**
-	 * set data.
+	 * 设置数据。
 	 *
 	 * @param array $items
 	 */
@@ -29,7 +33,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * 创建
+	 * 创建实例
 	 * @param array $items
 	 * @param Fluent|null $instance
 	 * @return static
@@ -40,7 +44,18 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Set the item value.
+	 * 添加项值。
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function add($key, $value)
+	{
+		Arr::set($this->items, $key, $value);
+	}
+
+	/**
+	 * 设置项值。
 	 *
 	 * @param string $key
 	 * @param mixed $value
@@ -51,7 +66,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Return specific items.
+	 * 返回指定键的项。
 	 *
 	 * @param array $keys
 	 * @return $this
@@ -72,7 +87,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Retrieve item from Collection.
+	 * 从集合中检索项。
 	 *
 	 * @param string $key
 	 * @param mixed $default
@@ -84,7 +99,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Get all items except for those with the specified keys.
+	 * 获取除指定键之外的所有项。
 	 *
 	 * @param mixed $keys
 	 * @return static
@@ -97,9 +112,9 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Merge data.
+	 * 合并数据。
 	 *
-	 * @param Collection|array $items
+	 * @param iterable|array $items
 	 * @return $this
 	 */
 	public function merge($items)
@@ -114,7 +129,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Return all items.
+	 * 返回所有项。
 	 *
 	 * @return array
 	 */
@@ -124,7 +139,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Retrieve the first item.
+	 * 检索第一项。
 	 *
 	 * @return mixed
 	 */
@@ -134,7 +149,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Retrieve the last item.
+	 * 检索最后一项。
 	 *
 	 * @return bool
 	 */
@@ -148,18 +163,17 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * add the item value.
+	 * 检查集合是否为空。
 	 *
-	 * @param string $key
-	 * @param mixed $value
+	 * @return bool
 	 */
-	public function add($key, $value)
+	public function isEmpty()
 	{
-		Arr::set($this->items, $key, $value);
+		return empty($this->items);
 	}
 
 	/**
-	 * Build to array.
+	 * 构建为数组。
 	 *
 	 * @return array
 	 */
@@ -169,7 +183,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * To string.
+	 * 转换为字符串。
 	 *
 	 * @return string
 	 */
@@ -180,23 +194,21 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Build to json.
+	 * 构建为 JSON。
 	 *
-	 * @param int $option
+	 * @param int $flags
 	 * @return string
 	 */
-	public function toJson($option = JSON_UNESCAPED_UNICODE)
+	public function toJson(int $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
 	{
-		return json_encode($this->all(), $option);
+		return json_encode($this->all(), $flags);
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.4.0)<br/>
-	 * Specify data which should be serialized to JSON.
+	 * 指定应序列化为 JSON 的数据。
 	 *
 	 * @see http://php.net/manual/en/jsonserializable.jsonserialize.php
-	 * @return array data which can be serialized by <b>json_encode</b>,
-	 *               which is a value of any type other than a resource
+	 * @return array 可由 <b>json_encode</b> 序列化的数据，即除资源类型外的任何类型的值
 	 */
 	#[\ReturnTypeWillChange]
 	public function jsonSerialize()
@@ -205,11 +217,10 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.1.0)<br/>
-	 * String representation of object.
+	 * 对象的字符串表示。
 	 *
 	 * @see http://php.net/manual/en/serializable.serialize.php
-	 * @return string the string representation of the object or null
+	 * @return string 对象的字符串表示或 null
 	 */
 	#[\ReturnTypeWillChange]
 	public function __serialize()
@@ -218,13 +229,10 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.1.0)<br/>
-	 * Constructs the object.
+	 * 构造对象。
 	 *
 	 * @see  http://php.net/manual/en/serializable.unserialize.php
-	 * @param string $serialized <p>
-	 *                           The string representation of the object.
-	 *                           </p>
+	 * @param string $serialized 对象的字符串表示。
 	 * @return mixed|void
 	 */
 	#[\ReturnTypeWillChange]
@@ -234,7 +242,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Get a data by key.
+	 * 通过键获取数据。
 	 *
 	 * @param string $key
 	 * @return mixed
@@ -245,7 +253,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Assigns a value to the specified data.
+	 * 为指定数据赋值。
 	 *
 	 * @param string $key
 	 * @param mixed $value
@@ -256,7 +264,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Whether or not an data exists by key.
+	 * 判断指定键的数据是否存在。
 	 *
 	 * @param string $key
 	 * @return bool
@@ -267,7 +275,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * To determine Whether the specified element exists.
+	 * 确定指定元素是否存在。
 	 *
 	 * @param string $key
 	 * @return bool
@@ -278,7 +286,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Unset an data by key.
+	 * 通过键取消设置数据。
 	 *
 	 * @param string $key
 	 */
@@ -288,7 +296,7 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * Remove item form Collection.
+	 * 从集合中移除项。
 	 *
 	 * @param string $key
 	 */
@@ -298,13 +306,10 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.0.0)<br/>
-	 * Offset to unset.
+	 * 取消设置偏移量。
 	 *
 	 * @see http://php.net/manual/en/arrayaccess.offsetunset.php
-	 * @param mixed $offset <p>
-	 *                      The offset to unset.
-	 *                      </p>
+	 * @param mixed $offset 要取消设置的偏移量。
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetUnset($offset)
@@ -315,15 +320,11 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.0.0)<br/>
-	 * Whether a offset exists.
+	 * 偏移量是否存在。
 	 *
 	 * @see http://php.net/manual/en/arrayaccess.offsetexists.php
-	 * @param mixed $offset <p>
-	 *                      An offset to check for.
-	 *                      </p>
-	 * @return bool true on success or false on failure.
-	 *              The return value will be casted to boolean if non-boolean was returned
+	 * @param mixed $offset 要检查的偏移量。
+	 * @return bool 成功返回 true，失败返回 false。
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetExists($offset)
@@ -332,14 +333,10 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.0.0)<br/>
-	 * Offset to retrieve.
-	 *
+	 * 检索偏移量。
 	 * @see http://php.net/manual/en/arrayaccess.offsetget.php
-	 * @param mixed $offset <p>
-	 *                      The offset to retrieve.
-	 *                      </p>
-	 * @return mixed Can return all value types
+	 * @param mixed $offset 要检索的偏移量。
+	 * @return mixed 可以返回所有值类型
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetGet($offset)
@@ -348,16 +345,11 @@ class Fluent implements ArrayAccess, JsonSerializable, Arrayable
 	}
 
 	/**
-	 * (PHP 5 &gt;= 5.0.0)<br/>
-	 * Offset to set.
+	 * 设置偏移量。
 	 *
 	 * @see http://php.net/manual/en/arrayaccess.offsetset.php
-	 * @param mixed $offset <p>
-	 *                      The offset to assign the value to.
-	 *                      </p>
-	 * @param mixed $value <p>
-	 *                      The value to set.
-	 *                      </p>
+	 * @param mixed $offset 要分配值的偏移量。
+	 * @param mixed $value 要设置的值。
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetSet($offset, $value)

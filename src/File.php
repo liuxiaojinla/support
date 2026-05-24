@@ -302,11 +302,11 @@ final class File
 	 * @param array $files
 	 * @return void
 	 * @deprecated
-	 * @see self::createFiles
+	 * @see self::createMany
 	 */
 	public static function createDirOrFiles(array $files)
 	{
-		self::createFiles($files);
+		self::createMany($files);
 	}
 
 	/**
@@ -315,7 +315,7 @@ final class File
 	 * @param array $files
 	 * @return array
 	 */
-	public static function createFiles(array $files)
+	public static function createMany(array $files)
 	{
 		$result = [];
 
@@ -341,6 +341,63 @@ final class File
 		}
 
 		return $result;
+	}
+
+	/**
+	 * 判断是否为目录
+	 * @param string $path
+	 * @return bool
+	 */
+	public static function isDirectory(string $path)
+	{
+		return is_dir($path);
+	}
+
+	/**
+	 * 判断是否为文件
+	 * @param string $path
+	 * @return bool
+	 */
+	public static function isFile(string $path)
+	{
+		return is_file($path);
+	}
+
+	/**
+	 * 判断文件是否可读
+	 * @param string $path
+	 * @return bool
+	 */
+	public static function isReadable(string $path)
+	{
+		return is_readable($path);
+	}
+
+	/**
+	 * 判断文件是否可写
+	 * @param string $path
+	 * @return bool
+	 */
+	public static function isWritable(string $path)
+	{
+		return is_writable($path);
+	}
+
+	/**
+	 * 打开文件
+	 * @param string $path
+	 * @param string $mode
+	 * @return FileStream
+	 * @throws RuntimeException
+	 */
+	public static function open(string $path, string $mode = 'r')
+	{
+		$resource = fopen($path, $mode);
+		if ($resource === false) {
+			throw new RuntimeException("Unable to open file: {$path}");
+		}
+
+		return new FileStream($resource);
 	}
 
 	/**
@@ -408,7 +465,19 @@ final class File
 
 		if ($data instanceof StreamInterface) {
 			$data = $data->getContents();
-		} elseif (is_object($data) || is_array($data)) {
+		} elseif (is_object($data)) {
+			if (method_exists($data, '__toString')) {
+				$data = (string)$data;
+			} elseif (method_exists($data, 'toString')) {
+				$data = (string)$data->toString();
+			} elseif (method_exists($data, 'toArray')) {
+				$data = Json::encode($data->toArray());
+			} elseif (method_exists($data, 'toJson')) {
+				$data = $data->toJson();
+			} else {
+				$data = Json::encode($data);
+			}
+		} elseif (is_array($data)) {
 			$data = Json::encode($data);
 		}
 

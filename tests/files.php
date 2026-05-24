@@ -47,7 +47,7 @@ File::mkdir('./test');
 Printer::log('mkdir: ', './test');
 Printer::log('=====================================');
 
-$files = File::createFiles([
+$files = File::createMany([
 	'./test/test.txt' => 'test',
 	'./test/test2/',
 ]);

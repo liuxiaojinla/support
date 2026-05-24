@@ -138,7 +138,7 @@ class SerializeLike extends Fluent
 	 * @param bool $shouldStorage
 	 * @return mixed
 	 */
-	public function dontAutomaticStorage(callable $callback, $shouldStorage = true)
+	public function dontAutomaticStorage(callable $callback, bool $shouldStorage = true)
 	{
 		try {
 			$this->setAutomaticStorage(false);

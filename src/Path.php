@@ -5,25 +5,32 @@ namespace Xin\Support;
 final class Path
 {
 	/**
-	 * 替换文件后缀
-	 * @param string $file
-	 * @param string $suffix
-	 * @return string
-	 */
-	public static function replaceSuffix(string $file, string $suffix)
-	{
-		return self::basename($file) . "." . $suffix;
-	}
-
-	/**
 	 * 获取文件路径的名字
 	 * @param string $file
 	 * @param bool $withSuffix
 	 * @return string
 	 */
-	public static function basename(string $file, bool $withSuffix = false)
+	public static function basename(string $filepath, bool $withSuffix = false)
 	{
-		return basename($file, $withSuffix ? '' : '.' . self::suffix($file));
+		return basename($filepath, $withSuffix ? '' : '.' . self::suffix($filepath));
+	}
+
+	/**
+	 * 替换文件路径的名字
+	 * @param string $filepath
+	 * @param string $newFilename
+	 * @return string
+	 */
+	public static function replaceFilename(string $filepath, string $newFilename)
+	{
+		$dir = dirname($filepath);
+		$suffix = self::suffix($filepath);
+
+		if ($suffix !== '') {
+			$newFilename .= '.' . $suffix;
+		}
+
+		return self::joins($dir, $newFilename);
 	}
 
 	/**
@@ -39,6 +46,17 @@ final class Path
 		}
 
 		return substr($file, $dotIndex + 1);
+	}
+
+	/**
+	 * 替换文件后缀
+	 * @param string $file
+	 * @param string $suffix
+	 * @return string
+	 */
+	public static function replaceSuffix(string $file, string $suffix)
+	{
+		return self::basename($file) . "." . $suffix;
 	}
 
 	/**

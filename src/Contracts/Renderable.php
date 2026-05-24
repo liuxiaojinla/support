@@ -7,7 +7,7 @@ interface Renderable
 {
 
 	/**
-	 * Get the evaluated contents of the object.
+	 * 获取对象的评估内容。
 	 *
 	 * @return string
 	 */
