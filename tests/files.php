@@ -72,3 +72,50 @@ foreach ($files as $key => $file) {
 }
 Printer::log('=====================================');
 
+// 测试 sortByDepth
+$treeFiles = File::treeFiles('../src');
+Printer::log('sortByDepth - 排序前:');
+foreach ($treeFiles as $file) {
+	$depth = substr_count($file->getPathname(), DIRECTORY_SEPARATOR);
+	Printer::log("  深度 {$depth}: ", $file->getPathname());
+}
+Printer::log('=====================================');
+
+$sortedByDepth = File::sortByDepth($treeFiles);
+Printer::log('sortByDepth - 排序后（按深度升序）:');
+foreach ($sortedByDepth as $file) {
+	$depth = substr_count($file->getPathname(), DIRECTORY_SEPARATOR);
+	Printer::log("  深度 {$depth}: ", $file->getPathname());
+}
+Printer::log('=====================================');
+
+// 测试 sortByPathname
+$unsortedFiles = File::filesIterator('../src');
+Printer::log('sortByPathname - 排序前:');
+foreach ($unsortedFiles as $file) {
+	Printer::log("  ", $file->getPathname());
+}
+Printer::log('=====================================');
+
+$sortedByPathname = File::sortByPathname($unsortedFiles);
+Printer::log('sortByPathname - 排序后（按路径字典序升序）:');
+foreach ($sortedByPathname as $file) {
+	Printer::log("  ", $file->getPathname());
+}
+Printer::log('=====================================');
+
+// 测试生成器输入
+function generateFiles(string $dir): Generator
+{
+	foreach (File::filesIterator($dir) as $file) {
+		yield $file;
+	}
+}
+
+$generatorFiles = generateFiles('../src');
+$sortedFromGenerator = File::sortByPathname($generatorFiles);
+Printer::log('sortByPathname - 从生成器排序:');
+foreach ($sortedFromGenerator as $file) {
+	Printer::log("  ", $file->getPathname());
+}
+Printer::log('=====================================');

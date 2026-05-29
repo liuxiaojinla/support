@@ -825,7 +825,7 @@ final class Str
 	public static function extractCode(?string $code, ?string $language = null, bool $failOrNull = false)
 	{
 		if (empty($code)) {
-			return null;
+			return $failOrNull ? null : $code;
 		}
 
 		if ($language) {

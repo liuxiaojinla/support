@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 
 namespace Xin\Support;
 
@@ -42,7 +42,7 @@ final class File
 	 * @param bool $recursive
 	 * @param int|null $recursiveIteratorIteratorFlag
 	 * @param int|null $filesystemIteratorFlags
-	 * @return RecursiveIteratorIterator|FilesystemIterator
+	 * @return RecursiveIteratorIterator<SplFileInfo>|FilesystemIterator<SplFileInfo>
 	 */
 	public static function filesIterator(
 		string $directory,
@@ -51,22 +51,27 @@ final class File
 		?int   $filesystemIteratorFlags = null
 	)
 	{
-		// 递归迭代器标志
-		if ($recursiveIteratorIteratorFlag === null) {
-			$recursiveIteratorIteratorFlag = RecursiveIteratorIterator::LEAVES_ONLY;
-		}
-
 		// 文件迭代器标志
 		if ($filesystemIteratorFlags === null) {
 			$filesystemIteratorFlags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO;
 		}
 		$filesystemIteratorFlags |= FilesystemIterator::SKIP_DOTS;
 
-		return $recursive ? new RecursiveIteratorIterator(
+		// 非递归直接返回
+		if (!$recursive) {
+			return new FilesystemIterator($directory, $filesystemIteratorFlags);
+		}
+
+		// 递归迭代器标志
+		if ($recursiveIteratorIteratorFlag === null) {
+			$recursiveIteratorIteratorFlag = RecursiveIteratorIterator::LEAVES_ONLY;
+		}
+
+		return new RecursiveIteratorIterator(
 			new RecursiveDirectoryIterator($directory, $filesystemIteratorFlags),
 			$recursiveIteratorIteratorFlag,
 			RecursiveIteratorIterator::CATCH_GET_CHILD
-		) : new FilesystemIterator($directory, $filesystemIteratorFlags);
+		);
 	}
 
 	/**
@@ -74,7 +79,7 @@ final class File
 	 *
 	 * @param string $directory
 	 * @param bool $recursive
-	 * @return FilesystemIterator|RecursiveIteratorIterator
+	 * @return FilesystemIterator<SplFileInfo>|RecursiveIteratorIterator<SplFileInfo>
 	 */
 	public static function files(string $directory, bool $recursive = true)
 	{
@@ -90,7 +95,7 @@ final class File
 	 * 获取指定目录下所有的文件迭代器，包括子目录下的文件
 	 * @param string $directory
 	 * @param int $filesystemIteratorFlags
-	 * @return RecursiveIteratorIterator
+	 * @return RecursiveIteratorIterator<SplFileInfo>
 	 */
 	public static function treeFiles(string $directory, int $filesystemIteratorFlags = FilesystemIterator::SKIP_DOTS)
 	{
@@ -104,7 +109,7 @@ final class File
 	 * @param bool $recursive
 	 * @param int|null $recursiveIteratorIteratorFlag
 	 * @param int|null $filesystemIteratorFlags
-	 * @return CallbackFilterIterator|RegexIterator
+	 * @return CallbackFilterIterator<SplFileInfo>|RegexIterator<SplFileInfo>
 	 */
 	public static function filter(
 		string $directory,
@@ -132,7 +137,7 @@ final class File
 	 * @param bool $recursive
 	 * @param int|null $recursiveIteratorIteratorFlag
 	 * @param int|null $filesystemIteratorFlags
-	 * @return RegexIterator
+	 * @return RegexIterator<SplFileInfo>
 	 */
 	public static function glob(
 		string $glob,
@@ -184,10 +189,58 @@ final class File
 	}
 
 	/**
+	 * 按深度排序文件迭代器
+	 * @param iterable<SplFileInfo> $files
+	 * @return array<SplFileInfo>
+	 */
+	public static function sortByDepth(iterable $files): array
+	{
+		// 兼容 Iterator、Generator、IteratorAggregate 等所有非数组 iterable
+		if (!is_array($files)) {
+			$files = iterator_to_array($files, false);
+		}
+
+		// 方式一：使用 array_map 和 array_multisort 排序深度，优化性能
+		$depths = array_map(static function (SplFileInfo $f) {
+			return substr_count($f->getPathname(), DIRECTORY_SEPARATOR);
+		}, $files);
+		array_multisort($depths, SORT_ASC, $files);
+
+		// // 方式二：使用 usort 排序深度，不优化性能
+		// usort($files, static function (SplFileInfo $a, SplFileInfo $b) {
+		// 	return substr_count($a->getPathname(), DIRECTORY_SEPARATOR)
+		// 		<=> substr_count($b->getPathname(), DIRECTORY_SEPARATOR);
+		// });
+
+		return $files;
+	}
+
+	/**
+	 * 按文件路径的字典序排序（升序）。
+	 *
+	 * 注意：FilesystemIterator 等迭代器的返回顺序依赖于底层文件系统，
+	 * POSIX 标准不保证其有序性。此方法提供跨平台、确定性的排序保障。
+	 * @param iterable<SplFileInfo> $files
+	 * @return array<SplFileInfo>
+	 */
+	public static function sortByPathname(iterable $files): array
+	{
+		if (!is_array($files)) {
+			$files = iterator_to_array($files, false);
+		}
+
+		usort($files, static function (SplFileInfo $a, SplFileInfo $b) {
+			return strcmp($a->getPathname(), $b->getPathname());
+		});
+
+		return $files;
+	}
+
+	/**
 	 * 获取指定目录下所有的目录迭代器，包括子目录下的目录
 	 * @param string $directory
 	 * @param bool $recursive
-	 * @return CallbackFilterIterator
+	 * @return CallbackFilterIterator<SplFileInfo>
 	 */
 	public static function directories(string $directory, bool $recursive = true)
 	{
@@ -344,60 +397,73 @@ final class File
 	}
 
 	/**
-	 * 判断是否为目录
-	 * @param string $path
+	 * 判断文件是否存在
+	 * @param string|SplFileInfo $path
 	 * @return bool
 	 */
-	public static function isDirectory(string $path)
+	public static function exists($path)
 	{
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
+		}
+
+		return file_exists($path);
+	}
+
+	/**
+	 * 判断是否为目录
+	 * @param string|SplFileInfo $path
+	 * @return bool
+	 */
+	public static function isDirectory($path)
+	{
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
+		}
+
 		return is_dir($path);
 	}
 
 	/**
 	 * 判断是否为文件
-	 * @param string $path
+	 * @param string|SplFileInfo $path
 	 * @return bool
 	 */
-	public static function isFile(string $path)
+	public static function isFile($path)
 	{
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
+		}
+
 		return is_file($path);
 	}
 
 	/**
 	 * 判断文件是否可读
-	 * @param string $path
+	 * @param string|SplFileInfo $path
 	 * @return bool
 	 */
-	public static function isReadable(string $path)
+	public static function isReadable($path)
 	{
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
+		}
+
 		return is_readable($path);
 	}
 
 	/**
 	 * 判断文件是否可写
-	 * @param string $path
+	 * @param string|SplFileInfo $path
 	 * @return bool
 	 */
-	public static function isWritable(string $path)
+	public static function isWritable($path)
 	{
-		return is_writable($path);
-	}
-
-	/**
-	 * 打开文件
-	 * @param string $path
-	 * @param string $mode
-	 * @return FileStream
-	 * @throws RuntimeException
-	 */
-	public static function open(string $path, string $mode = 'r')
-	{
-		$resource = fopen($path, $mode);
-		if ($resource === false) {
-			throw new RuntimeException("Unable to open file: {$path}");
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
 		}
 
-		return new FileStream($resource);
+		return is_writable($path);
 	}
 
 	/**
@@ -453,14 +519,18 @@ final class File
 
 	/**
 	 * 写入文件
-	 * @param string $path
+	 * @param string|SplFileInfo $path
 	 * @param mixed $data
 	 * @param int $flags
 	 * @param resource|null $context
 	 * @return false|int
 	 */
-	public static function put(string $path, $data, int $flags = 0, $context = null)
+	public static function put($path, $data, int $flags = 0, $context = null)
 	{
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
+		}
+
 		self::mkdir(dirname($path));
 
 		if ($data instanceof StreamInterface) {
@@ -486,36 +556,111 @@ final class File
 
 	/**
 	 * 追加写入文件
-	 * @param string $path
+	 * @param string|SplFileInfo $path
 	 * @param mixed $data
 	 * @param mixed|null $context
 	 * @return false|int
 	 */
-	public static function append(string $path, $data, $context = null)
+	public static function append($path, $data, $context = null)
 	{
 		return self::put($path, $data, FILE_APPEND, $context);
 	}
 
 	/**
 	 * 读取文件
-	 * @param string $path
+	 * @param string|SplFileInfo $path
 	 * @param bool $useIncludePath
 	 * @param resource|null $context
 	 * @param int $offset
 	 * @param int|null $length
 	 * @return false|string
 	 */
-	public static function get(string $path, bool $useIncludePath = false, $context = null, int $offset = 0, ?int $length = null)
+	public static function get($path, bool $useIncludePath = false, $context = null, int $offset = 0, ?int $length = null)
 	{
+		if ($path instanceof SplFileInfo) {
+			$path = $path->getRealPath();
+		}
+
+		if (!file_exists($path)) {
+			return '';
+		}
+
 		return file_get_contents($path, $useIncludePath, $context, $offset, $length);
 	}
 
 	/**
-	 * 获取文件扩展
+	 * 获取文件信息
+	 * @param SplFileInfo|string $file
+	 * @return SplFileInfo|null
+	 */
+	public function file($file)
+	{
+		if ($file instanceof SplFileInfo) {
+			return $file;
+		}
+
+		if (self::exists($file)) {
+			return null;
+		}
+
+		return new SplFileInfo($file);
+	}
+
+	/**
+	 * 获取文件路径
+	 * @param SplFileInfo|string $path
+	 * @return mixed|string
+	 */
+	public function path($path)
+	{
+		if ($path instanceof SplFileInfo) {
+			return $path->getPathname();
+		}
+
+		return $path;
+	}
+
+	/**
+	 * 获取文件真实路径
+	 * @param SplFileInfo|string $path
+	 * @return false|string
+	 */
+	public function realPath($path)
+	{
+		if ($path instanceof SplFileInfo) {
+			return $path->getRealPath();
+		}
+
+		return realpath($path);
+	}
+
+	/**
+	 * 获取文件基础名
+	 * @param SplFileInfo|string $file
+	 * @param string|null $suffix
 	 * @return string
 	 */
-	public static function extension(SplFileInfo $file)
+	public function basename($file, string $suffix = '')
 	{
+		if ($file instanceof SplFileInfo) {
+			return $file->getBasename($suffix);
+		}
+
+		return basename($file, $suffix);
+	}
+
+	/**
+	 * 获取文件扩展名
+	 * @param SplFileInfo|string $file
+	 * @return string
+	 */
+	public static function extension($file)
+	{
+		$file = self::file($file);
+		if (!$file) {
+			return '';
+		}
+
 		$extension = $file->getExtension();
 		if (empty($extension)) {
 			$mime = self::mime($file);
@@ -532,10 +677,16 @@ final class File
 
 	/**
 	 * 获取mime类型
+	 * @param SplFileInfo|string $file
 	 * @return string
 	 */
-	public static function mime(SplFileInfo $file)
+	public static function mime($file)
 	{
+		$file = self::file($file);
+		if (!$file) {
+			return '';
+		}
+
 		return mime_content_type($file->getPathname());
 	}
 
@@ -548,7 +699,7 @@ final class File
 	public static function hash($file, ?string $hashType = null)
 	{
 		$hashType = $hashType ?: self::HASH_ETAG;
-		$realPath = $file instanceof SplFileInfo ? $file->getRealPath() : $file;
+		$realPath = self::realPath($file);
 
 		if (self::HASH_ETAG === $hashType) {
 			return Etag::sum($realPath);
@@ -568,4 +719,5 @@ final class File
 
 		throw new RuntimeException("hash_type[{$hashType}] is not support.");
 	}
+
 }
