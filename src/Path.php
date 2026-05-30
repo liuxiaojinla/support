@@ -5,14 +5,36 @@ namespace Xin\Support;
 final class Path
 {
 	/**
-	 * 获取文件路径的名字
-	 * @param string $file
-	 * @param bool $withSuffix
+	 * 获取文件路径的根目录
+	 * @param string $filepath
+	 * @param int $levels
 	 * @return string
 	 */
-	public static function basename(string $filepath, bool $withSuffix = false)
+	public static function basepath(string $filepath, int $levels = 1)
 	{
-		return basename($filepath, $withSuffix ? '' : '.' . self::suffix($filepath));
+		return dirname($filepath, $levels);
+	}
+
+	/**
+	 * 获取文件名
+	 * @param string $filepath
+	 * @param bool $withExtension
+	 * @return string
+	 */
+	public static function basename(string $filepath, bool $withExtension = false)
+	{
+		return basename($filepath, $withExtension ? '' : '.' . self::extension($filepath));
+	}
+
+	/**
+	 * 获取文件名 - 别名
+	 * @param string $filepath
+	 * @param bool $withExtension
+	 * @return string
+	 */
+	public static function filename(string $filepath, bool $withExtension = false)
+	{
+		return self::basename($filepath, $withExtension);
 	}
 
 	/**
@@ -23,40 +45,53 @@ final class Path
 	 */
 	public static function replaceFilename(string $filepath, string $newFilename)
 	{
-		$dir = dirname($filepath);
-		$suffix = self::suffix($filepath);
+		$basepath = self::basepath($filepath);
+		$suffix = self::extension($filepath);
 
 		if ($suffix !== '') {
 			$newFilename .= '.' . $suffix;
 		}
 
-		return self::joins($dir, $newFilename);
+		return self::join($basepath, $newFilename);
 	}
 
 	/**
-	 * 获取文件的后缀名
-	 * @param string $file
+	 * 替换文件路径
+	 * @param string $filepath
+	 * @param string $newPath
 	 * @return string
 	 */
-	public static function suffix(string $file)
+	public static function replacePath(string $filepath, string $newPath)
 	{
-		$dotIndex = strrpos($file, ".");
-		if ($dotIndex === false) {
-			return '';
-		}
+		$filename = self::filename($filepath, true);
 
-		return substr($file, $dotIndex + 1);
+		return self::join($newPath, $filename);
 	}
 
 	/**
 	 * 替换文件后缀
-	 * @param string $file
-	 * @param string $suffix
+	 * @param string $filepath
+	 * @param string $newExtension
 	 * @return string
 	 */
-	public static function replaceSuffix(string $file, string $suffix)
+	public static function replaceExtension(string $filepath, string $newExtension)
 	{
-		return self::basename($file) . "." . $suffix;
+		return self::basename($filepath, false) . "." . $newExtension;
+	}
+
+	/**
+	 * 获取文件的后缀名
+	 * @param string $filepath
+	 * @return string
+	 */
+	public static function extension(string $filepath)
+	{
+		$dotIndex = strrpos($filepath, ".");
+		if ($dotIndex === false) {
+			return '';
+		}
+
+		return substr($filepath, $dotIndex + 1);
 	}
 
 	/**
@@ -64,7 +99,7 @@ final class Path
 	 * @param string|array ...$paths
 	 * @return string
 	 */
-	public static function joins(...$paths)
+	public static function join(...$paths)
 	{
 		$paths = array_filter($paths);
 		$paths = array_map(function ($itemPaths) {
@@ -81,6 +116,6 @@ final class Path
 	 */
 	public static function concat(string $basePath, string $subPath)
 	{
-		return self::joins(rtrim($basePath, '/'), ltrim($subPath, '/'));
+		return self::join(rtrim($basePath, '/'), ltrim($subPath, '/'));
 	}
 }

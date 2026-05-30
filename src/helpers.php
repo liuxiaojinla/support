@@ -307,31 +307,6 @@ if (!function_exists('with')) {
 	}
 }
 
-if (!function_exists('suffix')) {
-	/**
-	 * 获取文件后缀
-	 * @param string $file
-	 * @return string
-	 */
-	function path_suffix(string $file)
-	{
-		return Path::suffix($file);
-	}
-}
-
-if (!function_exists('replace_suffix')) {
-	/**
-	 * 替换文件后缀
-	 * @param string $file
-	 * @param string $suffix
-	 * @return string
-	 */
-	function path_replace_suffix(string $file, string $suffix)
-	{
-		return Path::replaceSuffix($file, $suffix);
-	}
-}
-
 if (!function_exists('join_paths')) {
 	/**
 	 * 拼接路径
@@ -340,7 +315,7 @@ if (!function_exists('join_paths')) {
 	 */
 	function join_paths(...$paths)
 	{
-		return Path::joins(...$paths);
+		return Path::join(...$paths);
 	}
 }
 
@@ -352,6 +327,6 @@ if (!function_exists('path_joins')) {
 	 */
 	function path_joins(...$paths)
 	{
-		return Path::joins(...$paths);
+		return Path::join(...$paths);
 	}
 }

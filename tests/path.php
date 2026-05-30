@@ -4,6 +4,56 @@ use Xin\Support\Path;
 
 require_once '../vendor/autoload.php';
 
-var_dump(Path::suffix("00.txt"));
-var_dump(Path::suffix("00."));
-var_dump(Path::suffix("00"));
+echo "========== Path 类测试 ==========\n\n";
+
+// 测试 suffix 方法
+echo "【测试 suffix 方法】\n";
+echo "suffix('test.txt'): " . Path::extension('test.txt') . "\n";
+echo "suffix('test.'): " . Path::extension('00.') . "\n";
+echo "suffix('test'): " . Path::extension('00') . "\n";
+echo "suffix('.env'): " . Path::extension('.env') . "\n";
+echo "suffix('/path/to/file.php'): " . Path::extension('/path/to/file.php') . "\n";
+echo "suffix('archive.tar.gz'): " . Path::extension('archive.tar.gz') . "\n";
+echo "\n";
+
+// 测试 basename 方法
+echo "【测试 basename 方法】\n";
+echo "basename('/path/to/test.txt', false): " . Path::basename('/path/to/test.txt', false) . "\n";
+echo "basename('/path/to/test.txt', true): " . Path::basename('/path/to/test.txt', true) . "\n";
+echo "basename('file.php', false): " . Path::basename('file.php', false) . "\n";
+echo "basename('file.php', true): " . Path::basename('file.php', true) . "\n";
+echo "basename('noext', false): " . Path::basename('noext', false) . "\n";
+echo "\n";
+
+// 测试 replaceFilename 方法
+echo "【测试 replaceFilename 方法】\n";
+echo "replaceFilename('/path/to/old.txt', 'new'): " . Path::replaceFilename('/path/to/old.txt', 'new') . "\n";
+echo "replaceFilename('/path/to/old.txt', 'newname'): " . Path::replaceFilename('/path/to/old.txt', 'newname') . "\n";
+echo "replaceFilename('file.php', 'index'): " . Path::replaceFilename('file.php', 'index') . "\n";
+echo "replaceFilename('/dir/file', 'newfile'): " . Path::replaceFilename('/dir/file', 'newfile') . "\n";
+echo "\n";
+
+// 测试 replaceSuffix 方法
+echo "【测试 replaceSuffix 方法】\n";
+echo "replaceSuffix('test.txt', 'jpg'): " . Path::replaceExtension('test.txt', 'jpg') . "\n";
+echo "replaceSuffix('/path/file.php', 'html'): " . Path::replaceExtension('/path/file.php', 'html') . "\n";
+echo "replaceSuffix('image.png', 'jpeg'): " . Path::replaceExtension('image.png', 'jpeg') . "\n";
+echo "\n";
+
+// 测试 joins 方法
+echo "【测试 joins 方法】\n";
+echo "joins('/path', 'to', 'file'): " . Path::join('/path', 'to', 'file') . "\n";
+echo "joins('dir', 'subdir', 'file.txt'): " . Path::join('dir', 'subdir', 'file.txt') . "\n";
+echo "joins(['/path', 'to'], 'file'): " . Path::join(['/path', 'to'], 'file') . "\n";
+echo "joins('', 'path', '', 'file'): " . Path::join('', 'path', '', 'file') . "\n";
+echo "\n";
+
+// 测试 concat 方法
+echo "【测试 concat 方法】\n";
+echo "concat('/path/', '/to/file'): " . Path::concat('/path/', '/to/file') . "\n";
+echo "concat('/path', 'to/file'): " . Path::concat('/path', 'to/file') . "\n";
+echo "concat('base/', 'sub/'): " . Path::concat('base/', 'sub/') . "\n";
+echo "concat('/', 'root'): " . Path::concat('/', 'root') . "\n";
+echo "\n";
+
+echo "========== 测试完成 ==========\n";
