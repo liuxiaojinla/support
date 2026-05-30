@@ -5,14 +5,37 @@ namespace Xin\Support;
 final class Path
 {
 	/**
-	 * 获取文件路径的根目录
+	 * 获取文件路径的根目录或向上查找 $levels 次目录部分
 	 * @param string $filepath
 	 * @param int $levels
 	 * @return string
 	 */
 	public static function basepath(string $filepath, int $levels = 1)
 	{
-		return dirname($filepath, $levels);
+		if ($levels < 1) {
+			return $filepath;
+		}
+
+		// 标准化分隔符以处理混合斜杠（如有必要），尽管 PHP 通常能处理它们，我们需要向上查找 $levels 次目录部分
+		$currentPath = rtrim($filepath, '/\\');
+		for ($i = 0; $i < $levels; $i++) {
+			$unixPos = strrpos($currentPath, '/');
+			$winPos = strrpos($currentPath, '\\');
+			// 取两者中较大的那个作为"最后一个分隔符"的位置
+			$lastSeparator = max($unixPos, $winPos);
+			// 没有更多目录可以向上查找，则返回空
+			if ($lastSeparator === false) {
+				return '';
+			}
+
+			$currentPath = substr($currentPath, 0, $lastSeparator);
+			// 处理路径变为空的情况（例如，文件在根目录）
+			if ($currentPath === '') {
+				return '';
+			}
+		}
+
+		return $currentPath;
 	}
 
 	/**
@@ -76,7 +99,9 @@ final class Path
 	 */
 	public static function replaceExtension(string $filepath, string $newExtension)
 	{
-		return self::basename($filepath, false) . "." . $newExtension;
+		$newFilename = self::basename($filepath, false) . "." . $newExtension;
+
+		return self::join(self::basepath($filepath), $newFilename);
 	}
 
 	/**

@@ -6,14 +6,14 @@ require_once '../vendor/autoload.php';
 
 echo "========== Path 类测试 ==========\n\n";
 
-// 测试 suffix 方法
-echo "【测试 suffix 方法】\n";
-echo "suffix('test.txt'): " . Path::extension('test.txt') . "\n";
-echo "suffix('test.'): " . Path::extension('00.') . "\n";
-echo "suffix('test'): " . Path::extension('00') . "\n";
-echo "suffix('.env'): " . Path::extension('.env') . "\n";
-echo "suffix('/path/to/file.php'): " . Path::extension('/path/to/file.php') . "\n";
-echo "suffix('archive.tar.gz'): " . Path::extension('archive.tar.gz') . "\n";
+// 测试 extension 方法
+echo "【测试 extension 方法】\n";
+echo "extension('test.txt'): " . Path::extension('test.txt') . "\n";
+echo "extension('test.'): " . Path::extension('00.') . "\n";
+echo "extension('test'): " . Path::extension('00') . "\n";
+echo "extension('.env'): " . Path::extension('.env') . "\n";
+echo "extension('/path/to/file.php'): " . Path::extension('/path/to/file.php') . "\n";
+echo "extension('archive.tar.gz'): " . Path::extension('archive.tar.gz') . "\n";
 echo "\n";
 
 // 测试 basename 方法
@@ -34,10 +34,10 @@ echo "replaceFilename('/dir/file', 'newfile'): " . Path::replaceFilename('/dir/f
 echo "\n";
 
 // 测试 replaceSuffix 方法
-echo "【测试 replaceSuffix 方法】\n";
-echo "replaceSuffix('test.txt', 'jpg'): " . Path::replaceExtension('test.txt', 'jpg') . "\n";
-echo "replaceSuffix('/path/file.php', 'html'): " . Path::replaceExtension('/path/file.php', 'html') . "\n";
-echo "replaceSuffix('image.png', 'jpeg'): " . Path::replaceExtension('image.png', 'jpeg') . "\n";
+echo "【测试 replaceExtension 方法】\n";
+echo "replaceExtension('test.txt', 'jpg'): " . Path::replaceExtension('test.txt', 'jpg') . "\n";
+echo "replaceExtension('/path/file.php', 'html'): " . Path::replaceExtension('/path/file.php', 'html') . "\n";
+echo "replaceExtension('image.png', 'jpeg'): " . Path::replaceExtension('image.png', 'jpeg') . "\n";
 echo "\n";
 
 // 测试 joins 方法
