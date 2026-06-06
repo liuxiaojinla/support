@@ -15,7 +15,7 @@ final class Arr
 	 * 如果元素不存在，则使用“点”表示法将其添加到数组中
 	 *
 	 * @param ArrayAccess|array $array
-	 * @param string $key
+	 * @param string|int $key
 	 * @param mixed $value
 	 * @return array
 	 */
@@ -261,10 +261,10 @@ final class Arr
 	 * 'contact.phone' => '13800138000',
 	 * ];
 	 * @param array $array
-	 * @param string $prepend
+	 * @param string|null $prepend
 	 * @return array
 	 */
-	public static function dot(array $array, string $prepend = '')
+	public static function dot(array $array, ?string $prepend = '')
 	{
 		$results = [];
 
@@ -477,6 +477,23 @@ final class Arr
 	}
 
 	/**
+	 * 检测数组是否有元素符合指定条件
+	 * @param iterable $array
+	 * @param callable $callback
+	 * @return bool
+	 */
+	public static function any(iterable $array, callable $callback)
+	{
+		foreach ($array as $k => $v) {
+			if ($callback($v, $k)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * 将项目推送到数组的开头
 	 *
 	 * @param array $array
@@ -560,12 +577,12 @@ final class Arr
 	/**
 	 * 根据字段规则判断给定的数组是否满足条件
 	 *
-	 * @param iterable $array
+	 * @param array|ArrayAccess $array
 	 * @param array $condition
 	 * @param bool $any
 	 * @return bool
 	 */
-	public static function is(iterable $array, $condition, bool $any = false)
+	public static function is($array, $condition, bool $any = false)
 	{
 		if (self::isAssoc($condition)) {
 			$temp = [];
@@ -646,32 +663,54 @@ final class Arr
 	}
 
 	/**
+	 * 过滤数组（对齐 array_filter，附加空值清洗能力）
+	 *
+	 * @param array $array 要处理的数组
+	 * @param callable|null $filter 过滤回调。签名: function(mixed $value, mixed $key): bool，返回 true 保留，false 移除
+	 * @param bool $trimEmpty 是否自动移除空值（''、null）。默认为 true
+	 * @return array
+	 */
+	public static function filter(array $array, ?callable $filter = null, bool $trimEmpty = true)
+	{
+		foreach ($array as $key => $val) {
+			// 移除空值：空字符串、null
+			if ($trimEmpty && ($val === '' || $val === null)) {
+				unset($array[$key]);
+				continue;
+			}
+
+			if ($filter !== null && !$filter($val, $key)) {
+				unset($array[$key]);
+			}
+		}
+
+		return $array;
+	}
+
+	/**
 	 * 筛选的项目。
-	 * @param array $arrays
-	 * @param array|callable $condition
-	 * @param bool $any
+	 * 从二维数组中筛选符合条件的记录
+	 *
+	 * @param array $arrays 二维数组（记录集）
+	 * @param array|callable $condition 筛选条件
+	 * - callable: 自定义回调，签名同 filter()
+	 * - array:    字段规则映射，交由 self::is() 校验
+	 * @param bool $any 数组规则模式下，是否满足任一条件即可（OR 逻辑）
 	 * @return array
 	 */
 	public static function where(array $arrays, $condition, bool $any = false)
 	{
-		$isAssoc = self::isAssoc($condition);
-
 		if (is_callable($condition)) {
-			$result = array_filter($arrays, $condition, ARRAY_FILTER_USE_BOTH);
-		} else {
-			$result = [];
-			foreach ($arrays as $key => $array) {
-				if (self::is($array, $condition, $any)) {
-					if ($isAssoc) {
-						$result[$key] = $array;
-					} else {
-						$result[] = $array;
-					}
-				}
+			return self::filter($arrays, $condition, false);
+		}
+
+		foreach ($arrays as $key => $item) {
+			if (!self::is($item, $condition, $any)) {
+				unset($arrays[$key]);
 			}
 		}
 
-		return $result;
+		return $arrays;
 	}
 
 	/**
@@ -682,7 +721,7 @@ final class Arr
 	 */
 	public static function whereNotNull(array $arrays)
 	{
-		return self::where($arrays, function ($value) {
+		return self::where($arrays, static function ($value) {
 			return !is_null($value);
 		});
 	}
@@ -704,30 +743,26 @@ final class Arr
 	}
 
 	/**
-	 * 除去数组中的空值和和附加键名
+	 * 对数组执行归约操作，支持在回调中访问键名
 	 *
-	 * @param array $params 要去除的数组
-	 * @param array $filter 要额外过滤的数据
-	 * @return array
+	 * @template TCarry
+	 * @template TValue
+	 * @template TKey of array-key
+	 *
+	 * @param array<TKey, TValue> $array 要归约的数组
+	 * @param callable(TCarry, TValue, TKey): TCarry $callback 回调函数，签名为 function($carry, $value, $key)
+	 * @param TCarry|null $initial 初始值。若为 null 且数组为空，则返回 null
+	 * @return TCarry|null 归约结果
 	 */
-	public static function filter(array &$params, array $filter = ["sign", "sign_type"])
+	public static function reduce(array $array, callable $callback, $initial = null)
 	{
-		foreach ($params as $key => $val) {
-			if ($val == "" || (is_array($val) && count($val) == 0)) {
-				unset ($params [$key]);
-			} else {
-				$len = count($filter);
-				for ($i = 0; $i < $len; $i++) {
-					if ($key == $filter [$i]) {
-						unset ($params [$key]);
-						array_splice($filter, $i, 1);
-						break;
-					}
-				}
-			}
+		$result = $initial;
+
+		foreach ($array as $key => $value) {
+			$result = $callback($result, $value, $key);
 		}
 
-		return $params;
+		return $result;
 	}
 
 	/**
@@ -791,7 +826,7 @@ final class Arr
 	 */
 	public static function sortWithKey(array &$array, string $sortKey = 'sort')
 	{
-		usort($array, function ($it1, $it2) use ($sortKey) {
+		usort($array, static function ($it1, $it2) use ($sortKey) {
 			$sort1 = $it1[$sortKey] ?? 0;
 			$sort2 = $it2[$sortKey] ?? 0;
 
@@ -1198,7 +1233,7 @@ final class Arr
 	 */
 	public static function camelCaseKeys(array $array, bool $recursive = false)
 	{
-		return self::transformKey($array, function ($key) {
+		return self::transformKey($array, static function ($key) {
 			return Str::camel($key);
 		}, $recursive);
 	}
@@ -1212,7 +1247,7 @@ final class Arr
 	 */
 	public static function studlyCaseKeys(array $array, bool $recursive = false)
 	{
-		return self::transformKey($array, function ($key) {
+		return self::transformKey($array, static function ($key) {
 			return Str::studly($key);
 		}, $recursive);
 	}
@@ -1226,7 +1261,7 @@ final class Arr
 	 */
 	public static function snakeCaseKeys(array $array, bool $recursive = false)
 	{
-		return self::transformKey($array, function ($key) {
+		return self::transformKey($array, static function ($key) {
 			return Str::snake($key);
 		}, $recursive);
 	}
@@ -1240,7 +1275,7 @@ final class Arr
 	 */
 	public static function lowerCaseKeys(array $array, bool $recursive = false)
 	{
-		return self::transformKey($array, function ($key) {
+		return self::transformKey($array, static function ($key) {
 			return strtolower($key);
 		}, $recursive);
 	}
@@ -1254,9 +1289,9 @@ final class Arr
 	 */
 	public static function upperCaseKeys(array $array, bool $recursive = false)
 	{
-		return self::transformKey($array, function ($key) {
+		return self::transformKey($array, static function ($key) {
 			return strtoupper($key);
-		});
+		}, $recursive);
 	}
 
 	/**
